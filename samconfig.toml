@@ -1,0 +1,52 @@
+# =============================================================================
+# samconfig.toml — AWS SAM Deployment Configuration
+# =============================================================================
+# This file configures the `sam deploy` command so it can run non-interactively
+# in the CI/CD pipeline (GitHub Actions deploy.yml).
+#
+# Usage:
+#   First deploy (manual):  sam build && sam deploy --guided
+#   Subsequent deploys:     sam build && sam deploy  (uses this config)
+#   CI/CD pipeline:         sam build && sam deploy --no-confirm-changeset
+#
+# After the first deploy, copy the Outputs from the CloudFormation stack
+# and add them as GitHub Secrets:
+#   - S3_FRONTEND_BUCKET         (from FrontendBucketName output)
+#   - CLOUDFRONT_DISTRIBUTION_ID (from CloudFrontDistributionId output)
+#
+# Parameters that require manual input before deploying:
+#   - CertificateArn: ARN of your ACM certificate (us-east-1, DNS validated)
+#   - SesSenderEmail: must be verified in SES before deploying
+# =============================================================================
+
+version = 0.1
+
+[default]
+[default.global.parameters]
+stack_name = "camiloavila-dev"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.deploy.parameters]
+capabilities       = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
+confirm_changeset  = false
+fail_on_empty_changeset = false
+region             = "us-east-1"
+resolve_s3         = true                    # SAM auto-creates a deployment S3 bucket
+s3_prefix          = "camiloavila-dev"
+
+# Stack-level parameter overrides.
+# Replace REPLACE_WITH_YOUR_CERTIFICATE_ARN with your actual ACM cert ARN
+# before running the first deploy. Example:
+#   arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+parameter_overrides = [
+  "CertificateArn=REPLACE_WITH_YOUR_CERTIFICATE_ARN",
+  "BedrockModelId=qwen.qwen3-coder-next",
+  "SesSenderEmail=camiloavilainfo@gmail.com",
+  "DomainName=camiloavila.dev"
+]
+
+# CloudFormation tags applied to all resources in the stack
+tags = "Project=camiloavila-dev Environment=production"

@@ -1,0 +1,59 @@
+# =============================================================================
+# .gitignore — camiloavila.dev
+# =============================================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.Python
+.env
+.venv
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Node / Frontend ---
+node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.production
+tests/node_modules/
+*.tsbuildinfo
+
+# --- AWS SAM ---
+.aws-sam/
+samconfig.toml.bak
+
+# --- Test reports (generated at runtime — not committed) ---
+reports/
+
+# --- Playwright ---
+playwright-report/
+test-results/
+
+# --- Puppeteer ---
+.local-chromium/
+
+# --- IDEs ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Secrets (never commit these) ---
+.env
+.env.*
+!.env.example
+credentials.json
+*.pem
+*.key

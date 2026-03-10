@@ -1,0 +1,445 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+# =============================================================================
+# camiloavila.dev — AWS SAM Infrastructure Template
+# =============================================================================
+# This file defines ALL AWS resources for the portfolio site.
+# Managed by: AWS SAM (Serverless Application Model)
+# Deployed by: GitHub Actions (deploy.yml) via OIDC role assumption
+#
+# Resources created:
+#   - S3 bucket (private): stores knowledge_base.md for the RAG chatbot
+#   - S3 bucket (public): hosts the React/Vite frontend static files
+#   - Lambda (ChatbotFunction): handles chatbot Q&A via Bedrock + Strands Agent
+#   - Lambda (ContactFunction): handles contact form, DynamoDB save, SES email
+#   - API Gateway HTTP API: exposes POST /chat and POST /contact endpoints
+#   - DynamoDB table: stores contact form submissions
+#   - CloudFront distribution: CDN + HTTPS for camiloavila.dev
+#   - IAM roles: least-privilege execution roles for each Lambda
+#
+# Parameters (passed via samconfig.toml or CLI overrides):
+#   - CertificateArn: ACM certificate ARN (must be in us-east-1)
+#   - BedrockModelId: Bedrock model ID for Qwen
+#   - SesSenderEmail: Verified SES sender address
+# =============================================================================
+
+Description: >
+  AI Resume Portfolio for Camilo Avila — camiloavila.dev.
+  Includes a Bedrock-powered RAG chatbot and a contact form with automated SES email replies.
+
+# ---------------------------------------------------------------------------
+# Parameters
+# ---------------------------------------------------------------------------
+Parameters:
+  CertificateArn:
+    Type: String
+    Description: >
+      ARN of the ACM TLS certificate for camiloavila.dev (must be issued in us-east-1).
+      Request via AWS Certificate Manager and validate via CNAME in Porkbun DNS.
+
+  BedrockModelId:
+    Type: String
+    Default: qwen.qwen3-coder-next
+    Description: >
+      Bedrock model ID for the chatbot and email generation.
+      Must be enabled in your Bedrock model access settings.
+
+  SesSenderEmail:
+    Type: String
+    Default: camiloavilainfo@gmail.com
+    Description: >
+      Verified SES sender email address. Must be verified in SES before deployment.
+      In SES sandbox mode only verified addresses can receive mail — request production
+      access to send to all visitors.
+
+  DomainName:
+    Type: String
+    Default: camiloavila.dev
+    Description: >
+      Custom domain for the CloudFront distribution.
+      DNS (ALIAS record) must be configured in Porkbun after first deploy.
+
+# ---------------------------------------------------------------------------
+# Globals — shared settings applied to all Lambda functions
+# ---------------------------------------------------------------------------
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        KNOWLEDGE_BUCKET: !Ref KnowledgeBaseBucket
+        KNOWLEDGE_KEY: knowledge_base.md
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+        CONTACT_TABLE: !Ref ContactTable
+        SES_SENDER_EMAIL: !Ref SesSenderEmail
+        ALLOWED_ORIGIN: !Sub "https://${DomainName}"
+
+# ---------------------------------------------------------------------------
+# Resources
+# ---------------------------------------------------------------------------
+Resources:
+
+  # -------------------------------------------------------------------------
+  # S3 — Knowledge Base Bucket (private)
+  # Stores knowledge_base.md — the RAG source document for the chatbot.
+  # Only accessible by the ChatbotFunction and ContactFunction Lambda roles.
+  # -------------------------------------------------------------------------
+  KnowledgeBaseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "camiloavila-knowledge-base-${AWS::AccountId}"
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Project
+          Value: camiloavila-dev
+        - Key: Purpose
+          Value: RAG knowledge base
+
+  # -------------------------------------------------------------------------
+  # S3 — Frontend Bucket (public website hosting)
+  # Hosts the compiled React/Vite static files (index.html, JS, CSS, assets).
+  # Served via CloudFront — direct S3 access is blocked.
+  # -------------------------------------------------------------------------
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "camiloavila-frontend-${AWS::AccountId}"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      Tags:
+        - Key: Project
+          Value: camiloavila-dev
+        - Key: Purpose
+          Value: Frontend static hosting
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Statement:
+          - Sid: AllowCloudFrontAccess
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
+
+  # -------------------------------------------------------------------------
+  # DynamoDB — Contact Table
+  # Stores all contact form submissions with the AI-generated reply for audit.
+  # Partition key: id (UUID) | Sort key: timestamp (ISO 8601)
+  # Billing: PAY_PER_REQUEST — no provisioned capacity costs.
+  # -------------------------------------------------------------------------
+  ContactTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: camiloavila-contacts
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      Tags:
+        - Key: Project
+          Value: camiloavila-dev
+        - Key: Purpose
+          Value: Contact form submissions
+
+  # -------------------------------------------------------------------------
+  # IAM — Chatbot Lambda Execution Role
+  # Principle of least privilege: only the permissions this function needs.
+  # - S3 GetObject on knowledge_base.md only
+  # - Bedrock InvokeModel on the configured model only
+  # - CloudWatch Logs for debugging
+  # -------------------------------------------------------------------------
+  ChatbotFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: camiloavila-chatbot-lambda-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ChatbotFunctionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: AllowKnowledgeBaseRead
+                Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "${KnowledgeBaseBucket.Arn}/knowledge_base.md"
+              - Sid: AllowBedrockInvoke
+                Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:Converse
+                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}"
+
+  # -------------------------------------------------------------------------
+  # IAM — Contact Lambda Execution Role
+  # - S3 GetObject on knowledge_base.md (for AI reply generation)
+  # - Bedrock InvokeModel for personalized email paragraph
+  # - DynamoDB PutItem on ContactTable
+  # - SES SendEmail from verified sender
+  # - CloudWatch Logs
+  # -------------------------------------------------------------------------
+  ContactFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: camiloavila-contact-lambda-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ContactFunctionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: AllowKnowledgeBaseRead
+                Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "${KnowledgeBaseBucket.Arn}/knowledge_base.md"
+              - Sid: AllowBedrockInvoke
+                Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:Converse
+                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}"
+              - Sid: AllowDynamoDBWrite
+                Effect: Allow
+                Action: dynamodb:PutItem
+                Resource: !GetAtt ContactTable.Arn
+              - Sid: AllowSESSend
+                Effect: Allow
+                Action: ses:SendEmail
+                Resource: "*"
+                Condition:
+                  StringEquals:
+                    ses:FromAddress: !Ref SesSenderEmail
+
+  # -------------------------------------------------------------------------
+  # Lambda — Chatbot Function
+  # Handles POST /chat requests.
+  # Uses Strands Agent with search_resume and get_contact_info tools.
+  # Reads knowledge_base.md from S3 (cached in memory after cold start).
+  # -------------------------------------------------------------------------
+  ChatbotFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: camiloavila-chatbot
+      CodeUri: backend/src/
+      Handler: handler.lambda_handler
+      Role: !GetAtt ChatbotFunctionRole.Arn
+      Description: >
+        RAG chatbot backed by Amazon Bedrock and Strands Agents.
+        Answers questions about Camilo Avila's resume using knowledge_base.md.
+      Events:
+        ChatPost:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PortfolioApi
+            Path: /chat
+            Method: POST
+        ChatOptions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PortfolioApi
+            Path: /chat
+            Method: OPTIONS
+      Tags:
+        Project: camiloavila-dev
+
+  # -------------------------------------------------------------------------
+  # Lambda — Contact Function
+  # Handles POST /contact requests.
+  # Saves submission to DynamoDB, generates AI reply, sends email via SES.
+  # -------------------------------------------------------------------------
+  ContactFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: camiloavila-contact
+      CodeUri: backend/src/
+      Handler: contact_handler.lambda_handler
+      Role: !GetAtt ContactFunctionRole.Arn
+      Description: >
+        Handles contact form submissions. Saves to DynamoDB, generates a
+        personalized AI email paragraph via Bedrock, and sends via SES.
+      Events:
+        ContactPost:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PortfolioApi
+            Path: /contact
+            Method: POST
+        ContactOptions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PortfolioApi
+            Path: /contact
+            Method: OPTIONS
+      Tags:
+        Project: camiloavila-dev
+
+  # -------------------------------------------------------------------------
+  # API Gateway — HTTP API
+  # Exposes two routes:
+  #   POST /chat    → ChatbotFunction
+  #   POST /contact → ContactFunction
+  # CORS is configured to allow requests only from camiloavila.dev.
+  # -------------------------------------------------------------------------
+  PortfolioApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
+      Description: >
+        HTTP API for camiloavila.dev — chatbot and contact form endpoints.
+      CorsConfiguration:
+        AllowOrigins:
+          - !Sub "https://${DomainName}"
+          - "http://localhost:5173"    # Allow local Vite dev server
+        AllowMethods:
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+        MaxAge: 300
+      Tags:
+        Project: camiloavila-dev
+
+  # -------------------------------------------------------------------------
+  # CloudFront — Distribution
+  # Serves the frontend S3 bucket over HTTPS with the custom domain.
+  # Custom domain: camiloavila.dev (ALIAS record configured in Porkbun)
+  # TLS: ACM certificate passed as parameter (must be in us-east-1)
+  # -------------------------------------------------------------------------
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: "camiloavila.dev portfolio distribution"
+        Aliases:
+          - !Ref DomainName
+          - !Sub "www.${DomainName}"
+        DefaultRootObject: index.html
+        Origins:
+          - Id: FrontendS3Origin
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !GetAtt CloudFrontOAC.Id
+        DefaultCacheBehavior:
+          TargetOriginId: FrontendS3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+          AllowedMethods:
+            - GET
+            - HEAD
+        CustomErrorResponses:
+          # SPA routing: return index.html for all 404s so React Router works
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        PriceClass: PriceClass_100  # US, Canada, Europe only — lowest cost
+      Tags:
+        - Key: Project
+          Value: camiloavila-dev
+
+  # CloudFront Origin Access Control — restricts S3 to CloudFront only
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: camiloavila-oac
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+# ---------------------------------------------------------------------------
+# Outputs — used by GitHub Actions deploy.yml to populate secrets
+# ---------------------------------------------------------------------------
+Outputs:
+  ApiUrl:
+    Description: >
+      API Gateway base URL. Used as VITE_API_URL in the frontend build.
+      Add /chat and /contact suffixes for the respective endpoints.
+    Value: !Sub "https://${PortfolioApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+    Export:
+      Name: CamiloAvilaApiUrl
+
+  CloudFrontUrl:
+    Description: >
+      CloudFront distribution domain name.
+      Use this to configure the ALIAS record in Porkbun DNS for camiloavila.dev.
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: CamiloAvilaCloudFrontUrl
+
+  CloudFrontDistributionId:
+    Description: >
+      CloudFront distribution ID. Add as CLOUDFRONT_DISTRIBUTION_ID GitHub Secret
+      so the deploy pipeline can invalidate the CDN cache after each frontend deploy.
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: CamiloAvilaCloudFrontId
+
+  FrontendBucketName:
+    Description: >
+      S3 bucket name for the frontend static files.
+      Add as S3_FRONTEND_BUCKET GitHub Secret so the deploy pipeline
+      can sync the Vite build output to this bucket.
+    Value: !Ref FrontendBucket
+    Export:
+      Name: CamiloAvilaFrontendBucket
+
+  KnowledgeBaseBucketName:
+    Description: >
+      S3 bucket name for the RAG knowledge base.
+      Upload knowledge_base.md to this bucket after first deploy.
+    Value: !Ref KnowledgeBaseBucket
+    Export:
+      Name: CamiloAvilaKnowledgeBucket
+
+  ContactTableName:
+    Description: DynamoDB table name for contact form submissions.
+    Value: !Ref ContactTable
+    Export:
+      Name: CamiloAvilaContactTable

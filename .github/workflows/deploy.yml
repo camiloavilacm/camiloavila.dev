@@ -1,0 +1,376 @@
+# =============================================================================
+# deploy.yml — Full CI/CD Deploy Pipeline
+# =============================================================================
+# Triggers on every push to the main branch (direct push or merged PR).
+#
+# Pipeline stages:
+#   1. backend-checks   — Python lint + unit tests (same as PR checks)
+#   2. frontend-checks  — ESLint + audit + build check
+#   3. deploy-backend   — SAM build + deploy to AWS
+#   4. upload-kb        — Upload knowledge_base.md to S3
+#   5. deploy-frontend  — Vite build + sync to S3 + CloudFront invalidation
+#   6. smoke-tests      — Cypress + Puppeteer + Playwright against live site
+#
+# All test reports (unit + smoke) are uploaded as artifacts after each run.
+#
+# Authentication:
+#   OIDC role assumption — no long-lived AWS access keys stored in GitHub.
+#   Required secrets: AWS_ROLE_TO_ASSUME (configured in GitHub → Settings → Secrets)
+#
+# Required GitHub Secrets:
+#   AWS_ROLE_TO_ASSUME           — IAM role ARN with required policies
+#   BEDROCK_MODEL_ID             — qwen.qwen3-coder-next
+#   SES_SENDER_EMAIL             — camiloavilainfo@gmail.com
+#   CERTIFICATE_ARN              — ACM cert ARN (after first manual setup)
+#   S3_FRONTEND_BUCKET           — Populated after first sam deploy
+#   CLOUDFRONT_DISTRIBUTION_ID   — Populated after first sam deploy
+#   PLAYWRIGHT_BASE_URL          — https://camiloavila.dev
+# =============================================================================
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write   # Required for OIDC role assumption
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Stage 1: Backend quality gate (same as PR checks)
+  # ---------------------------------------------------------------------------
+  backend-checks:
+    name: Backend — Lint & Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Lint with flake8
+        run: |
+          flake8 backend/src/ \
+            --count \
+            --select=E9,F63,F7,F82 \
+            --show-source \
+            --statistics
+          flake8 backend/src/ \
+            --count \
+            --exit-zero \
+            --max-line-length=100 \
+            --statistics
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+
+      - name: Run Pytest unit tests
+        run: |
+          mkdir -p reports/unit
+          pytest backend/tests/unit/ \
+            -v \
+            --html=reports/unit/report.html \
+            --self-contained-html \
+            --cov=backend/src \
+            --cov-report=html:reports/unit/coverage \
+            --cov-report=term-missing
+        env:
+          KNOWLEDGE_BUCKET: test-bucket
+          KNOWLEDGE_KEY: knowledge_base.md
+          BEDROCK_MODEL_ID: ${{ secrets.BEDROCK_MODEL_ID }}
+          CONTACT_TABLE: test-contacts
+          SES_SENDER_EMAIL: ${{ secrets.SES_SENDER_EMAIL }}
+          ALLOWED_ORIGIN: https://camiloavila.dev
+
+      - name: Upload unit test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-reports-${{ github.run_id }}
+          path: reports/unit/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Stage 2: Frontend quality gate
+  # ---------------------------------------------------------------------------
+  frontend-checks:
+    name: Frontend — Lint, Audit & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: TypeScript type check
+        working-directory: frontend
+        run: npm run type-check
+
+      - name: Security audit
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+      - name: Build frontend (pre-deploy check)
+        working-directory: frontend
+        run: npm run build
+        env:
+          VITE_API_URL: https://placeholder.execute-api.us-east-1.amazonaws.com/prod
+
+  # ---------------------------------------------------------------------------
+  # Stage 3: Deploy backend (SAM)
+  # Deploys the CloudFormation stack with Lambda, API Gateway, DynamoDB, S3
+  # ---------------------------------------------------------------------------
+  deploy-backend:
+    name: Deploy Backend (SAM)
+    runs-on: ubuntu-latest
+    needs: [backend-checks, frontend-checks]
+    outputs:
+      api_url: ${{ steps.get-outputs.outputs.api_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install AWS SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+
+      - name: SAM Build
+        run: sam build --parallel
+
+      - name: SAM Deploy
+        run: |
+          sam deploy \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides \
+              "CertificateArn=${{ secrets.CERTIFICATE_ARN }}" \
+              "BedrockModelId=${{ secrets.BEDROCK_MODEL_ID }}" \
+              "SesSenderEmail=${{ secrets.SES_SENDER_EMAIL }}" \
+              "DomainName=camiloavila.dev"
+
+      - name: Get API Gateway URL from stack outputs
+        id: get-outputs
+        run: |
+          API_URL=$(aws cloudformation describe-stacks \
+            --stack-name camiloavila-dev \
+            --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
+            --output text)
+          echo "api_url=$API_URL" >> "$GITHUB_OUTPUT"
+          echo "API URL: $API_URL"
+
+  # ---------------------------------------------------------------------------
+  # Stage 4: Upload knowledge base to S3
+  # ---------------------------------------------------------------------------
+  upload-kb:
+    name: Upload Knowledge Base to S3
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+
+      - name: Upload knowledge_base.md to S3
+        run: |
+          KB_BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name camiloavila-dev \
+            --query "Stacks[0].Outputs[?OutputKey=='KnowledgeBaseBucketName'].OutputValue" \
+            --output text)
+          aws s3 cp knowledge_base.md "s3://$KB_BUCKET/knowledge_base.md"
+          echo "Uploaded knowledge_base.md to s3://$KB_BUCKET/"
+
+  # ---------------------------------------------------------------------------
+  # Stage 5: Build and deploy frontend to S3 + CloudFront
+  # ---------------------------------------------------------------------------
+  deploy-frontend:
+    name: Deploy Frontend (S3 + CloudFront)
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend with production API URL
+        working-directory: frontend
+        run: npm run build
+        env:
+          VITE_API_URL: ${{ needs.deploy-backend.outputs.api_url }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+
+      - name: Sync dist/ to S3 frontend bucket
+        run: |
+          aws s3 sync frontend/dist/ \
+            "s3://${{ secrets.S3_FRONTEND_BUCKET }}/" \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "*.html"
+
+          # HTML files — no cache (always fresh)
+          aws s3 sync frontend/dist/ \
+            "s3://${{ secrets.S3_FRONTEND_BUCKET }}/" \
+            --exclude "*" \
+            --include "*.html" \
+            --cache-control "no-cache, no-store, must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
+          echo "CloudFront cache invalidated."
+
+  # ---------------------------------------------------------------------------
+  # Stage 6: Smoke tests against live site
+  # Runs after both backend and frontend are deployed and CDN cache is cleared.
+  # ---------------------------------------------------------------------------
+  smoke-tests:
+    name: Smoke Tests (Live Site)
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, upload-kb]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Wait for CloudFront propagation
+        run: sleep 30
+
+      # --- Cypress smoke tests ---
+      - name: Set up Node.js 20 (Cypress)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: tests/package.json
+
+      - name: Install test dependencies
+        working-directory: tests
+        run: npm ci
+
+      - name: Run Cypress smoke tests
+        working-directory: tests
+        run: npm run test:cypress
+        env:
+          CYPRESS_BASE_URL: https://camiloavila.dev
+        continue-on-error: true   # Upload reports even if tests fail
+
+      - name: Upload Cypress reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-smoke-reports-${{ github.run_id }}
+          path: reports/e2e/cypress/
+          retention-days: 30
+
+      # --- Puppeteer smoke tests ---
+      - name: Install Puppeteer browser
+        run: npx puppeteer browsers install chrome
+        working-directory: tests
+
+      - name: Run Puppeteer smoke tests
+        working-directory: tests
+        run: npm run test:puppeteer
+        env:
+          PUPPETEER_BASE_URL: https://camiloavila.dev
+        continue-on-error: true
+
+      - name: Upload Puppeteer reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: puppeteer-smoke-reports-${{ github.run_id }}
+          path: reports/e2e/puppeteer/
+          retention-days: 30
+
+      # --- Playwright smoke tests ---
+      - name: Set up Python 3.12 (Playwright)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Playwright dependencies
+        run: |
+          pip install playwright pytest pytest-html
+          playwright install chromium
+
+      - name: Run Playwright smoke + functional tests
+        run: |
+          mkdir -p reports/e2e/playwright
+          pytest tests/e2e/playwright/ \
+            -v \
+            -m "smoke or functional" \
+            --html=reports/e2e/playwright/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.PLAYWRIGHT_BASE_URL }}
+        continue-on-error: true
+
+      - name: Upload Playwright reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-smoke-reports-${{ github.run_id }}
+          path: reports/e2e/playwright/
+          retention-days: 30

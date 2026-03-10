@@ -1,0 +1,137 @@
+# =============================================================================
+# pr-checks.yml — Pull Request Quality Gate
+# =============================================================================
+# Runs on every pull request targeting the main branch.
+# All jobs must pass before a PR can be merged.
+#
+# Jobs:
+#   backend-checks  — Python lint (flake8), unit tests (pytest), coverage report
+#   frontend-checks — ESLint, npm audit, TypeScript type-check, Vite build
+#
+# Reports:
+#   - Pytest HTML report uploaded as artifact: test-reports-unit-{run_id}
+#   - Coverage report uploaded as artifact
+#
+# Authentication:
+#   Uses OIDC role assumption (AWS_ROLE_TO_ASSUME secret).
+#   No long-lived access keys stored in GitHub.
+# =============================================================================
+
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  id-token: write   # Required for OIDC role assumption
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Backend: Python lint + unit tests
+  # ---------------------------------------------------------------------------
+  backend-checks:
+    name: Backend — Lint & Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Lint with flake8
+        run: |
+          # Fail on syntax errors and undefined names (E9, F63, F7, F82)
+          # Warn on style issues but don't block (E501 = line too long)
+          flake8 backend/src/ \
+            --count \
+            --select=E9,F63,F7,F82 \
+            --show-source \
+            --statistics
+          flake8 backend/src/ \
+            --count \
+            --exit-zero \
+            --max-line-length=100 \
+            --statistics
+
+      - name: Configure AWS Credentials (for moto mocking validation)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+
+      - name: Run Pytest unit tests with HTML report
+        run: |
+          mkdir -p reports/unit
+          pytest backend/tests/unit/ \
+            -v \
+            --html=reports/unit/report.html \
+            --self-contained-html \
+            --cov=backend/src \
+            --cov-report=html:reports/unit/coverage \
+            --cov-report=term-missing
+        env:
+          KNOWLEDGE_BUCKET: test-bucket
+          KNOWLEDGE_KEY: knowledge_base.md
+          BEDROCK_MODEL_ID: qwen.qwen3-coder-next
+          CONTACT_TABLE: test-contacts
+          SES_SENDER_EMAIL: camiloavilainfo@gmail.com
+          ALLOWED_ORIGIN: https://camiloavila.dev
+
+      - name: Upload unit test reports
+        uses: actions/upload-artifact@v4
+        if: always()   # Upload even if tests fail
+        with:
+          name: test-reports-unit-${{ github.run_id }}
+          path: reports/unit/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Frontend: ESLint + security audit + build check
+  # ---------------------------------------------------------------------------
+  frontend-checks:
+    name: Frontend — Lint, Audit & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: TypeScript type check
+        working-directory: frontend
+        run: npm run type-check
+
+      - name: Security audit (fail on high severity)
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+      - name: Build frontend (Vite)
+        working-directory: frontend
+        run: npm run build
+        env:
+          VITE_API_URL: https://placeholder.execute-api.us-east-1.amazonaws.com/prod

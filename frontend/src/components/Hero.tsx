@@ -1,0 +1,108 @@
+/**
+ * Hero.tsx — Portfolio Hero Section
+ *
+ * The first thing visitors see. Introduces Camilo Avila with:
+ * - A greeting line in monospace font (establishes the "developer" tone)
+ * - Name as the primary H1 heading
+ * - Role/tagline as the secondary H2
+ * - A brief summary paragraph
+ * - Two CTA buttons: view work and contact
+ *
+ * Design follows Brittany Chiang's approach: large, impactful name,
+ * muted tagline, clean CTA row.
+ */
+
+import React from "react";
+
+/**
+ * Hero section component.
+ *
+ * @returns The hero section with name, title, summary, and CTAs.
+ */
+const Hero: React.FC = () => {
+  return (
+    <section id="hero" style={styles.section} aria-label="Introduction">
+      <p style={styles.greeting}>Hi, my name is</p>
+
+      <h1 style={styles.name}>Camilo Avila.</h1>
+
+      <h2 style={styles.tagline}>
+        Senior QA Automation Engineer.
+        <br />
+        <span style={styles.taglineSub}>AWS Certified. AI & Cloud focused.</span>
+      </h2>
+
+      <p style={styles.summary}>
+        I'm a polyglot QA Automation Engineer based in Spain with 15+ years of
+        experience designing test automation frameworks for web, mobile, API, and
+        microservices. I hold two AWS certifications and specialise in building
+        reliable, cloud-native testing pipelines. Currently available for remote
+        roles within US working hours.
+      </p>
+
+      <div style={styles.ctaRow}>
+        <a href="#contact" className="btn" aria-label="Go to contact section">
+          Get in touch
+        </a>
+        <a
+          href="https://www.linkedin.com/in/camiloavila"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn"
+          style={{ marginLeft: "16px" }}
+          aria-label="View LinkedIn profile"
+        >
+          LinkedIn
+        </a>
+      </div>
+    </section>
+  );
+};
+
+const styles: Record<string, React.CSSProperties> = {
+  section: {
+    paddingTop: "160px",
+    paddingBottom: "80px",
+    maxWidth: "700px",
+  },
+  greeting: {
+    fontFamily: "var(--font-mono)",
+    fontSize: "16px",
+    color: "var(--accent)",
+    marginBottom: "20px",
+  },
+  name: {
+    fontSize: "clamp(40px, 8vw, 80px)",
+    fontWeight: 700,
+    color: "var(--text-primary)",
+    lineHeight: 1.1,
+    marginBottom: "10px",
+  },
+  tagline: {
+    fontSize: "clamp(28px, 6vw, 60px)",
+    fontWeight: 600,
+    color: "var(--text-secondary)",
+    lineHeight: 1.2,
+    marginBottom: "24px",
+  },
+  taglineSub: {
+    fontSize: "clamp(20px, 4vw, 40px)",
+    color: "var(--text-secondary)",
+    opacity: 0.7,
+  },
+  summary: {
+    fontSize: "17px",
+    color: "var(--text-secondary)",
+    lineHeight: 1.7,
+    marginBottom: "40px",
+    maxWidth: "560px",
+  },
+  ctaRow: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "8px",
+  },
+};
+
+export default Hero;
