@@ -42,7 +42,7 @@ s3_prefix          = "camiloavila-dev"
 # before running the first deploy. Example:
 #   arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 parameter_overrides = [
-  "CertificateArn=REPLACE_WITH_YOUR_CERTIFICATE_ARN",
+  "CertificateArn=arn:aws:acm:us-east-1:046228935090:certificate/c5e7d57e-c441-4e8c-93b5-160fde897cff",
   "BedrockModelId=qwen.qwen3-coder-next",
   "SesSenderEmail=camiloavilainfo@gmail.com",
   "DomainName=camiloavila.dev"

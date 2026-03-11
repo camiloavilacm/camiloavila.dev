@@ -24,8 +24,7 @@ Strands Agents documentation:
 import os
 import logging
 
-from strands import Agent
-from strands_tools import tool  # noqa: F401 — imported for type resolution
+from strands import Agent, tool
 
 from tools.search_resume import search_resume
 from tools.get_contact_info import get_contact_info
