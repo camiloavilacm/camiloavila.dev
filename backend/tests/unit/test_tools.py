@@ -60,7 +60,7 @@ class TestSearchResumeTool:
                 else search_resume("certifications")
             )
 
-            assert "Developer Associate" in result
+            assert "AWS Certified Developer" in result
             assert "AI Practitioner" in result
 
     def test_propagates_kb_loader_error(self):
