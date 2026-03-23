@@ -181,16 +181,7 @@ jobs:
         run: sam build --parallel
 
       - name: SAM Deploy to Staging
-        run: |
-          sam deploy \
-            --stack-name camiloavila-dev-staging \
-            --no-confirm-changeset \
-            --no-fail-on-empty-changeset \
-            --parameter-overrides \
-              "CertificateArn=${{ secrets.ACM_CERTIFICATE_ARN }}" \
-              "BedrockModelId=${{ secrets.BEDROCK_MODEL_ID }}" \
-              "SesSenderEmail=${{ secrets.SES_SENDER_EMAIL }}" \
-              "DomainName=staging.camiloavila.dev"
+        run: sam deploy --stack-name camiloavila-dev-staging --no-confirm-changeset --no-fail-on-empty-changeset --parameter-overrides "CertificateArn=${{ secrets.ACM_CERTIFICATE_ARN }}" "BedrockModelId=${{ secrets.BEDROCK_MODEL_ID }}" "SesSenderEmail=${{ secrets.SES_SENDER_EMAIL }}" "DomainName=staging.camiloavila.dev"
 
       - name: Get API Gateway URL from stack outputs
         id: get-outputs
