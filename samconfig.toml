@@ -71,7 +71,7 @@ resolve_s3         = true
 s3_prefix          = "camiloavila-dev-staging"
 
 parameter_overrides = [
-  "CertificateArn=arn:aws:acm:us-east-1:046228935090:certificate/c5e7d57e-c441-4e8c-93b5-160fde897cff",
+  "CertificateArn=arn:aws:acm:us-east-1:046228935090:certificate/b4c5230f-ecae-43ca-93a2-ae68a26e7aee",
   "BedrockModelId=qwen.qwen3-coder-next",
   "SesSenderEmail=camiloavilainfo@gmail.com",
   "DomainName=staging.camiloavila.dev"
