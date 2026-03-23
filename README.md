@@ -59,9 +59,11 @@ camiloavila.dev/
 │   │   │   ├── Certifications.tsx# AWS certs + education
 │   │   │   ├── ContactForm.tsx   # Form with validation + API call
 │   │   │   └── Chatbot.tsx       # Floating AI chat widget
+│   │   ├── vite-env.d.ts         # Vite TypeScript environment types
 │   │   ├── App.tsx
 │   │   └── main.tsx
 │   ├── vite.config.ts
+│   ├── eslint.config.js       # ESLint flat config
 │   └── package.json
 │
 ├── tests/
@@ -103,7 +105,7 @@ cd camiloavila.dev
 # Backend dependencies
 python3 -m venv venv
 source venv/bin/activate
-pip install -r backend/requirements.txt
+python3 -m pip install -r backend/requirements.txt
 
 # Frontend dependencies
 cd frontend && npm install && cd ..
@@ -112,7 +114,7 @@ cd frontend && npm install && cd ..
 cd tests && npm install && cd ..
 
 # Playwright browser
-pip install playwright pytest pytest-html
+python3 -m pip install playwright pytest pytest-html allure-pytest
 playwright install chromium
 ```
 
@@ -150,11 +152,11 @@ cd frontend && npm run dev
 ### Unit tests (Pytest)
 
 ```bash
-pytest backend/tests/unit/ -v
+python3 -m pytest backend/tests/unit/ -v
 
 # With HTML report:
 mkdir -p reports/unit
-pytest backend/tests/unit/ -v \
+python3 -m pytest backend/tests/unit/ -v \
   --html=reports/unit/report.html \
   --self-contained-html \
   --cov=backend/src \
@@ -185,14 +187,14 @@ PUPPETEER_BASE_URL=http://localhost:5173 npm run test:puppeteer
 ### Playwright tests (Python)
 
 ```bash
-PLAYWRIGHT_BASE_URL=http://localhost:5173 pytest tests/e2e/playwright/ -v
+PLAYWRIGHT_BASE_URL=http://localhost:5173 python3 -m pytest tests/e2e/playwright/ -v
 # Report: reports/e2e/playwright/report.html
 
 # Smoke only:
-pytest tests/e2e/playwright/ -m smoke -v
+python3 -m pytest tests/e2e/playwright/ -m smoke -v
 
 # Functional only:
-pytest tests/e2e/playwright/ -m functional -v
+python3 -m pytest tests/e2e/playwright/ -m functional -v
 ```
 
 ---

@@ -48,7 +48,7 @@ jobs:
           cache: pip
 
       - name: Install backend dependencies
-        run: pip install -r backend/requirements.txt
+        run: python3 -m pip install -r backend/requirements.txt
 
       - name: Lint with flake8
         run: |
@@ -74,7 +74,7 @@ jobs:
       - name: Run Pytest unit tests with HTML report
         run: |
           mkdir -p reports/unit
-          pytest backend/tests/unit/ \
+          python3 -m pytest backend/tests/unit/ \
             -v \
             --html=reports/unit/report.html \
             --self-contained-html \
@@ -198,13 +198,13 @@ jobs:
 
       - name: Install Playwright dependencies
         run: |
-          pip install playwright pytest pytest-html allure-pytest
+          python3 -m pip install playwright pytest pytest-html allure-pytest
           playwright install chromium
 
       - name: Run Playwright smoke tests
         run: |
           mkdir -p reports/e2e/playwright
-          pytest tests/e2e/playwright/ \
+          python3 -m pytest tests/e2e/playwright/ \
             -v \
             -m smoke \
             --html=reports/e2e/playwright/report.html \
