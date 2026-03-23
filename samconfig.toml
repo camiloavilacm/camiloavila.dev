@@ -50,3 +50,31 @@ parameter_overrides = [
 
 # CloudFormation tags applied to all resources in the stack
 tags = "Project=camiloavila-dev Environment=production"
+
+# =============================================================================
+# Staging Environment (develop branch)
+# =============================================================================
+[staging]
+[staging.global.parameters]
+stack_name = "camiloavila-dev-staging"
+
+[staging.build.parameters]
+cached = true
+parallel = true
+
+[staging.deploy.parameters]
+capabilities       = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
+confirm_changeset  = false
+fail_on_empty_changeset = false
+region             = "us-east-1"
+resolve_s3         = true
+s3_prefix          = "camiloavila-dev-staging"
+
+parameter_overrides = [
+  "CertificateArn=arn:aws:acm:us-east-1:046228935090:certificate/c5e7d57e-c441-4e8c-93b5-160fde897cff",
+  "BedrockModelId=qwen.qwen3-coder-next",
+  "SesSenderEmail=camiloavilainfo@gmail.com",
+  "DomainName=staging.camiloavila.dev"
+]
+
+tags = "Project=camiloavila-dev Environment=staging"

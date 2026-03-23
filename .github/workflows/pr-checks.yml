@@ -23,6 +23,7 @@ on:
   pull_request:
     branches:
       - main
+      - develop
 
 permissions:
   id-token: write   # Required for OIDC role assumption
@@ -135,3 +136,87 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: https://placeholder.execute-api.us-east-1.amazonaws.com/prod
+
+  # ---------------------------------------------------------------------------
+  # E2E Tests: Run on PRs to develop branch only (against staging if available)
+  # ---------------------------------------------------------------------------
+  e2e-checks:
+    name: E2E Tests (PRs to develop)
+    runs-on: ubuntu-latest
+    if: github.base_ref == 'develop'
+    needs: [backend-checks, frontend-checks]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20 (Cypress)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: tests/package.json
+
+      - name: Install test dependencies
+        working-directory: tests
+        run: npm ci
+
+      - name: Run Cypress smoke tests
+        working-directory: tests
+        run: npm run test:cypress
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+        continue-on-error: true
+
+      - name: Upload Cypress reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-pr-reports-${{ github.run_id }}
+          path: reports/e2e/cypress/
+          retention-days: 30
+
+      - name: Run Puppeteer smoke tests
+        working-directory: tests
+        run: npm run test:puppeteer
+        env:
+          PUPPETEER_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+        continue-on-error: true
+
+      - name: Upload Puppeteer reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: puppeteer-pr-reports-${{ github.run_id }}
+          path: reports/e2e/puppeteer/
+          retention-days: 30
+
+      - name: Set up Python 3.12 (Playwright)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Playwright dependencies
+        run: |
+          pip install playwright pytest pytest-html allure-pytest
+          playwright install chromium
+
+      - name: Run Playwright smoke tests
+        run: |
+          mkdir -p reports/e2e/playwright
+          pytest tests/e2e/playwright/ \
+            -v \
+            -m smoke \
+            --html=reports/e2e/playwright/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+        continue-on-error: true
+
+      - name: Upload Playwright reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-pr-reports-${{ github.run_id }}
+          path: reports/e2e/playwright/
+          retention-days: 30

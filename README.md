@@ -8,19 +8,18 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 
 ## What's inside
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 18 + Vite + TypeScript |
-| Backend | Python 3.12 AWS Lambda + Strands Agents |
-| AI | Amazon Bedrock — `qwen.qwen3-coder-next` via Converse API |
-| Database | Amazon DynamoDB (contact form submissions) |
-| Email | Amazon SES (automated personalised replies) |
-| Infrastructure | AWS SAM (`template.yaml`) |
-| Hosting | S3 + CloudFront + camiloavila.dev (Porkbun DNS) |
-| CI/CD | GitHub Actions (OIDC role assumption — no stored keys) |
-| Unit tests | Pytest + pytest-html |
-| E2E tests | Cypress (TypeScript) + Puppeteer (TypeScript) |
-| Smoke/Functional | Playwright (Python) |
+| Layer            | Technology                                                |
+| ---------------- | --------------------------------------------------------- |
+| Frontend         | React 18 + Vite + TypeScript                              |
+| Backend          | Python 3.12 AWS Lambda + Strands Agents                   |
+| AI               | Amazon Bedrock — `qwen.qwen3-coder-next` via Converse API |
+| Database         | Amazon DynamoDB (contact form submissions)                |
+| Email            | Amazon SES (automated personalised replies)               |
+| Infrastructure   | AWS SAM (`template.yaml`)                                 |
+| Hosting          | S3 + CloudFront + camiloavila.dev (Porkbun DNS)           |
+| CI/CD            | GitHub Actions (OIDC role assumption — no stored keys)    |
+| Unit tests       | Pytest + pytest-html + Allure                          |
+| E2E tests        | Cypress + Puppeteer + Playwright (Allure reports)    |
 
 ---
 
@@ -30,7 +29,8 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 camiloavila.dev/
 ├── .github/workflows/
 │   ├── pr-checks.yml        # Runs on every PR — lint + unit tests + build check
-│   └── deploy.yml           # Runs on push to main — full deploy + smoke tests
+│   ├── deploy.yml           # Runs on push to main — production deploy + smoke tests
+│   └── deploy-develop.yml   # Runs on push to develop — staging deploy + smoke tests
 │
 ├── backend/
 │   ├── src/
@@ -101,6 +101,8 @@ git clone https://github.com/camiloavilacm/camiloavila.dev.git
 cd camiloavila.dev
 
 # Backend dependencies
+python3 -m venv venv
+source venv/bin/activate
 pip install -r backend/requirements.txt
 
 # Frontend dependencies
@@ -228,14 +230,17 @@ The CI/CD pipeline automates all subsequent deploys. The first deploy requires a
 
 Go to your repo → Settings → Secrets and variables → Actions:
 
-| Secret | Value |
-|---|---|
-| `AWS_ROLE_TO_ASSUME` | IAM role ARN from Step 3 |
-| `AWS_REGION` | `us-east-1` |
-| `CERTIFICATE_ARN` | From Step 1 |
-| `BEDROCK_MODEL_ID` | `qwen.qwen3-coder-next` |
-| `SES_SENDER_EMAIL` | `camiloavilainfo@gmail.com` |
-| `PLAYWRIGHT_BASE_URL` | `https://camiloavila.dev` |
+| Secret                     | Value                            |
+| -------------------------- | -------------------------------- |
+| `AWS_ROLE_TO_ASSUME`       | IAM role ARN from Step 3        |
+| `AWS_REGION`               | `us-east-1`                      |
+| `ACM_CERTIFICATE_ARN`          | From Step 1                     |
+| `BEDROCK_MODEL_ID`         | `qwen.qwen3-coder-next`          |
+| `SES_SENDER_EMAIL`         | `camiloavilainfo@gmail.com`      |
+| `PLAYWRIGHT_BASE_URL`      | `https://camiloavila.dev`        |
+| `STAGING_PLAYWRIGHT_BASE_URL` | `https://staging.camiloavila.dev` (optional) |
+| `STAGING_S3_FRONTEND_BUCKET` | (add after first staging deploy) |
+| `STAGING_CLOUDFRONT_DIST_ID` | (add after first staging deploy) |
 
 ### Step 5 — First SAM deploy
 
@@ -246,6 +251,7 @@ sam build && sam deploy --guided
 ```
 
 After deploy, the stack outputs:
+
 - `ApiUrl` → add as `VITE_API_URL` in your frontend `.env.local`
 - `CloudFrontUrl` → use for Porkbun DNS setup (Step 6)
 - `FrontendBucketName` → add as `S3_FRONTEND_BUCKET` GitHub Secret
@@ -254,6 +260,7 @@ After deploy, the stack outputs:
 ### Step 6 — Point Porkbun DNS to CloudFront
 
 In Porkbun → DNS for `camiloavila.dev`:
+
 - Add `ALIAS` record: `camiloavila.dev` → `xyz.cloudfront.net` (from Step 5 output)
 - Add `CNAME` record: `www.camiloavila.dev` → `xyz.cloudfront.net`
 
@@ -261,30 +268,107 @@ Wait ~15 minutes for DNS propagation.
 
 From this point, every push to `main` triggers the full deploy pipeline automatically.
 
+### Step 7 — First Staging Deploy (optional)
+
+To enable staging environment:
+
+1. Create and push the `develop` branch:
+   ```bash
+   git checkout -b develop
+   git push -u origin develop
+   ```
+
+2. Add staging secrets in GitHub (Settings → Secrets → Actions):
+   - `STAGING_PLAYWRIGHT_BASE_URL` = `https://staging.camiloavila.dev`
+
+3. Push any change to `develop` to trigger `deploy-develop.yml`
+
+4. After staging deploy completes, add these secrets:
+   - `STAGING_S3_FRONTEND_BUCKET` = FrontendBucketName (from CloudFormation output)
+   - `STAGING_CLOUDFRONT_DIST_ID` = CloudFrontDistributionId (from CloudFormation output)
+
+5. Configure DNS in Porkbun:
+   - Add CNAME: `staging` → `<staging-cloudfront>.cloudfront.net`
+
 ---
 
 ## CI/CD overview
 
-Two workflows:
+Three workflows:
 
-**`pr-checks.yml`** — runs on every PR:
+**`pr-checks.yml`** — runs on every PR to `main` or `develop`:
+
 - Python lint (flake8) + Pytest unit tests + coverage report
 - ESLint + TypeScript check + npm audit + Vite build check
-- Uploads HTML test reports as artifacts
+- E2E tests (only on PRs to `develop` against staging)
+- Uploads HTML + Allure reports as artifacts
+
+**`deploy-develop.yml`** — runs on push to `develop`:
+
+1. All PR checks (lint + unit tests)
+2. SAM build + deploy to staging stack (`camiloavila-dev-staging`)
+3. Upload `knowledge_base.md` to staging S3
+4. Vite build + S3 sync + CloudFront invalidation
+5. Smoke tests against staging site (Cypress + Puppeteer + Playwright)
+6. Publish Allure reports to GitHub Pages
 
 **`deploy.yml`** — runs on push to `main`:
+
 1. All PR checks (lint + unit tests)
 2. SAM build + deploy (CloudFormation stack update)
 3. Upload `knowledge_base.md` to S3
 4. Vite build (with real API URL) + S3 sync + CloudFront invalidation
 5. Smoke tests against live site (Cypress + Puppeteer + Playwright)
-6. All reports uploaded as artifacts (30-day retention)
+6. Publish Allure reports to GitHub Pages
+
+---
+
+## Environments
+
+| Environment | Branch | URL | Stack Name |
+|-------------|--------|-----|------------|
+| Production  | `main` | https://camiloavila.dev | camiloavila-dev |
+| Staging     | `develop` | https://staging.camiloavila.dev | camiloavila-dev-staging |
+
+### Workflow
+
+```
+feature branch → PR to develop → E2E tests → merge to develop → staging deploy
+                                      ↓
+                              PR to main → E2E tests → merge to main → production deploy
+```
+
+### GitHub Pages Reports
+
+Allure test reports are automatically published to GitHub Pages after each deploy:
+- Staging: Available after `deploy-develop.yml` completes
+- Production: Available after `deploy.yml` completes
+
+Access reports at: `https://camiloavilacm.github.io/camiloavila.dev/`
 
 ---
 
 ## Adding new content to the chatbot
 
 To update what the chatbot knows, edit [`knowledge_base.md`](knowledge_base.md) and push to `main`. The CI/CD pipeline uploads the updated file to S3 automatically. The Lambda picks up the new content on the next cold start.
+
+---
+
+## Enabling Allure Reports
+
+Allure test reports are published to GitHub Pages after each deploy (staging and production).
+
+### Setup GitHub Pages
+
+1. Go to repository **Settings** → **Pages**
+2. Under "Build and deployment", set **Source** to **"GitHub Actions"**
+3. Save
+
+### Accessing Reports
+
+After a deploy completes, visit:
+- Staging: `https://camiloavilacm.github.io/camiloavila.dev/` (after `deploy-develop.yml`)
+- Production: `https://camiloavilacm.github.io/camiloavila.dev/` (after `deploy.yml`)
 
 ---
 
@@ -297,3 +381,5 @@ Senior QA Automation Engineer
 - Phone: +34 655 524 297
 - LinkedIn: https://www.linkedin.com/in/camiloavila
 - Location: Spain — available for remote roles (US working hours)
+
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/camiloavilacm/camiloavila.dev?utm_source=oss&utm_medium=github&utm_campaign=camiloavilacm%2Fcamiloavila.dev&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)

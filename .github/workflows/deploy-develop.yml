@@ -1,47 +1,44 @@
 # =============================================================================
-# deploy.yml — Full CI/CD Deploy Pipeline
+# deploy-develop.yml — Staging CI/CD Deploy Pipeline
 # =============================================================================
-# Triggers on every push to the main branch (direct push or merged PR).
+# Triggers on every push to the develop branch.
+# Deploys to a separate staging environment (camiloavila-dev-staging stack).
 #
 # Pipeline stages:
-#   1. backend-checks   — Python lint + unit tests (same as PR checks)
+#   1. backend-checks   — Python lint + unit tests (pytest) + Allure
 #   2. frontend-checks  — ESLint + audit + build check
-#   3. deploy-backend   — SAM build + deploy to AWS
-#   4. upload-kb        — Upload knowledge_base.md to S3
+#   3. deploy-backend   — SAM build + deploy to staging stack
+#   4. upload-kb        — Upload knowledge_base.md to staging S3 bucket
 #   5. deploy-frontend  — Vite build + sync to S3 + CloudFront invalidation
-#   6. smoke-tests      — Cypress + Puppeteer + Playwright against live site
-#
-# All test reports (unit + smoke) are uploaded as artifacts after each run.
-#
-# Authentication:
-#   OIDC role assumption — no long-lived AWS access keys stored in GitHub.
-#   Required secrets: AWS_ROLE_TO_ASSUME (configured in GitHub → Settings → Secrets)
+#   6. smoke-tests      — Cypress + Puppeteer + Playwright against staging site
+#   7. publish-reports  — Generate Allure report and publish to GitHub Pages
 #
 # Required GitHub Secrets:
 #   AWS_ROLE_TO_ASSUME           — IAM role ARN with required policies
 #   BEDROCK_MODEL_ID             — qwen.qwen3-coder-next
 #   SES_SENDER_EMAIL             — camiloavilainfo@gmail.com
-#   ACM_CERTIFICATE_ARN              — ACM cert ARN (after first manual setup)
-#   S3_FRONTEND_BUCKET           — Populated after first sam deploy
-#   CLOUDFRONT_DISTRIBUTION_ID   — Populated after first sam deploy
-#   PLAYWRIGHT_BASE_URL          — https://camiloavila.dev
+#   ACM_CERTIFICATE_ARN              — ACM cert ARN
+#   STAGING_S3_FRONTEND_BUCKET   — Staging S3 bucket (populated after first staging deploy)
+#   STAGING_CLOUDFRONT_DIST_ID  — Staging CloudFront distribution ID
+#   STAGING_PLAYWRIGHT_BASE_URL  — https://staging.camiloavila.dev (or use custom domain)
 # =============================================================================
 
-name: Deploy
+name: Deploy Develop (Staging)
 
 on:
   push:
     branches:
-      - main
+      - develop
 
 permissions:
   id-token: write   # Required for OIDC role assumption
   contents: read
   pages: write      # Required for GitHub Pages
+  pages: write      # Required for GitHub Pages
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Stage 1: Backend quality gate (same as PR checks)
+  # Stage 1: Backend quality gate
   # ---------------------------------------------------------------------------
   backend-checks:
     name: Backend — Lint & Unit Tests
@@ -86,8 +83,6 @@ jobs:
             -v \
             --alluredir=reports/unit/allure-results \
             --clean-alluredir \
-            --html=reports/unit/report.html \
-            --self-contained-html \
             --cov=backend/src \
             --cov-report=html:reports/unit/coverage \
             --cov-report=term-missing
@@ -97,7 +92,7 @@ jobs:
           BEDROCK_MODEL_ID: ${{ secrets.BEDROCK_MODEL_ID }}
           CONTACT_TABLE: test-contacts
           SES_SENDER_EMAIL: ${{ secrets.SES_SENDER_EMAIL }}
-          ALLOWED_ORIGIN: https://camiloavila.dev
+          ALLOWED_ORIGIN: https://staging.camiloavila.dev
 
       - name: Upload unit test reports
         uses: actions/upload-artifact@v4
@@ -107,7 +102,7 @@ jobs:
           path: reports/unit/
           retention-days: 30
 
-      - name: Upload Allure unit results
+      - name: Upload Allure results
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -156,11 +151,10 @@ jobs:
           VITE_API_URL: https://placeholder.execute-api.us-east-1.amazonaws.com/prod
 
   # ---------------------------------------------------------------------------
-  # Stage 3: Deploy backend (SAM)
-  # Deploys the CloudFormation stack with Lambda, API Gateway, DynamoDB, S3
+  # Stage 3: Deploy backend to staging (SAM)
   # ---------------------------------------------------------------------------
   deploy-backend:
-    name: Deploy Backend (SAM)
+    name: Deploy Backend to Staging (SAM)
     runs-on: ubuntu-latest
     needs: [backend-checks, frontend-checks]
     outputs:
@@ -187,32 +181,33 @@ jobs:
       - name: SAM Build
         run: sam build --parallel
 
-      - name: SAM Deploy
+      - name: SAM Deploy to Staging
         run: |
           sam deploy \
+            --stack-name camiloavila-dev-staging \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --parameter-overrides \
               "CertificateArn=${{ secrets.ACM_CERTIFICATE_ARN }}" \
               "BedrockModelId=${{ secrets.BEDROCK_MODEL_ID }}" \
               "SesSenderEmail=${{ secrets.SES_SENDER_EMAIL }}" \
-              "DomainName=camiloavila.dev"
+              "DomainName=staging.camiloavila.dev"
 
       - name: Get API Gateway URL from stack outputs
         id: get-outputs
         run: |
           API_URL=$(aws cloudformation describe-stacks \
-            --stack-name camiloavila-dev \
+            --stack-name camiloavila-dev-staging \
             --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
             --output text)
           echo "api_url=$API_URL" >> "$GITHUB_OUTPUT"
           echo "API URL: $API_URL"
 
   # ---------------------------------------------------------------------------
-  # Stage 4: Upload knowledge base to S3
+  # Stage 4: Upload knowledge base to staging S3
   # ---------------------------------------------------------------------------
   upload-kb:
-    name: Upload Knowledge Base to S3
+    name: Upload Knowledge Base to Staging S3
     runs-on: ubuntu-latest
     needs: deploy-backend
 
@@ -226,20 +221,20 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
 
-      - name: Upload knowledge_base.md to S3
+      - name: Upload knowledge_base.md to staging S3
         run: |
           KB_BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name camiloavila-dev \
+            --stack-name camiloavila-dev-staging \
             --query "Stacks[0].Outputs[?OutputKey=='KnowledgeBaseBucketName'].OutputValue" \
             --output text)
           aws s3 cp knowledge_base.md "s3://$KB_BUCKET/knowledge_base.md"
           echo "Uploaded knowledge_base.md to s3://$KB_BUCKET/"
 
   # ---------------------------------------------------------------------------
-  # Stage 5: Build and deploy frontend to S3 + CloudFront
+  # Stage 5: Build and deploy frontend to staging S3 + CloudFront
   # ---------------------------------------------------------------------------
   deploy-frontend:
-    name: Deploy Frontend (S3 + CloudFront)
+    name: Deploy Frontend to Staging (S3 + CloudFront)
     runs-on: ubuntu-latest
     needs: deploy-backend
 
@@ -258,7 +253,7 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Build frontend with production API URL
+      - name: Build frontend with staging API URL
         working-directory: frontend
         run: npm run build
         env:
@@ -270,34 +265,32 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
 
-      - name: Sync dist/ to S3 frontend bucket
+      - name: Sync dist/ to staging S3 frontend bucket
         run: |
           aws s3 sync frontend/dist/ \
-            "s3://${{ secrets.S3_FRONTEND_BUCKET }}/" \
+            "s3://${{ secrets.STAGING_S3_FRONTEND_BUCKET }}/" \
             --delete \
             --cache-control "public, max-age=31536000, immutable" \
             --exclude "*.html"
 
-          # HTML files — no cache (always fresh)
           aws s3 sync frontend/dist/ \
-            "s3://${{ secrets.S3_FRONTEND_BUCKET }}/" \
+            "s3://${{ secrets.STAGING_S3_FRONTEND_BUCKET }}/" \
             --exclude "*" \
             --include "*.html" \
             --cache-control "no-cache, no-store, must-revalidate"
 
-      - name: Invalidate CloudFront cache
+      - name: Invalidate staging CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --distribution-id ${{ secrets.STAGING_CLOUDFRONT_DIST_ID }} \
             --paths "/*"
-          echo "CloudFront cache invalidated."
+          echo "Staging CloudFront cache invalidated."
 
   # ---------------------------------------------------------------------------
-  # Stage 6: Smoke tests against live site
-  # Runs after both backend and frontend are deployed and CDN cache is cleared.
+  # Stage 6: Smoke tests against staging site
   # ---------------------------------------------------------------------------
   smoke-tests:
-    name: Smoke Tests (Live Site)
+    name: Smoke Tests (Staging Site)
     runs-on: ubuntu-latest
     needs: [deploy-frontend, upload-kb]
 
@@ -320,12 +313,17 @@ jobs:
         working-directory: tests
         run: npm ci
 
+      - name: Configure Cypress Allure
+        working-directory: tests
+        run: npm run build
+        run: npx cypress-allure write
+
       - name: Run Cypress smoke tests
         working-directory: tests
         run: npm run test:cypress
         env:
-          CYPRESS_BASE_URL: https://camiloavila.dev
-        continue-on-error: true   # Upload reports even if tests fail
+          CYPRESS_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+        continue-on-error: true
 
       - name: Upload Cypress reports
         uses: actions/upload-artifact@v4
@@ -333,6 +331,14 @@ jobs:
         with:
           name: cypress-smoke-reports-${{ github.run_id }}
           path: reports/e2e/cypress/
+          retention-days: 30
+
+      - name: Upload Cypress Allure results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-cypress-results-${{ github.run_id }}
+          path: tests/e2e/cypress/allure-results/
           retention-days: 30
 
       # --- Puppeteer smoke tests ---
@@ -344,7 +350,7 @@ jobs:
         working-directory: tests
         run: npm run test:puppeteer
         env:
-          PUPPETEER_BASE_URL: https://camiloavila.dev
+          PUPPETEER_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
         continue-on-error: true
 
       - name: Upload Puppeteer reports
@@ -353,6 +359,14 @@ jobs:
         with:
           name: puppeteer-smoke-reports-${{ github.run_id }}
           path: reports/e2e/puppeteer/
+          retention-days: 30
+
+      - name: Upload Puppeteer Allure results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-puppeteer-results-${{ github.run_id }}
+          path: tests/e2e/puppeteer/allure-results/
           retention-days: 30
 
       # --- Playwright smoke tests ---
@@ -377,7 +391,7 @@ jobs:
             --html=reports/e2e/playwright/report.html \
             --self-contained-html
         env:
-          PLAYWRIGHT_BASE_URL: ${{ secrets.PLAYWRIGHT_BASE_URL }}
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
         continue-on-error: true
 
       - name: Upload Playwright reports
@@ -397,7 +411,7 @@ jobs:
           retention-days: 30
 
   # ---------------------------------------------------------------------------
-  # Stage 7: Publish Allure reports to GitHub Pages (Production)
+  # Stage 7: Publish Allure reports to GitHub Pages
   # ---------------------------------------------------------------------------
   publish-reports:
     name: Publish Allure Reports to GitHub Pages
