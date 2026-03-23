@@ -34,7 +34,7 @@ interface FormErrors {
 /** Possible submission states. */
 type SubmitStatus = "idle" | "loading" | "success" | "error";
 
-const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+]+@[a-zA-Z0-9.]+\.[a-zA-Z]{2,}$/;
 const API_URL = import.meta.env.VITE_API_URL ?? "";
 
 /**
