@@ -303,10 +303,6 @@ jobs:
         working-directory: tests
         run: npm ci
 
-      - name: Configure Cypress Allure
-        working-directory: tests
-        run: npx @shelex/cypress-allure write
-
       - name: Run Cypress smoke tests
         working-directory: tests
         run: npm run test:cypress
