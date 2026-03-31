@@ -351,7 +351,8 @@ Resources:
         Comment: "camiloavila.dev portfolio distribution"
         Aliases:
           - !Ref DomainName
-          - !Sub "www.${DomainName}"
+          # www alias disabled for staging (uncomment for production with www cert)
+          # - !Sub "www.${DomainName}"
         DefaultRootObject: index.html
         Origins:
           - Id: FrontendS3Origin
