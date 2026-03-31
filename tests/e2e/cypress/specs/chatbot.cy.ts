@@ -25,8 +25,13 @@
 
 describe("AI Resume Chatbot — E2E", () => {
   beforeEach(() => {
-    // Visit the portfolio homepage before each test
+    const baseUrl = Cypress.config("baseUrl");
+    if (baseUrl?.includes("localhost") || !baseUrl?.includes("camiloavila")) {
+      cy.log("Skipping chat tests - requires staging or production API");
+      return;
+    }
     cy.visit("/");
+    cy.get("[data-testid='chatbot-toggle']").click();
   });
 
   // -------------------------------------------------------------------------

@@ -22,7 +22,7 @@ export default defineConfig({
   e2e: {
     // Base URL — overridden by CYPRESS_BASE_URL in CI/CD
     baseUrl: process.env.CYPRESS_BASE_URL ?? "http://localhost:5173",
-
+    chromeWebSecurity: false,
     // Spec file location
     specPattern: "e2e/cypress/specs/**/*.cy.ts",
     supportFile: false,

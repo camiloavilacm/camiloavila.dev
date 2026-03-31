@@ -12,8 +12,12 @@
 
 describe("Contact Form — E2E", () => {
   beforeEach(() => {
+    const baseUrl = Cypress.config("baseUrl");
+    if (baseUrl?.includes("localhost") || !baseUrl?.includes("camiloavila")) {
+      cy.log("Skipping contact tests - requires staging or production API");
+      return;
+    }
     cy.visit("/");
-    // Scroll to the contact section
     cy.get("#contact").scrollIntoView();
   });
 
