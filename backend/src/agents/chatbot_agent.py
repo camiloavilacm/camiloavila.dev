@@ -73,7 +73,7 @@ def create_chatbot_agent() -> Agent:
     logger.info("Initialising ChatbotAgent with model: %s", model_id)
 
     agent = Agent(
-        model=f"bedrock/{model_id}",
+        model=model_id,
         system_prompt=_CHATBOT_SYSTEM_PROMPT,
         tools=[search_resume, get_contact_info],
     )

@@ -81,7 +81,7 @@ def process_contact(name: str, email: str, message: str) -> dict:
 
     # Step 1 — Generate personalised AI paragraph via Strands Agent
     agent = Agent(
-        model=f"bedrock/{model_id}",
+        model=model_id,
         system_prompt=_CONTACT_SYSTEM_PROMPT,
         tools=[generate_reply],
     )
