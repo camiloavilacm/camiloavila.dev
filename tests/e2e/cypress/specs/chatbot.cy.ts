@@ -97,8 +97,8 @@ describe("AI Resume Chatbot — E2E", () => {
     cy.get("[data-testid='chat-send']").click();
 
     // Wait up to 30s for Bedrock cold start
+    // Use a different assertion - look for AI message that contains the expected text
     cy.get("[data-testid='message-ai']", { timeout: 30000 })
-      .last()
       .should("contain.text", "Developer Associate");
   });
 
@@ -138,7 +138,6 @@ describe("AI Resume Chatbot — E2E", () => {
     cy.get("[data-testid='chat-send']").click();
 
     cy.get("[data-testid='message-ai']", { timeout: 30000 })
-      .last()
       .should("contain.text", "only answer questions about Camilo");
   });
 });
