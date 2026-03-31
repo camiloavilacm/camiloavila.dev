@@ -8,18 +8,18 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 
 ## What's inside
 
-| Layer            | Technology                                                |
-| ---------------- | --------------------------------------------------------- |
-| Frontend         | React 18 + Vite + TypeScript                              |
-| Backend          | Python 3.12 AWS Lambda + Strands Agents                   |
-| AI               | Amazon Bedrock — `qwen.qwen3-coder-next` via Converse API |
-| Database         | Amazon DynamoDB (contact form submissions)                |
-| Email            | Amazon SES (automated personalised replies)               |
-| Infrastructure   | AWS SAM (`template.yaml`)                                 |
-| Hosting          | S3 + CloudFront + camiloavila.dev (Porkbun DNS)           |
-| CI/CD            | GitHub Actions (OIDC role assumption — no stored keys)    |
-| Unit tests       | Pytest + pytest-html + Allure                          |
-| E2E tests        | Cypress + Puppeteer + Playwright (Allure reports)    |
+| Layer          | Technology                                                |
+| -------------- | --------------------------------------------------------- |
+| Frontend       | React 18 + Vite + TypeScript                              |
+| Backend        | Python 3.12 AWS Lambda + Strands Agents                   |
+| AI             | Amazon Bedrock — `qwen.qwen3-coder-next` via Converse API |
+| Database       | Amazon DynamoDB (contact form submissions)                |
+| Email          | Amazon SES (automated personalised replies)               |
+| Infrastructure | AWS SAM (`template.yaml`)                                 |
+| Hosting        | S3 + CloudFront + camiloavila.dev (Route 53 DNS)           |
+| CI/CD          | GitHub Actions (OIDC role assumption — no stored keys)    |
+| Unit tests     | Pytest + pytest-html + Allure                             |
+| E2E tests      | Cypress + Puppeteer + Playwright (Allure reports)         |
 
 ---
 
@@ -59,11 +59,9 @@ camiloavila.dev/
 │   │   │   ├── Certifications.tsx# AWS certs + education
 │   │   │   ├── ContactForm.tsx   # Form with validation + API call
 │   │   │   └── Chatbot.tsx       # Floating AI chat widget
-│   │   ├── vite-env.d.ts         # Vite TypeScript environment types
 │   │   ├── App.tsx
 │   │   └── main.tsx
 │   ├── vite.config.ts
-│   ├── eslint.config.js       # ESLint flat config
 │   └── package.json
 │
 ├── tests/
@@ -105,7 +103,7 @@ cd camiloavila.dev
 # Backend dependencies
 python3 -m venv venv
 source venv/bin/activate
-python3 -m pip install -r backend/requirements.txt
+pip install -r backend/requirements.txt
 
 # Frontend dependencies
 cd frontend && npm install && cd ..
@@ -114,7 +112,7 @@ cd frontend && npm install && cd ..
 cd tests && npm install && cd ..
 
 # Playwright browser
-python3 -m pip install playwright pytest pytest-html allure-pytest
+pip install playwright pytest pytest-html
 playwright install chromium
 ```
 
@@ -152,11 +150,11 @@ cd frontend && npm run dev
 ### Unit tests (Pytest)
 
 ```bash
-python3 -m pytest backend/tests/unit/ -v
+pytest backend/tests/unit/ -v
 
 # With HTML report:
 mkdir -p reports/unit
-python3 -m pytest backend/tests/unit/ -v \
+pytest backend/tests/unit/ -v \
   --html=reports/unit/report.html \
   --self-contained-html \
   --cov=backend/src \
@@ -187,14 +185,14 @@ PUPPETEER_BASE_URL=http://localhost:5173 npm run test:puppeteer
 ### Playwright tests (Python)
 
 ```bash
-PLAYWRIGHT_BASE_URL=http://localhost:5173 python3 -m pytest tests/e2e/playwright/ -v
+PLAYWRIGHT_BASE_URL=http://localhost:5173 pytest tests/e2e/playwright/ -v
 # Report: reports/e2e/playwright/report.html
 
 # Smoke only:
-python3 -m pytest tests/e2e/playwright/ -m smoke -v
+pytest tests/e2e/playwright/ -m smoke -v
 
 # Functional only:
-python3 -m pytest tests/e2e/playwright/ -m functional -v
+pytest tests/e2e/playwright/ -m functional -v
 ```
 
 ---
@@ -208,7 +206,7 @@ The CI/CD pipeline automates all subsequent deploys. The first deploy requires a
 1. AWS Console → Certificate Manager → Request public certificate
 2. Add domains: `camiloavila.dev` and `www.camiloavila.dev`
 3. Choose **DNS validation** — ACM gives you two CNAME records
-4. Add those CNAMEs in **Porkbun DNS** for `camiloavila.dev`
+4. Add those CNAMEs in **Route 53** for `camiloavila.dev`
 5. Wait for status: "Issued"
 6. Copy the Certificate ARN
 
@@ -232,17 +230,17 @@ The CI/CD pipeline automates all subsequent deploys. The first deploy requires a
 
 Go to your repo → Settings → Secrets and variables → Actions:
 
-| Secret                     | Value                            |
-| -------------------------- | -------------------------------- |
-| `AWS_ROLE_TO_ASSUME`       | IAM role ARN from Step 3        |
-| `AWS_REGION`               | `us-east-1`                      |
-| `ACM_CERTIFICATE_ARN`          | From Step 1                     |
-| `BEDROCK_MODEL_ID`         | `qwen.qwen3-coder-next`          |
-| `SES_SENDER_EMAIL`         | `camiloavilainfo@gmail.com`      |
-| `PLAYWRIGHT_BASE_URL`      | `https://camiloavila.dev`        |
+| Secret                        | Value                                        |
+| ----------------------------- | -------------------------------------------- |
+| `AWS_ROLE_TO_ASSUME`          | IAM role ARN from Step 3                     |
+| `AWS_REGION`                  | `us-east-1`                                  |
+| `ACM_CERTIFICATE_ARN`         | From Step 1                                  |
+| `BEDROCK_MODEL_ID`            | `qwen.qwen3-coder-next`                      |
+| `SES_SENDER_EMAIL`            | `camiloavilainfo@gmail.com`                  |
+| `PLAYWRIGHT_BASE_URL`         | `https://camiloavila.dev`                    |
 | `STAGING_PLAYWRIGHT_BASE_URL` | `https://staging.camiloavila.dev` (optional) |
-| `STAGING_S3_FRONTEND_BUCKET` | (add after first staging deploy) |
-| `STAGING_CLOUDFRONT_DIST_ID` | (add after first staging deploy) |
+| `STAGING_S3_FRONTEND_BUCKET`  | (add after first staging deploy)             |
+| `STAGING_CLOUDFRONT_DIST_ID`  | (add after first staging deploy)             |
 
 ### Step 5 — First SAM deploy
 
@@ -255,13 +253,13 @@ sam build && sam deploy --guided
 After deploy, the stack outputs:
 
 - `ApiUrl` → add as `VITE_API_URL` in your frontend `.env.local`
-- `CloudFrontUrl` → use for Porkbun DNS setup (Step 6)
+- `CloudFrontUrl` → use for Route 53 DNS setup (Step 6)
 - `FrontendBucketName` → add as `S3_FRONTEND_BUCKET` GitHub Secret
 - `CloudFrontDistributionId` → add as `CLOUDFRONT_DISTRIBUTION_ID` GitHub Secret
 
-### Step 6 — Point Porkbun DNS to CloudFront
+### Step 6 — Point Route 53 DNS to CloudFront
 
-In Porkbun → DNS for `camiloavila.dev`:
+In AWS Console → Route 53 → Hosted Zones → `camiloavila.dev`:
 
 - Add `ALIAS` record: `camiloavila.dev` → `xyz.cloudfront.net` (from Step 5 output)
 - Add `CNAME` record: `www.camiloavila.dev` → `xyz.cloudfront.net`
@@ -275,6 +273,7 @@ From this point, every push to `main` triggers the full deploy pipeline automati
 To enable staging environment:
 
 1. Create and push the `develop` branch:
+
    ```bash
    git checkout -b develop
    git push -u origin develop
@@ -289,7 +288,7 @@ To enable staging environment:
    - `STAGING_S3_FRONTEND_BUCKET` = FrontendBucketName (from CloudFormation output)
    - `STAGING_CLOUDFRONT_DIST_ID` = CloudFrontDistributionId (from CloudFormation output)
 
-5. Configure DNS in Porkbun:
+5. Configure DNS in Route 53:
    - Add CNAME: `staging` → `<staging-cloudfront>.cloudfront.net`
 
 ---
@@ -327,9 +326,9 @@ Three workflows:
 
 ## Environments
 
-| Environment | Branch | URL | Stack Name |
-|-------------|--------|-----|------------|
-| Production  | `main` | https://camiloavila.dev | camiloavila-dev |
+| Environment | Branch    | URL                             | Stack Name              |
+| ----------- | --------- | ------------------------------- | ----------------------- |
+| Production  | `main`    | https://camiloavila.dev         | camiloavila-dev         |
 | Staging     | `develop` | https://staging.camiloavila.dev | camiloavila-dev-staging |
 
 ### Workflow
@@ -343,6 +342,7 @@ feature branch → PR to develop → E2E tests → merge to develop → staging 
 ### GitHub Pages Reports
 
 Allure test reports are automatically published to GitHub Pages after each deploy:
+
 - Staging: Available after `deploy-develop.yml` completes
 - Production: Available after `deploy.yml` completes
 
@@ -369,6 +369,7 @@ Allure test reports are published to GitHub Pages after each deploy (staging and
 ### Accessing Reports
 
 After a deploy completes, visit:
+
 - Staging: `https://camiloavilacm.github.io/camiloavila.dev/` (after `deploy-develop.yml`)
 - Production: `https://camiloavilacm.github.io/camiloavila.dev/` (after `deploy.yml`)
 

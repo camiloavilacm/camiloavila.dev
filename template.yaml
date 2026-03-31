@@ -36,7 +36,7 @@ Parameters:
     Type: String
     Description: >
       ARN of the ACM TLS certificate for camiloavila.dev (must be issued in us-east-1).
-      Request via AWS Certificate Manager and validate via CNAME in Porkbun DNS.
+      Request via AWS Certificate Manager and validate via CNAME in Route 53 DNS.
 
   BedrockModelId:
     Type: String
@@ -58,7 +58,7 @@ Parameters:
     Default: camiloavila.dev
     Description: >
       Custom domain for the CloudFront distribution.
-      DNS (ALIAS record) must be configured in Porkbun after first deploy.
+      DNS (ALIAS record) must be configured in Route 53 after first deploy.
 
 # ---------------------------------------------------------------------------
 # Globals — shared settings applied to all Lambda functions
@@ -340,7 +340,7 @@ Resources:
   # -------------------------------------------------------------------------
   # CloudFront — Distribution
   # Serves the frontend S3 bucket over HTTPS with the custom domain.
-  # Custom domain: camiloavila.dev (ALIAS record configured in Porkbun)
+  # Custom domain: camiloavila.dev (ALIAS record configured in Route 53)
   # TLS: ACM certificate passed as parameter (must be in us-east-1)
   # -------------------------------------------------------------------------
   CloudFrontDistribution:
@@ -408,7 +408,7 @@ Outputs:
   CloudFrontUrl:
     Description: >
       CloudFront distribution domain name.
-      Use this to configure the ALIAS record in Porkbun DNS for camiloavila.dev.
+      Use this to configure the ALIAS record in Route 53 DNS for camiloavila.dev.
     Value: !GetAtt CloudFrontDistribution.DomainName
     Export:
       Name: CamiloAvilaCloudFrontUrl
