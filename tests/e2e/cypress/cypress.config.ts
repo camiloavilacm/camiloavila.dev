@@ -24,7 +24,7 @@ export default defineConfig({
     baseUrl: process.env.CYPRESS_BASE_URL ?? "http://localhost:5173",
 
     // Spec file location
-    specPattern: "tests/e2e/cypress/specs/**/*.cy.ts",
+    specPattern: "e2e/cypress/specs/**/*.cy.ts",
     supportFile: false,
 
     // Timeouts — generous for Bedrock API cold starts
