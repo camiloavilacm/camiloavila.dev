@@ -91,8 +91,8 @@ describe("Contact Form — E2E", () => {
     cy.contains("button", "Sending...").should("exist");
 
     // Success state — wait up to 20s for Lambda + SES
-    cy.contains("Test Visitor", { timeout: 20000 }).should("be.visible");
-    cy.contains("reply has been sent", { timeout: 20000 }).should("be.visible");
+    cy.contains("Message sent successfully", { timeout: 20000 }).should("be.visible");
+    cy.contains("Check your inbox", { timeout: 20000 }).should("be.visible");
   });
 
   it("shows 'Send another message' button after success @smoke", () => {
