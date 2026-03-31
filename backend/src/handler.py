@@ -87,8 +87,6 @@ def lambda_handler(event: dict, context: object) -> dict:
         dict: API Gateway HTTP response with statusCode, headers, and body.
 
     Raises:
-        No exceptions are propagated — all errors are caught and returned
-        as structured JSON error responses with appropriate HTTP status codes.
 
     Example event:
         {
@@ -96,6 +94,11 @@ def lambda_handler(event: dict, context: object) -> dict:
             "requestContext": { "http": { "method": "POST" } }
         }
     """
+    # Handle CORS preflight OPTIONS request
+    http_method = event.get("requestContext", {}).get("http", {}).get("method", "")
+    if http_method == "OPTIONS":
+        return _build_response(200, {"message": "OK"})
+
     logger.info(
         "Chatbot Lambda invoked. RequestId: %s",
         getattr(context, "aws_request_id", "local"),
