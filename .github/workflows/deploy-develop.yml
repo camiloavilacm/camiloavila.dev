@@ -181,7 +181,7 @@ jobs:
         run: sam build --parallel
 
       - name: SAM Deploy to Staging
-        run: sam deploy --config-env staging --stack-name camiloavila-dev-staging
+        run: sam deploy --config-env staging --stack-name camiloavila-dev-staging --force-upload
 
       - name: Get API Gateway URL from stack outputs
         id: get-outputs
