@@ -198,6 +198,7 @@ Resources:
                 Action:
                   - bedrock:InvokeModel
                   - bedrock:Converse
+                  - bedrock:InvokeModelWithResponseStream
                 Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}"
 
   # -------------------------------------------------------------------------
@@ -235,6 +236,7 @@ Resources:
                 Action:
                   - bedrock:InvokeModel
                   - bedrock:Converse
+                  - bedrock:InvokeModelWithResponseStream
                 Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}"
               - Sid: AllowDynamoDBWrite
                 Effect: Allow
