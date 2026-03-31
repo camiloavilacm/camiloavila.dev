@@ -21,7 +21,7 @@ Camilo Avila is a polyglot Senior QA Automation Engineer with over 15 years of e
 
 He has delivered projects for clients based in the United States, Canada, and Argentina, working with local and distributed teams. His experience spans sectors including fintech (digital banks), IoT, Data Science, and government applications.
 
-Camilo is currently based in Spain and is available for remote roles operating within US working hours.
+Camilo is currently based in Spain and is available for remote roles operating within US working hours
 
 ---
 
