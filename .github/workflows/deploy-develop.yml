@@ -305,7 +305,7 @@ jobs:
 
       - name: Configure Cypress Allure
         working-directory: tests
-        run: npm run build && npx cypress-allure write
+        run: npx cypress-allure write
 
       - name: Run Cypress smoke tests
         working-directory: tests

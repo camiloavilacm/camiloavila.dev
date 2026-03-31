@@ -4,9 +4,9 @@
   "description": "E2E test dependencies for camiloavila.dev — Cypress and Puppeteer",
   "private": true,
   "scripts": {
-    "test:cypress": "cypress run --config-file tests/e2e/cypress/cypress.config.ts",
-    "test:cypress:open": "cypress open --config-file tests/e2e/cypress/cypress.config.ts",
-    "test:puppeteer": "jest --config tests/e2e/puppeteer/jest.config.ts"
+    "test:cypress": "cypress run --config-file e2e/cypress/cypress.config.ts",
+    "test:cypress:open": "cypress open --config-file e2e/cypress/cypress.config.ts",
+    "test:puppeteer": "jest --config e2e/puppeteer/jest.config.ts"
   },
   "devDependencies": {
     "@shelex/cypress-allure-plugin": "^2.40.0",
