@@ -13,6 +13,7 @@
  *   6. How to reach you (ContactForm)
  */
 
+import { GlowCapture, Glow } from "@codaworks/react-glow";
 import Hero from "./components/Hero";
 import Chatbot from "./components/Chatbot";
 import Skills from "./components/Skills";
@@ -27,16 +28,24 @@ import ContactForm from "./components/ContactForm";
  */
 function App() {
   return (
-    <div className="app">
-      <main>
-        <Hero />
-        <Chatbot />
-        <Skills />
-        <Experience />
-        <Certifications />
-        <ContactForm />
-      </main>
-    </div>
+    <GlowCapture>
+      <div className="app">
+        <main>
+          <Hero />
+          <Chatbot />
+          <Glow color="#64ffda">
+            <Skills />
+          </Glow>
+          <Glow color="#64ffda">
+            <Experience />
+          </Glow>
+          <Glow color="#64ffda">
+            <Certifications />
+          </Glow>
+          <ContactForm />
+        </main>
+      </div>
+    </GlowCapture>
   );
 }
 

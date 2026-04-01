@@ -229,3 +229,14 @@ label {
     max-width: 560px;
   }
 }
+
+/* ---- Mouse Glow Effect ---- */
+[glow] .card {
+  background-color: rgba(100, 255, 218, 0.08);
+  border-color: var(--accent);
+}
+
+[glow] .tag {
+  background-color: rgba(100, 255, 218, 0.2);
+  box-shadow: 0 0 12px rgba(100, 255, 218, 0.3);
+}
