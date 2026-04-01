@@ -8,18 +8,19 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 
 ## What's inside
 
-| Layer          | Technology                                                |
-| -------------- | --------------------------------------------------------- |
-| Frontend       | React 18 + Vite + TypeScript                              |
-| Backend        | Python 3.12 AWS Lambda + Strands Agents                   |
-| AI             | Amazon Bedrock — `qwen.qwen3-coder-next` via Converse API |
-| Database       | Amazon DynamoDB (contact form submissions)                |
-| Email          | Amazon SES (automated personalised replies)               |
-| Infrastructure | AWS SAM (`template.yaml`)                                 |
-| Hosting        | S3 + CloudFront + camiloavila.dev (Route 53 DNS)           |
-| CI/CD          | GitHub Actions (OIDC role assumption — no stored keys)    |
-| Unit tests     | Pytest + pytest-html + Allure                             |
-| E2E tests      | Cypress + Puppeteer + Playwright (Allure reports)         |
+| Layer          | Technology                                                        |
+| -------------- | ----------------------------------------------------------------- |
+| Frontend       | React 18 + Vite + TypeScript                                      |
+| Backend        | Python 3.12 AWS Lambda + Strands Agents                           |
+| AI             | Amazon Bedrock — `qwen.qwen3-coder-next` via Converse API        |
+| Database       | Amazon DynamoDB (contact form submissions)                       |
+| Email          | Amazon SES (automated personalised replies)                      |
+| Infrastructure | AWS SAM (`template.yaml`)                                         |
+| Hosting        | S3 + CloudFront + camiloavila.dev (Route 53 DNS)                 |
+| CI/CD          | GitHub Actions (OIDC role assumption — no stored keys)          |
+| Unit tests     | Pytest + pytest-html + Allure                                    |
+| E2E tests      | Cypress + Puppeteer + Playwright (Allure reports)                |
+| Security tests | Pytest + Playwright + Guardrails AI (unit + E2E penetration)   |
 
 ---
 
@@ -163,12 +164,12 @@ The chatbot and contact form include built-in security guardrails to ensure the 
 
 The following are blocked at the pre-validation stage:
 
-| Category | Examples |
-| -------- | -------- |
-| Prompt injection | "ignore previous", "system prompt", "you are now", "forget everything" |
+| Category           | Examples                                                               |
+| ------------------ | ---------------------------------------------------------------------- |
+| Prompt injection   | "ignore previous", "system prompt", "you are now", "forget everything" |
 | Off-topic keywords | weather, sports, politics, news, stock price, celebrity, health advice |
-| Suspicious input | `<script>`, `javascript:`, `onerror=`, `eval(` |
-| Malicious output | `<script>`, `javascript:`, URLs in AI responses |
+| Suspicious input   | `<script>`, `javascript:`, `onerror=`, `eval(`                         |
+| Malicious output   | `<script>`, `javascript:`, URLs in AI responses                        |
 
 ---
 
