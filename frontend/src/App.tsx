@@ -2,7 +2,7 @@
  * App.tsx — Root Application Component
  *
  * Composes all portfolio sections in order:
- *   Hero → Chatbot → Skills → Experience → Certifications → ContactForm
+ *   Hero → Chatbot → Skills → Experience → Certifications → ContactForm → ThisSite
  *
  * Section order matches a typical portfolio reading flow:
  *   1. Who you are (Hero)
@@ -11,6 +11,7 @@
  *   4. Where you've done it (Experience)
  *   5. How it's validated (Certifications)
  *   6. How to reach you (ContactForm)
+ *   7. Technical stack (ThisSite)
  */
 
 import { GlowCapture, Glow } from "@codaworks/react-glow";
@@ -20,6 +21,7 @@ import Skills from "./components/Skills";
 import Experience from "./components/Experience";
 import Certifications from "./components/Certifications";
 import ContactForm from "./components/ContactForm";
+import ThisSite from "./components/ThisSite";
 
 /**
  * Root component — renders the full portfolio page.
@@ -43,6 +45,7 @@ function App() {
             <Certifications />
           </Glow>
           <ContactForm />
+          <ThisSite />
         </main>
       </div>
     </GlowCapture>

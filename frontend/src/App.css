@@ -220,15 +220,8 @@ label {
 }
 
 /* ---- Contact Form ---- */
-.contact-container {
-  max-width: 800px;
-}
-
-@media (max-width: 768px) {
-  .contact-container {
-    max-width: 560px;
-  }
-}
+/* ---- This Site ---- */
+/* Sections 04 and 05 now use full main width (1000px) like sections 01-03 */
 
 /* ---- Mouse Glow Effect ---- */
 [glow] .card {
