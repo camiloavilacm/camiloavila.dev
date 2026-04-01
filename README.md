@@ -40,6 +40,46 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 
 ---
 
+## Code Quality
+
+This project follows strict code quality standards:
+
+### Frontend Standards
+- **ESLint** — Enforces JavaScript/TypeScript best practices
+- **Prettier** — Consistent code formatting
+- **TypeScript** — Full type safety with strict mode
+- **React** — Functional components with hooks
+
+### Backend Standards
+- **flake8** — Python linting
+- **Docstrings** — All functions documented
+- **DRY** — Shared utilities (response_builder.py)
+
+### Code Quality Tools
+| Tool | Purpose | Config |
+|------|---------|--------|
+| ESLint | JavaScript/TypeScript linting | package.json |
+| Prettier | Code formatting | .prettierrc |
+| flake8 | Python linting | Inline in CI/CD |
+| pytest-cov | Test coverage | --cov flag |
+
+### Running Code Quality Checks
+
+```bash
+# Frontend
+cd frontend
+npm run lint        # ESLint
+npm run format       # Prettier
+npm run type-check  # TypeScript
+
+# Backend
+cd backend
+flake8 src/         # Python lint
+pytest --cov=src/   # Test coverage
+```
+
+---
+
 ## SEO
 
 This portfolio implements comprehensive SEO best practices:

@@ -123,6 +123,10 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
+      - name: Check code formatting with Prettier
+        working-directory: frontend
+        run: npm run format:check
+
       - name: TypeScript type check
         working-directory: frontend
         run: npm run type-check
