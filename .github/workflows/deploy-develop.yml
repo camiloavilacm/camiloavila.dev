@@ -213,12 +213,16 @@ jobs:
 
       - name: Upload knowledge_base.md to staging S3
         run: |
-          KB_BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name camiloavila-dev-staging \
-            --query "Stacks[0].Outputs[?OutputKey=='KnowledgeBaseBucketName'].OutputValue" \
-            --output text)
-          aws s3 cp knowledge_base.md "s3://$KB_BUCKET/knowledge_base.md"
-          echo "Uploaded knowledge_base.md to s3://$KB_BUCKET/"
+          if [ -f knowledge_base.md ]; then
+            KB_BUCKET=$(aws cloudformation describe-stacks \
+              --stack-name camiloavila-dev-staging \
+              --query "Stacks[0].Outputs[?OutputKey=='KnowledgeBaseBucketName'].OutputValue" \
+              --output text)
+            aws s3 cp knowledge_base.md "s3://$KB_BUCKET/knowledge_base.md"
+            echo "Uploaded knowledge_base.md to s3://$KB_BUCKET/"
+          else
+            echo "knowledge_base.md not found in repo (file is in .gitignore). Using existing S3 version."
+          fi
 
   # ---------------------------------------------------------------------------
   # Stage 5: Build and deploy frontend to staging S3 + CloudFront
