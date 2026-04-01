@@ -162,11 +162,26 @@ jobs:
       contents: read
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download security test results
         uses: actions/download-artifact@v4
         with:
           name: security-test-results
           path: allure-results
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+
+      - name: Install Allure
+        run: |
+          cd /tmp
+          wget https://github.com/allure-framework/allure2/releases/download/2.13.9/allure-2.13.9.zip
+          unzip allure-2.13.9.zip -d /opt/
+          echo "/opt/allure-2.13.9/bin" >> $GITHUB_PATH
 
       - name: Generate Allure report
         run: |
