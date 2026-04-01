@@ -59,6 +59,38 @@ _EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$
 _MAX_MESSAGE_LENGTH = 2000
 _MAX_NAME_LENGTH = 100
 
+# ---------------------------------------------------------------------------
+# Security guardrails — input validation for contact form
+# ---------------------------------------------------------------------------
+_SUSPICIOUS_PATTERNS = [
+    "<script",
+    "javascript:",
+    "onerror=",
+    "onclick=",
+    "onload=",
+    "eval(",
+    "alert(",
+]
+
+
+def _is_message_safe(message: str) -> tuple[bool, str]:
+    """Validate message for suspicious content before passing to AI.
+
+    Args:
+        message: The raw message from the contact form.
+
+    Returns:
+        tuple: (is_safe, error_message)
+    """
+    lower_msg = message.lower()
+
+    for pattern in _SUSPICIOUS_PATTERNS:
+        if pattern in lower_msg:
+            logger.warning("Blocked suspicious pattern in message: %s", pattern)
+            return False, "Message contains disallowed content."
+
+    return True, ""
+
 
 def _build_response(status_code: int, body: dict) -> dict:
     """Build a standard API Gateway HTTP response with CORS headers.
@@ -153,6 +185,11 @@ def lambda_handler(event: dict, context: object) -> dict:
                 )
             },
         )
+
+    # Security guardrails — validate message content
+    is_safe, error_msg = _is_message_safe(message)
+    if not is_safe:
+        return _build_response(400, {"error": error_msg})
 
     # Delegate to ContactAgent
     try:

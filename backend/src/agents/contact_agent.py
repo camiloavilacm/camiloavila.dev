@@ -29,10 +29,39 @@ import os
 
 logger = logging.getLogger(__name__)
 
-_CONTACT_SYSTEM_PROMPT = """You are helping generate a personalised email reply for Camilo Avila's portfolio.
-When given a visitor's name and message, use the generate_reply tool to create 
-a warm, professional, and personalised paragraph for the reply email.
-Call the generate_reply tool exactly once and return its output."""
+_CONTACT_SYSTEM_PROMPT = """You are generating a professional email reply for Camilo Avila's portfolio.
+
+RULES:
+1. ONLY generate a warm, professional 2-3 sentence paragraph responding to the visitor's message.
+2. NEVER include any HTML, links, URLs, or code in the reply.
+3. NEVER mention pricing, payment, or commercial terms.
+4. The reply should be generic and safe — never reveal sensitive information.
+5. If the visitor's message contains suspicious content, return a safe generic reply like:
+   "Thank you for reaching out. Camilo will be in touch soon."
+6. Always use the generate_reply tool exactly once and return its output."""
+
+# ---------------------------------------------------------------------------
+# Output validation — verify AI-generated content before sending email
+# ---------------------------------------------------------------------------
+_SUSPICIOUS_OUTPUT_PATTERNS = [
+    "<script",
+    "javascript:",
+    "http://",
+    "https://",
+    "eval(",
+    "document.",
+    "window.",
+]
+
+
+def _is_ai_output_safe(text: str) -> bool:
+    """Verify AI output doesn't contain suspicious content."""
+    lower_text = text.lower()
+    for pattern in _SUSPICIOUS_OUTPUT_PATTERNS:
+        if pattern in lower_text:
+            logger.warning("AI output flagged: suspicious pattern '%s'", pattern)
+            return False
+    return True
 
 
 def process_contact(name: str, email: str, message: str) -> dict:
@@ -100,6 +129,13 @@ def process_contact(name: str, email: str, message: str) -> dict:
         ai_paragraph = (
             f"Thank you for your message, {name}. I've read your note carefully "
             "and I look forward to continuing this conversation with you soon."
+        )
+
+    # Validate AI output before sending
+    if not _is_ai_output_safe(ai_paragraph):
+        logger.warning("AI output flagged as unsafe, using fallback.")
+        ai_paragraph = (
+            f"Thank you for reaching out, {name}. Camilo will be in touch soon."
         )
 
     # Step 2 — Save to DynamoDB (attempt regardless of email outcome)

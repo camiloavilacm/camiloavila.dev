@@ -48,6 +48,83 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Security guardrails — pre-validation before passing to AI
+# ---------------------------------------------------------------------------
+_INJECTION_PATTERNS = [
+    "ignore previous",
+    "disregard",
+    "system prompt",
+    "new instructions",
+    "override",
+    "you are now",
+    "forget everything",
+    "roleplay as",
+    "pretend to be",
+    "ignore all",
+    "disregard instructions",
+    "bypass",
+    "jailbreak",
+    " DAN ",
+    "developer mode",
+    "enable developer",
+]
+
+_OFF_TOPIC_KEYWORDS = [
+    "weather",
+    "sports",
+    "politics",
+    "news",
+    "stock price",
+    "cryptocurrency",
+    "celebrity",
+    "movie",
+    "music",
+    "recipe",
+    "health advice",
+    "medical",
+    "religion",
+    "gambling",
+    "lottery",
+    "sex",
+    "porn",
+    "adult",
+]
+
+
+def _is_question_safe(question: str) -> tuple[bool, str]:
+    """Validate question before passing to the AI agent.
+
+    This is the first layer of defense — catches prompt injection attempts
+    and off-topic questions before they reach the Bedrock model.
+
+    Args:
+        question: The raw question string from the user.
+
+    Returns:
+        tuple: (is_safe, error_message). If not safe, returns the error
+               message to return to the user.
+    """
+    lower_q = question.lower()
+
+    for pattern in _INJECTION_PATTERNS:
+        if pattern in lower_q:
+            logger.warning("Blocked injection pattern: %s", pattern)
+            return (
+                False,
+                "I can only answer questions about Camilo Avila's resume and professional background.",
+            )
+
+    for keyword in _OFF_TOPIC_KEYWORDS:
+        if keyword in lower_q:
+            logger.warning("Blocked off-topic keyword: %s", keyword)
+            return (
+                False,
+                "I can only answer questions about Camilo Avila's resume and professional background. For other inquiries, contact Camilo directly at camiloavilainfo@gmail.com",
+            )
+
+    return True, ""
+
 
 def _build_response(status_code: int, body: dict) -> dict:
     """Build a standard API Gateway HTTP response with CORS headers.
@@ -122,6 +199,12 @@ def lambda_handler(event: dict, context: object) -> dict:
             400,
             {"error": "Question exceeds maximum length of 500 characters."},
         )
+
+    # Security guardrails — pre-validation
+    is_safe, error_msg = _is_question_safe(question)
+    if not is_safe:
+        logger.info("Question blocked by guardrails.")
+        return _build_response(200, {"answer": error_msg})
 
     # Delegate to ChatbotAgent
     try:
