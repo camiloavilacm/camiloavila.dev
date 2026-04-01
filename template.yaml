@@ -422,7 +422,7 @@ Outputs:
       Add /chat and /contact suffixes for the respective endpoints.
     Value: !Sub "https://${PortfolioApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
     Export:
-      Name: CamiloAvilaApiUrl
+      Name: !Sub "CamiloAvilaApiUrl-${Stage}"
 
   CloudFrontUrl:
     Description: >
@@ -430,7 +430,7 @@ Outputs:
       Use this to configure the ALIAS record in Route 53 DNS for camiloavila.dev.
     Value: !GetAtt CloudFrontDistribution.DomainName
     Export:
-      Name: CamiloAvilaCloudFrontUrl
+      Name: !Sub "CamiloAvilaCloudFrontUrl-${Stage}"
 
   CloudFrontDistributionId:
     Description: >
@@ -438,7 +438,7 @@ Outputs:
       so the deploy pipeline can invalidate the CDN cache after each frontend deploy.
     Value: !Ref CloudFrontDistribution
     Export:
-      Name: CamiloAvilaCloudFrontId
+      Name: !Sub "CamiloAvilaCloudFrontId-${Stage}"
 
   FrontendBucketName:
     Description: >
@@ -447,7 +447,7 @@ Outputs:
       can sync the Vite build output to this bucket.
     Value: !Ref FrontendBucket
     Export:
-      Name: CamiloAvilaFrontendBucket
+      Name: !Sub "CamiloAvilaFrontendBucket-${Stage}"
 
   KnowledgeBaseBucketName:
     Description: >
@@ -455,10 +455,10 @@ Outputs:
       Upload knowledge_base.md to this bucket after first deploy.
     Value: !Ref KnowledgeBaseBucket
     Export:
-      Name: CamiloAvilaKnowledgeBucket
+      Name: !Sub "CamiloAvilaKnowledgeBucket-${Stage}"
 
   ContactTableName:
     Description: DynamoDB table name for contact form submissions.
     Value: !Ref ContactTable
     Export:
-      Name: CamiloAvilaContactTable
+      Name: !Sub "CamiloAvilaContactTable-${Stage}"
