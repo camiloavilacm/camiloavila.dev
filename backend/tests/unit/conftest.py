@@ -23,6 +23,7 @@ def mock_env(monkeypatch):
     Uses monkeypatch so environment is restored after each test.
     The autouse=True means this fixture runs for every test automatically.
     """
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
     monkeypatch.setenv("KNOWLEDGE_BUCKET", "test-kb-bucket")
     monkeypatch.setenv("KNOWLEDGE_KEY", "knowledge_base.md")
     monkeypatch.setenv("BEDROCK_MODEL_ID", "qwen.qwen3-coder-next")
