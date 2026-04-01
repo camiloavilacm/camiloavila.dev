@@ -26,6 +26,20 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 
 ---
 
+## Testing
+
+| Category | Status | Tests | Notes |
+|----------|--------|-------|-------|
+| Unit Tests | ✅ Implemented | ~124 tests | Pytest, 80%+ coverage target |
+| Integration Tests | ✅ Implemented | Good | moto mocking for AWS |
+| E2E Tests | ✅ Implemented | ~50 tests | Cypress + Playwright + Puppeteer |
+| Security Tests | ✅ Implemented | 73 tests | OWASP LLM01/LLM05 covered |
+| Performance Tests | ✅ Implemented | k6 scripts | Load testing (k6) |
+| Accessibility Tests | ✅ Implemented | 17 tests | WCAG 2.1 AA (Playwright) |
+| CI/CD Automation | ✅ Implemented | Full | PR checks + weekly security |
+
+---
+
 ## SEO
 
 This portfolio implements comprehensive SEO best practices:
