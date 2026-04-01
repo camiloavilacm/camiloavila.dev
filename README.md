@@ -12,6 +12,7 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 | -------------- | ----------------------------------------------------------------- |
 | Frontend       | React 18 + Vite + TypeScript                                      |
 | Backend        | Python 3.12 AWS Lambda + Strands Agents                           |
+| API            | POST /chat (chatbot) • POST /contact (form)                      |
 | AI             | Amazon Bedrock — `qwen.qwen3-coder-next` via Converse API        |
 | Database       | Amazon DynamoDB (contact form submissions)                       |
 | Email          | Amazon SES (automated personalised replies)                      |
@@ -20,6 +21,7 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 | CI/CD          | GitHub Actions (OIDC role assumption — no stored keys)          |
 | Unit tests     | Pytest + pytest-html + Allure                                    |
 | E2E tests      | Cypress + Puppeteer + Playwright (Allure reports)                |
+| API tests      | Playwright + pytest (functional API validation)                   |
 | Security tests | Pytest + Playwright + Guardrails AI (unit + E2E penetration)   |
 
 ---

@@ -10,6 +10,7 @@ import React from "react";
 const TECH_STACK = [
   { layer: "Frontend", technology: "React 18 + Vite + TypeScript" },
   { layer: "Backend", technology: "Python 3.12 AWS Lambda + Strands Agents" },
+  { layer: "API", technology: "POST /chat (chatbot) • POST /contact (form)" },
   { layer: "AI", technology: "Amazon Bedrock — qwen.qwen3-coder-next via Converse API" },
   { layer: "Database", technology: "Amazon DynamoDB (contact form submissions)" },
   { layer: "Email", technology: "Amazon SES (automated personalised replies)" },
@@ -18,6 +19,7 @@ const TECH_STACK = [
   { layer: "CI/CD", technology: "GitHub Actions (OIDC role assumption — no stored keys)" },
   { layer: "Unit tests", technology: "Pytest + pytest-html + Allure" },
   { layer: "E2E tests", technology: "Cypress + Puppeteer + Playwright (Allure reports)" },
+  { layer: "API tests", technology: "Playwright + pytest (functional API validation)" },
   { layer: "Security tests", technology: "Pytest + Playwright + Guardrails AI" },
 ];
 
