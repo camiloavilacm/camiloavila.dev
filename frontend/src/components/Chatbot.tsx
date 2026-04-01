@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 
 /** A single message in the chat thread. */
 interface Message {
@@ -111,7 +112,36 @@ const Chatbot: React.FC = () => {
             }}
             data-testid={`message-${msg.role}`}
           >
-            {msg.text}
+            {msg.role === "ai" ? (
+              <ReactMarkdown
+                components={{
+                  p: ({ children }) => <p style={{ margin: 0 }}>{children}</p>,
+                  ul: ({ children }) => (
+                    <ul style={{ margin: "8px 0", paddingLeft: "20px" }}>{children}</ul>
+                  ),
+                  li: ({ children }) => <li style={{ marginBottom: "4px" }}>{children}</li>,
+                  strong: ({ children }) => (
+                    <strong style={{ color: "var(--accent)" }}>{children}</strong>
+                  ),
+                  code: ({ children }) => (
+                    <code
+                      style={{
+                        background: "rgba(100, 255, 218, 0.1)",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        fontSize: "13px",
+                      }}
+                    >
+                      {children}
+                    </code>
+                  ),
+                }}
+              >
+                {msg.text}
+              </ReactMarkdown>
+            ) : (
+              msg.text
+            )}
           </div>
         ))}
 
