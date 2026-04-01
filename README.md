@@ -130,6 +130,32 @@ export ALLOWED_ORIGIN=http://localhost:5173
 # Frontend — create local env file
 cp frontend/.env.example frontend/.env.local
 # Edit .env.local and set: VITE_API_URL=http://localhost:3000
+
+# IMPORTANT: Get knowledge_base.md for local testing
+# The file is NOT in the repo (it's in .gitignore to protect personal data)
+# Option A: Download from S3
+aws s3 cp s3://your-kb-bucket-name/knowledge_base.md ./
+# Option B: Ask the owner (Camilo) for a copy
+```
+
+### 3. Sync knowledge_base.md
+
+The knowledge base is stored in S3 (source of truth) and excluded from git to protect personal data.
+
+**Get your S3 bucket name:**
+```bash
+# From CloudFormation stack outputs
+aws cloudformation describe-stacks --stack-name camiloavila-dev --query "Stacks[0].Outputs[?OutputKey=='KnowledgeBaseBucketName'].OutputValue" --output text
+```
+
+**To update after making changes:**
+```bash
+aws s3 cp ./knowledge_base.md s3://camiloavila-knowledge-base-<ACCOUNT_ID>/knowledge_base.md
+```
+
+**To download latest from S3:**
+```bash
+aws s3 cp s3://camiloavila-knowledge-base-<ACCOUNT_ID>/knowledge_base.md ./
 ```
 
 ### 3. Run locally
