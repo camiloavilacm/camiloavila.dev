@@ -141,7 +141,7 @@ const ContactForm: React.FC = () => {
   };
 
   return (
-    <section id="contact" aria-labelledby="contact-heading" className="contact-container">
+    <section id="contact" aria-labelledby="contact-heading">
       <h2 className="section-heading" id="contact-heading">
         <span className="section-number">04.</span> Get In Touch
       </h2>

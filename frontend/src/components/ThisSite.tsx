@@ -23,7 +23,7 @@ const TECH_STACK = [
 
 const ThisSite: React.FC = () => {
   return (
-    <section id="this-site" style={styles.section} aria-labelledby="this-site-heading">
+    <section id="this-site" aria-labelledby="this-site-heading">
       <h2 className="section-heading" id="this-site-heading">
         <span className="section-number">05.</span> This site
       </h2>
@@ -54,8 +54,6 @@ const styles: Record<string, React.CSSProperties> = {
   section: {
     paddingTop: "60px",
     paddingBottom: "100px",
-    maxWidth: "800px",
-    margin: "0 auto",
   },
   tableWrapper: {
     overflowX: "auto",
@@ -83,6 +81,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: "var(--text-primary)",
     fontFamily: "var(--font-mono)",
     fontSize: "13px",
+    fontWeight: 600,
     borderBottom: "1px solid var(--border)",
   },
   tdTech: {
