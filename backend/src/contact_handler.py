@@ -47,6 +47,9 @@ import re
 from agents.contact_agent import process_contact
 from utils.response_builder import build_response
 
+# Alias for backwards compatibility with tests
+_build_response = build_response
+
 try:
     from guardrails import Guard
 

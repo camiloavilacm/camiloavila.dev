@@ -41,6 +41,9 @@ import logging
 from agents.chatbot_agent import ask
 from utils.response_builder import build_response
 
+# Alias for backwards compatibility with tests
+_build_response = build_response
+
 try:
     from guardrails import Guard
 
