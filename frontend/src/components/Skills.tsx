@@ -78,7 +78,7 @@ const SKILL_GROUPS: SkillGroup[] = [
   },
   {
     title: "Languages Spoken",
-    skills: ["Spanish (Native)", "English (Full)", "French (Full)", "Portuguese (Full)", "Italian (Limited)"],
+    skills: ["Spanish (Native)", "English (Full)", "Portuguese (Full)", "French",  "Italian (Limited)"],
   },
 ];
 
