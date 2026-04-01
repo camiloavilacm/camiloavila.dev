@@ -148,9 +148,9 @@ const Experience: React.FC = () => {
         <span className="section-number">02.</span> Experience
       </h2>
 
-      <div style={styles.container}>
+      <div style={styles.container} className="experience-container">
         {/* Company tab list */}
-        <div style={styles.tabList} role="tablist" aria-label="Companies">
+        <div style={styles.tabList} role="tablist" aria-label="Companies" className="tab-list">
           {EXPERIENCE.map((entry, i) => (
             <button
               key={entry.company}
@@ -207,6 +207,9 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: "column",
     minWidth: "160px",
     borderLeft: "2px solid var(--border)",
+    width: "100%",
+    maxWidth: "100%",
+    overflowX: "auto",
   },
   tab: {
     background: "none",
@@ -221,6 +224,8 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: "left",
     transition: "var(--transition)",
     whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   tabActive: {
     borderLeftColor: "var(--accent)",

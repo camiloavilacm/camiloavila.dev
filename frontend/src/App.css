@@ -217,6 +217,81 @@ label {
   section {
     padding: 60px 0;
   }
+
+  h2.section-heading {
+    font-size: 24px;
+    white-space: normal;
+  }
+
+  h2.section-heading::after {
+    width: 100px;
+    margin-left: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 0 12px;
+  }
+
+  section {
+    padding: 50px 0;
+  }
+
+  h2.section-heading {
+    font-size: 20px;
+  }
+
+  h2.section-heading .section-number {
+    font-size: 16px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  #hero {
+    padding-top: 100px !important;
+    padding-bottom: 40px !important;
+  }
+
+  #hero p,
+  #hero h1,
+  #hero h2 {
+    max-width: 100% !important;
+  }
+
+  /* Experience section - stack tabs above panel on mobile */
+  #experience .container {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+
+  #experience .tab-list {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    border-left: none !important;
+    border-bottom: 2px solid var(--border) !important;
+    padding-bottom: 8px !important;
+  }
+
+  #experience .tab {
+    border-left: none !important;
+    border-bottom: 2px solid transparent !important;
+    margin-left: 0 !important;
+    padding: 8px 16px !important;
+  }
+
+  #experience .tab-active {
+    border-left: none !important;
+    border-bottom-color: var(--accent) !important;
+  }
 }
 
 /* ---- Contact Form ---- */

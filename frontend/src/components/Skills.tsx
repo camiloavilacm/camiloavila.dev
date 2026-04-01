@@ -115,7 +115,7 @@ const Skills: React.FC = () => {
 const styles: Record<string, React.CSSProperties> = {
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
     gap: "20px",
   },
   card: {
