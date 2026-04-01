@@ -29,7 +29,7 @@ const SKILL_GROUPS: SkillGroup[] = [
   },
   {
     title: "Programming Languages",
-    skills: ["Python", "TypeScript", "JavaScript", "C#"],
+    skills: ["Python", "TypeScript", "JavaScript"],
   },
   {
     title: "Cloud & DevOps",
@@ -38,7 +38,6 @@ const SKILL_GROUPS: SkillGroup[] = [
       "Amazon S3",
       "Amazon Bedrock",
       "AWS CodePipeline",
-      "Docker",
       "Jenkins",
       "GitLab CI",
       "GitHub Actions",
@@ -57,6 +56,24 @@ const SKILL_GROUPS: SkillGroup[] = [
       "Agile / Scrum",
       "Critical Thinking",
       "API Testing",
+    ],
+  },
+  {
+    title: " Industry Experience",
+    skills: [
+      "Financial Services (Digital Banking)",
+      "IoT (Internet of Things)",
+      "Data Science & Analytics",
+      "Government & Public Sector",
+    ],
+  },
+    {
+    title: " Project Management & Collaboration",
+    skills: [
+      "Issue Tracking: Jira, Linear",
+      "Design Tools: Figma",
+      "Documentation: Confluence, Notion",
+      "Collaboration: Miro",
     ],
   },
   {

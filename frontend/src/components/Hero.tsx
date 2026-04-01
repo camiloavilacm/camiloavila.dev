@@ -29,14 +29,12 @@ const Hero: React.FC = () => {
       <h2 style={styles.tagline}>
         Senior Quality Engineer.
         <br />
-        <span style={styles.taglineSub}>QA Automation • AWS Certified • AI & Cloud</span>
+        <span style={styles.taglineSub}>AWS Certified • AI & Cloud</span>
       </h2>
 
       <p style={styles.summary}>
-        QA Automation Engineer with 15+ years building enterprise-grade test automation frameworks.
+        QA Automation Engineer with 13+ years building enterprise-grade test automation frameworks.
         <br />
-        <br />
-        <strong>Core expertise:</strong>
         <br />• Web, mobile, API & microservices testing
         <br />• Cloud-native testing pipelines (AWS Lambda, CloudWatch, DynamoDB)
         <br />• AWS Certified AI Practitioner and Developer – Associate — testing AI-powered features
@@ -44,9 +42,7 @@ const Hero: React.FC = () => {
         <br />• Cypress, Selenium, REST API testing
         <br />
         <br />
-        Specializing in reliable, scalable testing infrastructure for distributed systems.
-        <br />
-        Based in Spain • Available for remote US-based roles and
+        Based in Spain • Available for remote US-based roles
       </p>
 
       <div style={styles.ctaRow}>
