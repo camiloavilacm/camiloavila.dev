@@ -27,17 +27,26 @@ const Hero: React.FC = () => {
       <h1 style={styles.name}>Camilo Avila.</h1>
 
       <h2 style={styles.tagline}>
-        Senior QA Automation Engineer.
+        Senior Quality Engineer.
         <br />
-        <span style={styles.taglineSub}>AWS Certified. AI & Cloud focused.</span>
+        <span style={styles.taglineSub}>QA Automation • AWS Certified • AI & Cloud</span>
       </h2>
 
       <p style={styles.summary}>
-        I'm a polyglot QA Automation Engineer based in Spain with 15+ years of
-        experience designing test automation frameworks for web, mobile, API, and
-        microservices. I hold two AWS certifications and specialise in building
-        reliable, cloud-native testing pipelines. Currently available for remote
-        roles within US working hours.
+        QA Automation Engineer with 15+ years building enterprise-grade test automation frameworks.
+        <br />
+        <br />
+        <strong>Core expertise:</strong>
+        <br />• Web, mobile, API & microservices testing
+        <br />• Cloud-native testing pipelines (AWS Lambda, CloudWatch, DynamoDB)
+        <br />• AWS Certified AI Practitioner and Developer – Associate — testing AI-powered features
+        <br />• Test automation frameworks & architecture
+        <br />• Cypress, Selenium, REST API testing
+        <br />
+        <br />
+        Specializing in reliable, scalable testing infrastructure for distributed systems.
+        <br />
+        Based in Spain • Available for remote US-based roles and
       </p>
 
       <div style={styles.ctaRow}>
