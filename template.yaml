@@ -98,6 +98,7 @@ Resources:
   KnowledgeBaseBucket:
     Type: AWS::S3::Bucket
     Properties:
+      BucketName: !Sub "camiloavila-knowledge-base-${Stage}-${AWS::AccountId}"
       AccessControl: Private
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
@@ -109,6 +110,8 @@ Resources:
           Value: camiloavila-dev
         - Key: Purpose
           Value: RAG knowledge base
+        - Key: Stage
+          Value: !Ref Stage
 
   # -------------------------------------------------------------------------
   # S3 — Frontend Bucket (public website hosting)
@@ -118,10 +121,17 @@ Resources:
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
+      BucketName: !Sub "camiloavila-frontend-${Stage}-${AWS::AccountId}"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: index.html
       Tags:
+        - Key: Project
+          Value: camiloavila-dev
+        - Key: Purpose
+          Value: Frontend static hosting
+        - Key: Stage
+          Value: !Ref Stage
         - Key: Project
           Value: camiloavila-dev
         - Key: Purpose
@@ -152,7 +162,7 @@ Resources:
   ContactTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: camiloavila-contacts
+      TableName: !Sub "camiloavila-contacts-${Stage}"
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: id
