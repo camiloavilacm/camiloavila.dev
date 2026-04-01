@@ -22,6 +22,7 @@ import Experience from "./components/Experience";
 import Certifications from "./components/Certifications";
 import ContactForm from "./components/ContactForm";
 import ThisSite from "./components/ThisSite";
+import SEO from "./components/SEO";
 
 /**
  * Root component — renders the full portfolio page.
@@ -31,6 +32,7 @@ import ThisSite from "./components/ThisSite";
 function App() {
   return (
     <GlowCapture>
+      <SEO />
       <div className="app">
         <main>
           <Hero />

@@ -26,6 +26,30 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 
 ---
 
+## SEO
+
+This portfolio implements comprehensive SEO best practices:
+
+### Technical SEO
+- **Meta tags** — title, description, Open Graph, Twitter cards via SEO component
+- **sitemap.xml** — Search engine discovery for indexing
+- **robots.txt** — Crawler instructions
+- **JSON-LD** — Person schema for structured data (search engines)
+- **Favicon** — Brand initial (C) in mint green accent color
+- **GSC** — Google Search Console verified via HTML file upload
+
+### Performance
+- **Core Web Vitals** — Optimized LCP, INP, CLS
+- **Lazy loading** — Images load on demand
+- **Code splitting** — Vite automatic chunking
+- **WebP** — Optimized image format
+
+### Monitoring
+- **Google Search Console** — Property registered
+- **Sitemap** — Submitted for indexing
+
+---
+
 ## Repository structure
 
 ```
