@@ -91,14 +91,13 @@ Globals:
 Resources:
 
   # -------------------------------------------------------------------------
-  # S3 — Knowledge Base Bucket (private)
+  # S3 — Knowledge Base Bucket
   # Stores knowledge_base.md — the RAG source document for the chatbot.
   # Only accessible by the ChatbotFunction and ContactFunction Lambda roles.
   # -------------------------------------------------------------------------
   KnowledgeBaseBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "camiloavila-knowledge-base-${AWS::AccountId}"
       AccessControl: Private
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
@@ -119,7 +118,6 @@ Resources:
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "camiloavila-frontend-${AWS::AccountId}"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: index.html
