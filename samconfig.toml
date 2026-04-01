@@ -45,7 +45,8 @@ parameter_overrides = [
   "CertificateArn=arn:aws:acm:us-east-1:046228935090:certificate/c5e7d57e-c441-4e8c-93b5-160fde897cff",
   "BedrockModelId=qwen.qwen3-coder-next",
   "SesSenderEmail=camiloavilainfo@gmail.com",
-  "DomainName=camiloavila.dev"
+  "DomainName=camiloavila.dev",
+  "Stage=prod"
 ]
 
 # CloudFormation tags applied to all resources in the stack
@@ -74,7 +75,8 @@ parameter_overrides = [
   "CertificateArn=arn:aws:acm:us-east-1:046228935090:certificate/58ff1939-6f3a-44de-964d-4b801bd7b4a1",
   "BedrockModelId=qwen.qwen3-coder-next",
   "SesSenderEmail=camiloavilainfo@gmail.com",
-  "DomainName=staging.camiloavila.dev"
+  "DomainName=staging.camiloavila.dev",
+  "Stage=staging"
 ]
 
 tags = "Project=camiloavila-dev Environment=staging"

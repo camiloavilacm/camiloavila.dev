@@ -32,6 +32,14 @@ Description: >
 # Parameters
 # ---------------------------------------------------------------------------
 Parameters:
+  Stage:
+    Type: String
+    Default: staging
+    AllowedValues:
+      - staging
+      - prod
+    Description: Deployment stage (staging or prod)
+
   CertificateArn:
     Type: String
     Description: >
@@ -393,8 +401,8 @@ Resources:
   WebACL:
     Type: AWS::WAFv2::WebACL
     Properties:
-      Name: camiloavila-waf
-      Description: "WAF for camiloavila.dev portfolio"
+      Name: !Sub "camiloavila-waf-${Stage}"
+      Description: !Sub "WAF for camiloavila.dev portfolio (${Stage})"
       Scope: CLOUDFRONT
       DefaultAction:
         Allow: {}
