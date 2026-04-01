@@ -190,7 +190,7 @@ Resources:
   ChatbotFunctionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: camiloavila-chatbot-lambda-role
+      RoleName: !Sub "camiloavila-chatbot-lambda-role-${Stage}"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -228,7 +228,7 @@ Resources:
   ContactFunctionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: camiloavila-contact-lambda-role
+      RoleName: !Sub "camiloavila-contact-lambda-role-${Stage}"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
