@@ -37,10 +37,9 @@ Environment variables (set by SAM template.yaml):
 
 import json
 import logging
-import os
 
 from agents.chatbot_agent import ask
-from utils.response_builder import build_response, build_error_response
+from utils.response_builder import build_response
 
 try:
     from guardrails import Guard
@@ -203,7 +202,7 @@ def lambda_handler(event: dict, context: object) -> dict:
     # Handle CORS preflight OPTIONS request
     http_method = event.get("requestContext", {}).get("http", {}).get("method", "")
     if http_method == "OPTIONS":
-        return _build_response(200, {"message": "OK"})
+        return build_response(200, {"message": "OK"})
 
     logger.info(
         "Chatbot Lambda invoked. RequestId: %s",
@@ -215,16 +214,16 @@ def lambda_handler(event: dict, context: object) -> dict:
         body = json.loads(event.get("body") or "{}")
     except json.JSONDecodeError:
         logger.warning("Request body is not valid JSON.")
-        return _build_response(400, {"error": "Request body must be valid JSON."})
+        return build_response(400, {"error": "Request body must be valid JSON."})
 
     question = body.get("question", "").strip()
 
     # Input validation
     if not question:
-        return _build_response(400, {"error": "Question cannot be empty."})
+        return build_response(400, {"error": "Question cannot be empty."})
 
     if len(question) > 500:
-        return _build_response(
+        return build_response(
             400,
             {"error": "Question exceeds maximum length of 500 characters."},
         )
@@ -233,7 +232,7 @@ def lambda_handler(event: dict, context: object) -> dict:
     is_safe_gr, error_msg_gr = _validate_with_guardrails(question)
     if not is_safe_gr:
         logger.info("Question blocked by Guardrails AI.")
-        return _build_response(
+        return build_response(
             200,
             {"answer": error_msg_gr or "Your input was flagged by security filters."},
         )
@@ -242,21 +241,21 @@ def lambda_handler(event: dict, context: object) -> dict:
     is_safe, error_msg = _is_question_safe(question)
     if not is_safe:
         logger.info("Question blocked by guardrails.")
-        return _build_response(200, {"answer": error_msg})
+        return build_response(200, {"answer": error_msg})
 
     # Delegate to ChatbotAgent
     try:
         answer = ask(question)
         logger.info("Chatbot answered successfully.")
-        return _build_response(200, {"answer": answer})
+        return build_response(200, {"answer": answer})
 
     except ValueError as exc:
         logger.warning("Validation error: %s", str(exc))
-        return _build_response(400, {"error": str(exc)})
+        return build_response(400, {"error": str(exc)})
 
     except Exception as exc:
         logger.error("Unexpected error in ChatbotAgent: %s", str(exc), exc_info=True)
-        return _build_response(
+        return build_response(
             500,
             {"error": "An unexpected error occurred. Please try again."},
         )

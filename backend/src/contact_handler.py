@@ -42,11 +42,10 @@ Environment variables (set by SAM template.yaml):
 
 import json
 import logging
-import os
 import re
 
 from agents.contact_agent import process_contact
-from utils.response_builder import build_response, build_error_response
+from utils.response_builder import build_response
 
 try:
     from guardrails import Guard
@@ -163,7 +162,7 @@ def lambda_handler(event: dict, context: object) -> dict:
     # Handle CORS preflight OPTIONS request
     http_method = event.get("requestContext", {}).get("http", {}).get("method", "")
     if http_method == "OPTIONS":
-        return _build_response(200, {"message": "OK"})
+        return build_response(200, {"message": "OK"})
 
     logger.info(
         "Contact Lambda invoked. RequestId: %s",
@@ -175,7 +174,7 @@ def lambda_handler(event: dict, context: object) -> dict:
         body = json.loads(event.get("body") or "{}")
     except json.JSONDecodeError:
         logger.warning("Request body is not valid JSON.")
-        return _build_response(400, {"error": "Request body must be valid JSON."})
+        return build_response(400, {"error": "Request body must be valid JSON."})
 
     name = body.get("name", "").strip()
     email = body.get("email", "").strip()
@@ -183,25 +182,25 @@ def lambda_handler(event: dict, context: object) -> dict:
 
     # Field presence validation
     if not name or not email or not message:
-        return _build_response(
+        return build_response(
             400,
             {"error": "Name, email, and message are required."},
         )
 
     # Name length validation
     if len(name) > _MAX_NAME_LENGTH:
-        return _build_response(
+        return build_response(
             400,
             {"error": f"Name exceeds maximum length of {_MAX_NAME_LENGTH} characters."},
         )
 
     # Email format validation
     if not _EMAIL_PATTERN.match(email):
-        return _build_response(400, {"error": "Invalid email address format."})
+        return build_response(400, {"error": "Invalid email address format."})
 
     # Message length validation
     if len(message) > _MAX_MESSAGE_LENGTH:
-        return _build_response(
+        return build_response(
             400,
             {
                 "error": (
@@ -214,12 +213,12 @@ def lambda_handler(event: dict, context: object) -> dict:
     is_safe_gr, error_msg_gr = _validate_with_guardrails(message)
     if not is_safe_gr:
         logger.info("Message blocked by Guardrails AI.")
-        return _build_response(400, {"error": "Message contains disallowed content."})
+        return build_response(400, {"error": "Message contains disallowed content."})
 
     # Layer 2: Custom validation
     is_safe, error_msg = _is_message_safe(message)
     if not is_safe:
-        return _build_response(400, {"error": error_msg})
+        return build_response(400, {"error": error_msg})
 
     # Delegate to ContactAgent
     try:
@@ -231,7 +230,7 @@ def lambda_handler(event: dict, context: object) -> dict:
         )
 
         if result["success"]:
-            return _build_response(
+            return build_response(
                 200,
                 {
                     "message": (
@@ -242,7 +241,7 @@ def lambda_handler(event: dict, context: object) -> dict:
             )
         else:
             # Submission saved to DynamoDB but email failed
-            return _build_response(
+            return build_response(
                 200,
                 {
                     "message": (
@@ -254,11 +253,11 @@ def lambda_handler(event: dict, context: object) -> dict:
 
     except ValueError as exc:
         logger.warning("Validation error in contact flow: %s", str(exc))
-        return _build_response(400, {"error": str(exc)})
+        return build_response(400, {"error": str(exc)})
 
     except Exception as exc:
         logger.error("Unexpected error in contact flow: %s", str(exc), exc_info=True)
-        return _build_response(
+        return build_response(
             500,
             {"error": "An unexpected error occurred. Please try again."},
         )
