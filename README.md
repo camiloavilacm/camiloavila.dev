@@ -50,6 +50,42 @@ This portfolio implements comprehensive SEO best practices:
 
 ---
 
+## Security
+
+This portfolio implements comprehensive security best practices:
+
+### Data Protection
+- **HTTPS/TLS** — All traffic via AWS CloudFront (managed)
+- **Data at rest** — AWS DynamoDB and S3 encryption (managed by AWS)
+- **No SQL** — Uses DynamoDB (NoSQL) with parameterized queries
+
+### Input Validation
+- **Prompt injection** — Custom validation blocks injection patterns
+- **SQL injection** — Blocks SQL patterns in chatbot questions
+- **XSS protection** — Blocks malicious scripts in contact form
+- **Off-topic blocking** — Rejects non-resume questions
+
+### API Security
+- **CORS** — Configured per environment via ALLOWED_ORIGIN
+- **Security headers** — HSTS, X-Frame-Options, X-XSS-Protection, Referrer-Policy
+- **Input sanitization** — Both handlers validate and sanitize all input
+- **Rate limiting** — Handled by API Gateway (AWS managed)
+
+### Security Testing
+- **Unit tests** — 53 tests in test_security.py
+- **Security headers tests** — 20 tests in test_security_headers.py
+- **E2E security tests** — Playwright tests for production
+- **Weekly scans** — security-tests.yml workflow runs every Sunday
+- **Dependency scanning** — safety + npm audit in CI/CD
+- **Guardrails AI** — Layer 1 of defense for input validation
+
+### Secrets Management
+- **No hardcoded credentials** — All secrets from environment variables
+- **OIDC** — GitHub Actions uses role assumption (no stored keys)
+- **AWS IAM** — Lambda execution role with minimal permissions
+
+---
+
 ## Repository structure
 
 ```

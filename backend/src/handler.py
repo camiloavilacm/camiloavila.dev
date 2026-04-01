@@ -78,6 +78,15 @@ _INJECTION_PATTERNS = [
     "hidden instructions",
     "reveal your",
     "print all",
+    # SQL injection patterns
+    "drop table",
+    "drop tables",
+    "--",
+    "';",
+    "1=1",
+    "union select",
+    "union all",
+    "or 1=1",
 ]
 
 _OFF_TOPIC_KEYWORDS = [
@@ -169,7 +178,7 @@ def _validate_with_guardrails(question: str) -> tuple[bool, str]:
 
 
 def _build_response(status_code: int, body: dict) -> dict:
-    """Build a standard API Gateway HTTP response with CORS headers.
+    """Build a standard API Gateway HTTP response with security headers.
 
     Args:
         status_code: HTTP status code (200, 400, 500, etc.).
@@ -186,6 +195,12 @@ def _build_response(status_code: int, body: dict) -> dict:
             "Access-Control-Allow-Origin": allowed_origin,
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type",
+            # Security headers
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+            "X-XSS-Protection": "1; mode=block",
+            "Referrer-Policy": "strict-origin-when-cross-origin",
         },
         "body": json.dumps(body),
     }
