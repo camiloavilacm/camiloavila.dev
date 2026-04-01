@@ -23,7 +23,6 @@ How it integrates:
 
 import os
 import logging
-import json
 
 import boto3
 from strands import tool
@@ -32,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 _bedrock_client = boto3.client("bedrock-runtime", region_name="us-east-1")
 
-_REPLY_SYSTEM_PROMPT = """You are helping Camilo Avila respond to someone who has contacted him 
+_REPLY_SYSTEM_PROMPT = """You are helping Camilo Avila respond to someone who has contacted him
 through his portfolio website. Write a single short paragraph (3-4 sentences) that:
 1. Acknowledges the visitor's specific message or question in a personalised way
 2. Briefly mentions how Camilo's background is relevant to their interest

@@ -38,7 +38,6 @@ Environment variables (set by SAM template.yaml):
 import json
 import logging
 import os
-from typing import Optional
 
 from agents.chatbot_agent import ask
 
@@ -162,7 +161,7 @@ def _validate_with_guardrails(question: str) -> tuple[bool, str]:
                 "guardrails/validators/no-prompt-injection",
             ],
         )
-        validated = guard.validate(question)
+        guard.validate(question)
         return True, ""
     except Exception as exc:
         logger.warning("Guardrails validation failed: %s", str(exc))

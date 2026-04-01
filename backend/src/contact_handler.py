@@ -44,7 +44,6 @@ import json
 import logging
 import os
 import re
-from typing import Optional
 
 from agents.contact_agent import process_contact
 
@@ -132,7 +131,7 @@ def _validate_with_guardrails(message: str) -> tuple[bool, str]:
                 "guardrails/validators/no-prompt-injection",
             ],
         )
-        validated = guard.validate(message)
+        guard.validate(message)
         return True, ""
     except Exception as exc:
         logger.warning("Guardrails validation failed: %s", str(exc))
