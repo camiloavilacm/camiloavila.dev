@@ -446,7 +446,6 @@ Resources:
               AggregateKeyType: IP
               Limit: 100
               EvaluationWindowSec: 300
-              Scope: IP
           Action:
             Block:
               CustomResponse:
