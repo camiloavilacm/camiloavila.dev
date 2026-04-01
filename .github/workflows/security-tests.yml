@@ -70,6 +70,7 @@ jobs:
         working-directory: backend
         run: |
           source venv/bin/activate
+          export AWS_DEFAULT_REGION=us-east-1
           mkdir -p reports/security/allure-results
           pytest tests/unit/test_security.py -v \
             --tb=short \
