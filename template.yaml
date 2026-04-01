@@ -407,13 +407,14 @@ Resources:
                 Body:
                   OversizeHandling: MATCH
               TextTransformations:
-                - Type: NONE
-                - Type: URL_DECODE
+                - Priority: 1
+                  Type: NONE
+                - Priority: 2
+                  Type: URL_DECODE
           Action:
             Block:
               CustomResponse:
                 ResponseCode: 403
-                ResponseBody: camiloavila-blocked
           VisibilityConfig:
             SampledRequestsEnabled: true
             CloudWatchMetricsEnabled: true
@@ -426,13 +427,14 @@ Resources:
                 Body:
                   OversizeHandling: MATCH
               TextTransformations:
-                - Type: NONE
-                - Type: URL_DECODE
+                - Priority: 1
+                  Type: NONE
+                - Priority: 2
+                  Type: URL_DECODE
           Action:
             Block:
               CustomResponse:
                 ResponseCode: 403
-                ResponseBody: camiloavila-blocked
           VisibilityConfig:
             SampledRequestsEnabled: true
             CloudWatchMetricsEnabled: true
@@ -441,15 +443,14 @@ Resources:
           Priority: 3
           Statement:
             RateBasedStatement:
+              AggregateKeyType: IP
               Limit: 100
               EvaluationWindowSec: 300
-              Condition:
-                Scope: IP
+              Scope: IP
           Action:
             Block:
               CustomResponse:
                 ResponseCode: 429
-                ResponseBody: camiloavila-rate-limited
           VisibilityConfig:
             SampledRequestsEnabled: true
             CloudWatchMetricsEnabled: true
