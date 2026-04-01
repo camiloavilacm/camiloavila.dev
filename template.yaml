@@ -275,7 +275,7 @@ Resources:
   ChatbotFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: camiloavila-chatbot
+      FunctionName: !Sub "camiloavila-chatbot-${Stage}"
       CodeUri: backend/src/
       Handler: handler.lambda_handler
       Role: !GetAtt ChatbotFunctionRole.Arn
@@ -306,7 +306,7 @@ Resources:
   ContactFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: camiloavila-contact
+      FunctionName: !Sub "camiloavila-contact-${Stage}"
       CodeUri: backend/src/
       Handler: contact_handler.lambda_handler
       Role: !GetAtt ContactFunctionRole.Arn
