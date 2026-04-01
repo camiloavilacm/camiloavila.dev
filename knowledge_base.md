@@ -32,7 +32,6 @@ Camilo is currently based in Spain and is available for remote roles operating w
 - Python
 - TypeScript
 - JavaScript
-- C#
 
 ### Test Automation Frameworks & Tools
 

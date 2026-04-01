@@ -51,6 +51,9 @@ _SUSPICIOUS_OUTPUT_PATTERNS = [
     "eval(",
     "document.",
     "window.",
+    "<img",
+    "onerror=",
+    "onclick=",
 ]
 
 

@@ -44,8 +44,16 @@ import json
 import logging
 import os
 import re
+from typing import Optional
 
 from agents.contact_agent import process_contact
+
+try:
+    from guardrails import Guard
+
+    GUARDRAILS_AVAILABLE = True
+except ImportError:
+    GUARDRAILS_AVAILABLE = False
 
 logging.basicConfig(
     level=logging.INFO,
@@ -70,6 +78,15 @@ _SUSPICIOUS_PATTERNS = [
     "onload=",
     "eval(",
     "alert(",
+    "<iframe",
+    "<svg",
+    "<img",
+    "drop table",
+    "drop tables",
+    "--",
+    "';",
+    "' or '",
+    "1=1",
 ]
 
 
@@ -90,6 +107,36 @@ def _is_message_safe(message: str) -> tuple[bool, str]:
             return False, "Message contains disallowed content."
 
     return True, ""
+
+
+def _validate_with_guardrails(message: str) -> tuple[bool, str]:
+    """Validate message using Guardrails AI.
+
+    This is Layer 1 of defense for contact form - catches common
+    attack patterns using Guardrails AI's built-in validators.
+
+    Args:
+        message: The raw message from the contact form.
+
+    Returns:
+        tuple: (is_safe, error_message). If not safe, returns error message.
+    """
+    if not GUARDRAILS_AVAILABLE:
+        return True, ""
+
+    try:
+        guard = Guard.from_pydantic(
+            schema=None,
+            validators=[
+                "guardrails/validators/no-secure-sql-queries",
+                "guardrails/validators/no-prompt-injection",
+            ],
+        )
+        validated = guard.validate(message)
+        return True, ""
+    except Exception as exc:
+        logger.warning("Guardrails validation failed: %s", str(exc))
+        return True, ""
 
 
 def _build_response(status_code: int, body: dict) -> dict:
@@ -186,7 +233,13 @@ def lambda_handler(event: dict, context: object) -> dict:
             },
         )
 
-    # Security guardrails — validate message content
+    # Layer 1: Guardrails AI validation
+    is_safe_gr, error_msg_gr = _validate_with_guardrails(message)
+    if not is_safe_gr:
+        logger.info("Message blocked by Guardrails AI.")
+        return _build_response(400, {"error": "Message contains disallowed content."})
+
+    # Layer 2: Custom validation
     is_safe, error_msg = _is_message_safe(message)
     if not is_safe:
         return _build_response(400, {"error": error_msg})

@@ -38,8 +38,16 @@ Environment variables (set by SAM template.yaml):
 import json
 import logging
 import os
+from typing import Optional
 
 from agents.chatbot_agent import ask
+
+try:
+    from guardrails import Guard
+
+    GUARDRAILS_AVAILABLE = True
+except ImportError:
+    GUARDRAILS_AVAILABLE = False
 
 # Configure structured logging — visible in CloudWatch Logs
 logging.basicConfig(
@@ -68,15 +76,20 @@ _INJECTION_PATTERNS = [
     " DAN ",
     "developer mode",
     "enable developer",
+    "hidden instructions",
+    "reveal your",
+    "print all",
 ]
 
 _OFF_TOPIC_KEYWORDS = [
     "weather",
     "sports",
+    "world cup",
     "politics",
     "news",
     "stock price",
     "cryptocurrency",
+    "bitcoin",
     "celebrity",
     "movie",
     "music",
@@ -124,6 +137,36 @@ def _is_question_safe(question: str) -> tuple[bool, str]:
             )
 
     return True, ""
+
+
+def _validate_with_guardrails(question: str) -> tuple[bool, str]:
+    """Validate input using Guardrails AI.
+
+    This is Layer 1 of defense - catches common attack patterns using
+    Guardrails AI's built-in validators.
+
+    Args:
+        question: The raw question string from the user.
+
+    Returns:
+        tuple: (is_safe, error_message). If not safe, returns error message.
+    """
+    if not GUARDRAILS_AVAILABLE:
+        return True, ""
+
+    try:
+        guard = Guard.from_pydantic(
+            schema=None,
+            validators=[
+                "guardrails/validators/no-secure-sql-queries",
+                "guardrails/validators/no-prompt-injection",
+            ],
+        )
+        validated = guard.validate(question)
+        return True, ""
+    except Exception as exc:
+        logger.warning("Guardrails validation failed: %s", str(exc))
+        return True, ""
 
 
 def _build_response(status_code: int, body: dict) -> dict:
@@ -200,7 +243,16 @@ def lambda_handler(event: dict, context: object) -> dict:
             {"error": "Question exceeds maximum length of 500 characters."},
         )
 
-    # Security guardrails — pre-validation
+    # Layer 1: Guardrails AI validation
+    is_safe_gr, error_msg_gr = _validate_with_guardrails(question)
+    if not is_safe_gr:
+        logger.info("Question blocked by Guardrails AI.")
+        return _build_response(
+            200,
+            {"answer": error_msg_gr or "Your input was flagged by security filters."},
+        )
+
+    # Layer 2: Custom pre-validation
     is_safe, error_msg = _is_question_safe(question)
     if not is_safe:
         logger.info("Question blocked by guardrails.")
