@@ -157,6 +157,7 @@ const Experience: React.FC = () => {
               role="tab"
               aria-selected={i === activeIndex}
               aria-controls={`panel-${i}`}
+              className={`tab ${i === activeIndex ? "tab-active" : ""}`}
               style={{
                 ...styles.tab,
                 ...(i === activeIndex ? styles.tabActive : {}),
@@ -174,6 +175,7 @@ const Experience: React.FC = () => {
           role="tabpanel"
           aria-label={active.company}
           style={styles.panel}
+          className="experience-panel"
         >
           <h3 style={styles.role}>
             {active.role}{" "}
@@ -207,9 +209,6 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: "column",
     minWidth: "160px",
     borderLeft: "2px solid var(--border)",
-    width: "100%",
-    maxWidth: "100%",
-    overflowX: "auto",
   },
   tab: {
     background: "none",
@@ -224,8 +223,6 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: "left",
     transition: "var(--transition)",
     whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
   },
   tabActive: {
     borderLeftColor: "var(--accent)",
