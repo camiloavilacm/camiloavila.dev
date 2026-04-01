@@ -143,6 +143,33 @@ cd frontend && npm run dev
 # Open http://localhost:5173
 ```
 
+### Security guardrails
+
+The chatbot and contact form include built-in security guardrails to ensure the AI only responds to appropriate requests and to prevent abuse.
+
+#### Chatbot guardrails (`handler.py`)
+
+- **Pre-validation layer**: Blocks suspicious patterns (prompt injection, jailbreak attempts) and off-topic keywords before the question reaches the AI model
+- **System prompt enforcement**: The agent is configured with a strict system prompt that limits responses to Camilo Avila's resume and professional background only
+- **Off-topic handling**: Questions about weather, sports, politics, or other unrelated topics receive a polite refusal with contact information
+
+#### Contact form guardrails (`contact_handler.py` + `contact_agent.py`)
+
+- **Input validation**: Messages are checked for suspicious patterns (script tags, JavaScript injection, etc.) before processing
+- **Output validation**: AI-generated email replies are validated to ensure no malicious content is included before sending
+- **System prompt constraints**: The email generator is restricted to safe, professional 2-3 sentence responses with no HTML, links, or code
+
+#### Blocked patterns
+
+The following are blocked at the pre-validation stage:
+
+| Category | Examples |
+| -------- | -------- |
+| Prompt injection | "ignore previous", "system prompt", "you are now", "forget everything" |
+| Off-topic keywords | weather, sports, politics, news, stock price, celebrity, health advice |
+| Suspicious input | `<script>`, `javascript:`, `onerror=`, `eval(` |
+| Malicious output | `<script>`, `javascript:`, URLs in AI responses |
+
 ---
 
 ## Running tests
