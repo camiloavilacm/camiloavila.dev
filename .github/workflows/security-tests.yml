@@ -10,11 +10,15 @@
 #   - Output handling issues (OWASP LLM05)
 #
 # Jobs:
-#   security-tests    — Run security unit tests against the codebase
+#   security-tests    — Run security unit tests with Allure reports
 #   lint-checks       — Run code quality checks
+#   dependency-scan   — Check for vulnerable dependencies
+#   publish-reports   — Publish Allure reports to GitHub Pages (main + develop)
 #
-# Environment:
-#   Runs on develop branch (latest deployed code)
+# GitHub Pages:
+#   Security reports available at:
+#   - Production: camiloavila.dev/test-reports/security/
+#   - Staging: camiloavila-dev-staging.test-reports.security/
 #
 # Note: E2E security tests (real API tests) are SKIPPED by default.
 #       They only run when manually triggered with ENV=production.
@@ -26,15 +30,20 @@ on:
   schedule:
     - cron: '0 0 * * 0'  # Sunday 00:00 UTC
   workflow_dispatch:  # Manual trigger
+  push:
+    branches:
+      - main
+      - develop
 
 permissions:
   id-token: write
   contents: read
   pull-requests: write
+  pages: write
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Security Unit Tests
+  # Security Unit Tests with Allure
   # ---------------------------------------------------------------------------
   security-tests:
     name: Security — Unit Tests
@@ -55,19 +64,23 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
+          pip install pytest allure-pytest
 
-      - name: Run security unit tests
+      - name: Run security unit tests with Allure
         working-directory: backend
         run: |
           source venv/bin/activate
-          pytest tests/unit/test_security.py -v --tb=short
+          mkdir -p reports/security/allure-results
+          pytest tests/unit/test_security.py -v \
+            --tb=short \
+            --alluredir=reports/security/allure-results
 
       - name: Upload security test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: security-test-results
-          path: backend/tests/results/
+          path: reports/security/
           retention-days: 30
 
   # ---------------------------------------------------------------------------
@@ -134,7 +147,45 @@ jobs:
           npm audit --audit-level=moderate || true
 
   # ---------------------------------------------------------------------------
-  # Generate Security Report
+  # Publish Allure Reports to GitHub Pages
+  # ---------------------------------------------------------------------------
+  publish-reports:
+    name: Security — Publish Allure Reports
+    needs: [security-tests, lint-checks, dependency-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download security test results
+        uses: actions/download-artifact@v4
+        with:
+          name: security-test-results
+          path: allure-results
+
+      - name: Generate Allure report
+        run: |
+          allure generate allure-results/ -o security-report --clean
+
+      - name: Upload Allure report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-allure-report
+          path: security-report/
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: security-report/
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
+
+  # ---------------------------------------------------------------------------
+  # Generate Security Report Summary
   # ---------------------------------------------------------------------------
   security-report:
     name: Security — Summary Report
@@ -155,6 +206,11 @@ jobs:
           echo "1. Review any test failures" >> $GITHUB_STEP_SUMMARY
           echo "2. Check dependency vulnerabilities" >> $GITHUB_STEP_SUMMARY
           echo "3. Run E2E tests manually against production if needed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Reports" >> $GITHUB_STEP_SUMMARY
+          echo "Allure test reports are published to GitHub Pages:" >> $GITHUB_STEP_SUMMARY
+          echo "- Main branch: /test-reports/security/" >> $GITHUB_STEP_SUMMARY
+          echo "- Develop branch: /test-reports/security/" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "To run E2E tests against production:" >> $GITHUB_STEP_SUMMARY
           echo "```bash" >> $GITHUB_STEP_SUMMARY
