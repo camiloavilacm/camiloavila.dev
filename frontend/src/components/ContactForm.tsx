@@ -141,7 +141,7 @@ const ContactForm: React.FC = () => {
   };
 
   return (
-    <section id="contact" aria-labelledby="contact-heading">
+    <section id="contact" aria-labelledby="contact-heading" className="contact-container">
       <h2 className="section-heading" id="contact-heading">
         <span className="section-number">04.</span> Get In Touch
       </h2>
@@ -278,7 +278,6 @@ const ContactForm: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   intro: {
-    maxWidth: "560px",
     marginBottom: "40px",
   },
   introText: {
@@ -292,7 +291,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "15px",
   },
   form: {
-    maxWidth: "560px",
     display: "flex",
     flexDirection: "column",
     gap: "20px",
@@ -326,7 +324,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "14px",
   },
   successBox: {
-    maxWidth: "560px",
     background: "rgba(100, 255, 218, 0.05)",
     border: "1px solid var(--accent)",
     borderRadius: "8px",

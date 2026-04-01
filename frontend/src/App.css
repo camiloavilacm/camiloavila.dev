@@ -218,3 +218,14 @@ label {
     padding: 60px 0;
   }
 }
+
+/* ---- Contact Form ---- */
+.contact-container {
+  max-width: 800px;
+}
+
+@media (max-width: 768px) {
+  .contact-container {
+    max-width: 560px;
+  }
+}
