@@ -198,7 +198,7 @@ jobs:
 
       - name: Install Playwright dependencies
         run: |
-          python3 -m pip install playwright pytest pytest-html allure-pytest
+          python3 -m pip install playwright pytest pytest-html allure-pytest requests
           playwright install chromium
 
       - name: Run Playwright smoke tests
