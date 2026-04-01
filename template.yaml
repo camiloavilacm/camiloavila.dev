@@ -386,6 +386,85 @@ Resources:
         - Key: Project
           Value: camiloavila-dev
 
+  # -------------------------------------------------------------------------
+  # AWS WAF — Web Application Firewall
+  # Protects against common web exploits, SQL injection, XSS
+  # -------------------------------------------------------------------------
+  WebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: camiloavila-waf
+      Description: "WAF for camiloavila.dev portfolio"
+      Scope: CLOUDFRONT
+      DefaultAction:
+        Allow: {}
+      Rules:
+        - Name: Block-SQL-Injection
+          Priority: 1
+          Statement:
+            SqliMatchStatement:
+              FieldToMatch:
+                Body:
+                  OversizeHandling: MATCH
+              TextTransformations:
+                - Type: NONE
+                - Type: URL_DECODE
+          Action:
+            Block:
+              CustomResponse:
+                ResponseCode: 403
+                ResponseBody: camiloavila-blocked
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: BlockSQLInjection
+        - Name: Block-XSS-Injection
+          Priority: 2
+          Statement:
+            XssMatchStatement:
+              FieldToMatch:
+                Body:
+                  OversizeHandling: MATCH
+              TextTransformations:
+                - Type: NONE
+                - Type: URL_DECODE
+          Action:
+            Block:
+              CustomResponse:
+                ResponseCode: 403
+                ResponseBody: camiloavila-blocked
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: BlockXSSInjection
+        - Name: Rate-Limit-100
+          Priority: 3
+          Statement:
+            RateBasedStatement:
+              Limit: 100
+              EvaluationWindowSec: 300
+              Condition:
+                Scope: IP
+          Action:
+            Block:
+              CustomResponse:
+                ResponseCode: 429
+                ResponseBody: camiloavila-rate-limited
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: RateLimit100
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: camiloavila-waf-metrics
+
+  WebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
+      WebACLArn: !GetAtt WebACL.Arn
+
   # CloudFront Origin Access Control — restricts S3 to CloudFront only
   CloudFrontOAC:
     Type: AWS::CloudFront::OriginAccessControl

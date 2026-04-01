@@ -162,6 +162,8 @@ def _build_response(status_code: int, body: dict) -> dict:
             "X-Frame-Options": "DENY",
             "X-XSS-Protection": "1; mode=block",
             "Referrer-Policy": "strict-origin-when-cross-origin",
+            # CSP header for XSS protection
+            "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';",
         },
         "body": json.dumps(body),
     }

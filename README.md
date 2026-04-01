@@ -76,14 +76,20 @@ This portfolio implements comprehensive security best practices:
 ### Input Validation
 - **Prompt injection** — Custom validation blocks injection patterns
 - **SQL injection** — Blocks SQL patterns in chatbot questions
-- **XSS protection** — Blocks malicious scripts in contact form
+- **XSS protection** — CSP header, blocks malicious scripts in contact form
 - **Off-topic blocking** — Rejects non-resume questions
 
 ### API Security
 - **CORS** — Configured per environment via ALLOWED_ORIGIN
-- **Security headers** — HSTS, X-Frame-Options, X-XSS-Protection, Referrer-Policy
+- **Security headers** — HSTS, CSP, X-Frame-Options, X-XSS-Protection, Referrer-Policy
 - **Input sanitization** — Both handlers validate and sanitize all input
-- **Rate limiting** — Handled by API Gateway (AWS managed)
+- **Rate limiting** — AWS WAF rate-based rules (100 req/5min per IP)
+
+### Infrastructure Security
+- **WAF** — AWS WAF with SQL injection, XSS, and rate limiting rules
+- **DDoS protection** — AWS Shield Standard with CloudFront (automatic)
+- **Security headers** — All modern headers (HSTS, CSP, X-Frame, etc.)
+- **Backups** — DynamoDB point-in-time recovery enabled
 
 ### Security Testing
 - **Unit tests** — 53 tests in test_security.py
