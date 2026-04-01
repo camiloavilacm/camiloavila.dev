@@ -46,6 +46,7 @@ import os
 import re
 
 from agents.contact_agent import process_contact
+from utils.response_builder import build_response, build_error_response
 
 try:
     from guardrails import Guard
@@ -136,37 +137,6 @@ def _validate_with_guardrails(message: str) -> tuple[bool, str]:
     except Exception as exc:
         logger.warning("Guardrails validation failed: %s", str(exc))
         return True, ""
-
-
-def _build_response(status_code: int, body: dict) -> dict:
-    """Build a standard API Gateway HTTP response with CORS headers.
-
-    Args:
-        status_code: HTTP status code.
-        body:        Dictionary to serialise as the JSON response body.
-
-    Returns:
-        dict: API Gateway-compatible response object.
-    """
-    allowed_origin = os.environ.get("ALLOWED_ORIGIN", "https://camiloavila.dev")
-    return {
-        "statusCode": status_code,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": allowed_origin,
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-            # Security headers
-            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-            "X-Content-Type-Options": "nosniff",
-            "X-Frame-Options": "DENY",
-            "X-XSS-Protection": "1; mode=block",
-            "Referrer-Policy": "strict-origin-when-cross-origin",
-            # CSP header for XSS protection
-            "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';",
-        },
-        "body": json.dumps(body),
-    }
 
 
 def lambda_handler(event: dict, context: object) -> dict:
