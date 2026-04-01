@@ -67,6 +67,7 @@ jobs:
           pip install pytest allure-pytest
 
       - name: Run security unit tests with Allure
+        id: run-tests
         working-directory: backend
         run: |
           source venv/bin/activate
@@ -77,11 +78,11 @@ jobs:
             --alluredir=reports/security/allure-results
 
       - name: Upload security test results
-        if: always()
+        if: always() && steps.run-tests.outcome != 'skipped'
         uses: actions/upload-artifact@v4
         with:
           name: security-test-results
-          path: reports/security/
+          path: backend/reports/security/
           retention-days: 30
 
   # ---------------------------------------------------------------------------
