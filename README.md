@@ -4,6 +4,14 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 
 **Live site:** https://camiloavila.dev
 
+## Coverage Dashboard
+
+Test coverage reports are automatically generated and published to GitHub Pages:
+- [Coverage Dashboard](https://camiloavilacm.github.io/camiloavila.dev/coverage-dashboard/)
+- [Allure Reports](https://camiloavilacm.github.io/camiloavila.dev/)
+
+Every PR automatically receives a detailed coverage comment with before/after comparison.
+
 ---
 
 ## What's inside
