@@ -1,4 +1,4 @@
-name: Visual Diff Check
+name: Visual Regression
 
 on:
   pull_request:
@@ -6,7 +6,6 @@ on:
       - develop
       - main
     types: [opened, synchronize]
-  workflow_dispatch:
 
 jobs:
   visual-diff:
