@@ -8,7 +8,7 @@
  * a key differentiator for the target audience (US tech companies).
  */
 
-import React from "react";
+import React from 'react';
 
 /** A certification or education entry. */
 interface CertEntry {
@@ -24,47 +24,47 @@ interface CertEntry {
 
 const AWS_CERTS: CertEntry[] = [
   {
-    title: "AWS Certified Developer – Associate",
-    issuer: "Amazon Web Services",
-    year: "Active",
-    badge: "AWS",
+    title: 'AWS Certified Developer – Associate',
+    issuer: 'Amazon Web Services',
+    year: 'Active',
+    badge: 'AWS',
   },
   {
-    title: "AWS Certified AI Practitioner (AIF-C01)",
-    issuer: "Amazon Web Services",
-    year: "Active",
-    badge: "AWS AI",
+    title: 'AWS Certified AI Practitioner (AIF-C01)',
+    issuer: 'Amazon Web Services',
+    year: 'Active',
+    badge: 'AWS AI',
   },
 ];
 
 const OTHER_CERTS: CertEntry[] = [
   {
-    title: "Project Execution: Running the Project",
-    issuer: "Google / Coursera",
-    year: "2023",
+    title: 'Project Execution: Running the Project',
+    issuer: 'Google / Coursera',
+    year: '2023',
   },
   {
-    title: "Agile Project Management",
-    issuer: "Google / Coursera",
-    year: "2023",
+    title: 'Agile Project Management',
+    issuer: 'Google / Coursera',
+    year: '2023',
   },
   {
-    title: "Foundations of Project Management",
-    issuer: "Google / Coursera",
-    year: "2023",
+    title: 'Foundations of Project Management',
+    issuer: 'Google / Coursera',
+    year: '2023',
   },
   {
-    title: "Data Science",
-    issuer: "Digital House",
-    year: "2020",
+    title: 'Data Science',
+    issuer: 'Digital House',
+    year: '2020',
   },
 ];
 
 const EDUCATION: CertEntry[] = [
   {
-    title: "Economist — Economics",
-    issuer: "Pontificia Universidad Javeriana",
-    year: "1999 – 2005",
+    title: 'Economist — Economics',
+    issuer: 'Pontificia Universidad Javeriana',
+    year: '1999 – 2005',
   },
 ];
 
@@ -94,9 +94,7 @@ const Certifications: React.FC = () => {
       </div>
 
       {/* Other Certifications */}
-      <h3 style={{ ...styles.subheading, marginTop: "40px" }}>
-        Additional Certifications
-      </h3>
+      <h3 style={{ ...styles.subheading, marginTop: '40px' }}>Additional Certifications</h3>
       <div style={styles.grid}>
         {OTHER_CERTS.map((cert) => (
           <div key={cert.title} className="card">
@@ -108,7 +106,7 @@ const Certifications: React.FC = () => {
       </div>
 
       {/* Education */}
-      <h3 style={{ ...styles.subheading, marginTop: "40px" }}>Education</h3>
+      <h3 style={{ ...styles.subheading, marginTop: '40px' }}>Education</h3>
       <div style={styles.grid}>
         {EDUCATION.map((edu) => (
           <div key={edu.title} className="card">
@@ -124,49 +122,49 @@ const Certifications: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   subheading: {
-    fontFamily: "var(--font-mono)",
-    fontSize: "14px",
-    color: "var(--accent)",
-    marginBottom: "20px",
-    textTransform: "uppercase",
-    letterSpacing: "0.1em",
+    fontFamily: 'var(--font-mono)',
+    fontSize: '14px',
+    color: 'var(--accent)',
+    marginBottom: '20px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
   },
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-    gap: "16px",
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+    gap: '16px',
   },
   awsCard: {
-    borderColor: "var(--accent)",
-    position: "relative",
+    borderColor: 'var(--accent)',
+    position: 'relative',
   },
   awsBadge: {
-    display: "inline-block",
-    background: "var(--accent)",
-    color: "var(--bg-primary)",
-    fontFamily: "var(--font-mono)",
-    fontSize: "11px",
+    display: 'inline-block',
+    background: 'var(--accent)',
+    color: 'var(--bg-primary)',
+    fontFamily: 'var(--font-mono)',
+    fontSize: '11px',
     fontWeight: 700,
-    padding: "2px 8px",
-    borderRadius: "3px",
-    marginBottom: "12px",
+    padding: '2px 8px',
+    borderRadius: '3px',
+    marginBottom: '12px',
   },
   certTitle: {
-    fontSize: "15px",
-    color: "var(--text-primary)",
+    fontSize: '15px',
+    color: 'var(--text-primary)',
     fontWeight: 500,
-    marginBottom: "6px",
+    marginBottom: '6px',
     lineHeight: 1.4,
   },
   certIssuer: {
-    fontSize: "13px",
-    color: "var(--text-secondary)",
-    marginBottom: "4px",
+    fontSize: '13px',
+    color: 'var(--text-secondary)',
+    marginBottom: '4px',
   },
   certYear: {
-    fontFamily: "var(--font-mono)",
-    fontSize: "12px",
-    color: "var(--accent)",
+    fontFamily: 'var(--font-mono)',
+    fontSize: '12px',
+    color: 'var(--accent)',
   },
 };
 

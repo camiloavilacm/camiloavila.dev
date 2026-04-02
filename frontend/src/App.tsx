@@ -14,15 +14,15 @@
  *   7. Technical stack (ThisSite)
  */
 
-import { GlowCapture, Glow } from "@codaworks/react-glow";
-import Hero from "./components/Hero";
-import Chatbot from "./components/Chatbot";
-import Skills from "./components/Skills";
-import Experience from "./components/Experience";
-import Certifications from "./components/Certifications";
-import ContactForm from "./components/ContactForm";
-import ThisSite from "./components/ThisSite";
-import SEO from "./components/SEO";
+import { GlowCapture, Glow } from '@codaworks/react-glow';
+import Hero from './components/Hero';
+import Chatbot from './components/Chatbot';
+import Skills from './components/Skills';
+import Experience from './components/Experience';
+import Certifications from './components/Certifications';
+import ContactForm from './components/ContactForm';
+import ThisSite from './components/ThisSite';
+import SEO from './components/SEO';
 
 /**
  * Root component — renders the full portfolio page.

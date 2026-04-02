@@ -15,7 +15,7 @@
  * See frontend/.env.example for setup instructions.
  */
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 /** Form field values. */
 interface FormValues {
@@ -32,10 +32,10 @@ interface FormErrors {
 }
 
 /** Possible submission states. */
-type SubmitStatus = "idle" | "loading" | "success" | "error";
+type SubmitStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+]+@[a-zA-Z0-9.]+\.[a-zA-Z]{2,}$/;
-const API_URL = import.meta.env.VITE_API_URL ?? "";
+const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 /**
  * Validate form values and return an errors object.
@@ -48,19 +48,19 @@ function validate(values: FormValues): FormErrors {
   const errors: FormErrors = {};
 
   if (!values.name.trim()) {
-    errors.name = "Name is required.";
+    errors.name = 'Name is required.';
   }
 
   if (!values.email.trim()) {
-    errors.email = "Email is required.";
+    errors.email = 'Email is required.';
   } else if (!EMAIL_REGEX.test(values.email)) {
-    errors.email = "Please enter a valid email address.";
+    errors.email = 'Please enter a valid email address.';
   }
 
   if (!values.message.trim()) {
-    errors.message = "Message is required.";
+    errors.message = 'Message is required.';
   } else if (values.message.trim().length > 2000) {
-    errors.message = "Message must be under 2000 characters.";
+    errors.message = 'Message must be under 2000 characters.';
   }
 
   return errors;
@@ -73,13 +73,13 @@ function validate(values: FormValues): FormErrors {
  */
 const ContactForm: React.FC = () => {
   const [values, setValues] = useState<FormValues>({
-    name: "",
-    email: "",
-    message: "",
+    name: '',
+    email: '',
+    message: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
-  const [status, setStatus] = useState<SubmitStatus>("idle");
-  const [serverMessage, setServerMessage] = useState("");
+  const [status, setStatus] = useState<SubmitStatus>('idle');
+  const [serverMessage, setServerMessage] = useState('');
 
   /**
    * Update a single form field value and clear its error.
@@ -87,10 +87,7 @@ const ContactForm: React.FC = () => {
    * @param field - The field name to update.
    * @param value - The new value.
    */
-  const handleChange = (
-    field: keyof FormValues,
-    value: string
-  ) => {
+  const handleChange = (field: keyof FormValues, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -112,31 +109,29 @@ const ContactForm: React.FC = () => {
       return;
     }
 
-    setStatus("loading");
-    setServerMessage("");
+    setStatus('loading');
+    setServerMessage('');
 
     try {
       const response = await fetch(`${API_URL}/contact`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setStatus("success");
-        setServerMessage(data.message ?? "Message sent successfully!");
-        setValues({ name: "", email: "", message: "" });
+        setStatus('success');
+        setServerMessage(data.message ?? 'Message sent successfully!');
+        setValues({ name: '', email: '', message: '' });
       } else {
-        setStatus("error");
-        setServerMessage(data.error ?? "Something went wrong. Please try again.");
+        setStatus('error');
+        setServerMessage(data.error ?? 'Something went wrong. Please try again.');
       }
     } catch {
-      setStatus("error");
-      setServerMessage(
-        "Could not reach the server. Please check your connection and try again."
-      );
+      setStatus('error');
+      setServerMessage('Could not reach the server. Please check your connection and try again.');
     }
   };
 
@@ -148,16 +143,13 @@ const ContactForm: React.FC = () => {
 
       <div style={styles.intro}>
         <p style={styles.introText}>
-          I'm currently available for Senior QA Automation Engineer roles with a
-          focus on AI and cloud. Whether you have a question, a project in mind,
-          or just want to say hi — my inbox is open.
+          I'm currently available for Senior QA Automation Engineer roles with a focus on AI and
+          cloud. Whether you have a question, a project in mind, or just want to say hi — my inbox
+          is open.
         </p>
         <p style={styles.introContact}>
-          You can also reach me directly at{" "}
-          <a href="mailto:camiloavilainfo@gmail.com">
-            camiloavilainfo@gmail.com
-          </a>{" "}
-          or{" "}
+          You can also reach me directly at{' '}
+          <a href="mailto:camiloavilainfo@gmail.com">camiloavilainfo@gmail.com</a> or{' '}
           <a
             href="https://www.linkedin.com/in/camiloavila"
             target="_blank"
@@ -169,27 +161,16 @@ const ContactForm: React.FC = () => {
         </p>
       </div>
 
-      {status === "success" ? (
+      {status === 'success' ? (
         <div style={styles.successBox} role="alert">
           <p style={styles.successText}>✓ {serverMessage}</p>
-          <p style={styles.successSub}>
-            Check your inbox — a personalised reply is on its way.
-          </p>
-          <button
-            style={styles.resetBtn}
-            onClick={() => setStatus("idle")}
-            className="btn"
-          >
+          <p style={styles.successSub}>Check your inbox — a personalised reply is on its way.</p>
+          <button style={styles.resetBtn} onClick={() => setStatus('idle')} className="btn">
             Send another message
           </button>
         </div>
       ) : (
-        <form
-          style={styles.form}
-          onSubmit={handleSubmit}
-          noValidate
-          aria-label="Contact form"
-        >
+        <form style={styles.form} onSubmit={handleSubmit} noValidate aria-label="Contact form">
           {/* Name */}
           <div style={styles.field}>
             <label htmlFor="contact-name">Name</label>
@@ -198,8 +179,8 @@ const ContactForm: React.FC = () => {
               type="text"
               placeholder="Your full name"
               value={values.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-              aria-describedby={errors.name ? "name-error" : undefined}
+              onChange={(e) => handleChange('name', e.target.value)}
+              aria-describedby={errors.name ? 'name-error' : undefined}
               aria-invalid={!!errors.name}
               maxLength={100}
             />
@@ -218,8 +199,8 @@ const ContactForm: React.FC = () => {
               type="email"
               placeholder="your@email.com"
               value={values.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              aria-describedby={errors.email ? "email-error" : undefined}
+              onChange={(e) => handleChange('email', e.target.value)}
+              aria-describedby={errors.email ? 'email-error' : undefined}
               aria-invalid={!!errors.email}
             />
             {errors.email && (
@@ -233,17 +214,15 @@ const ContactForm: React.FC = () => {
           <div style={styles.field}>
             <label htmlFor="contact-message">
               Message
-              <span style={styles.charCount}>
-                {values.message.length}/2000
-              </span>
+              <span style={styles.charCount}>{values.message.length}/2000</span>
             </label>
             <textarea
               id="contact-message"
               rows={6}
               placeholder="Tell me about the role, project, or question you have..."
               value={values.message}
-              onChange={(e) => handleChange("message", e.target.value)}
-              aria-describedby={errors.message ? "message-error" : undefined}
+              onChange={(e) => handleChange('message', e.target.value)}
+              aria-describedby={errors.message ? 'message-error' : undefined}
               aria-invalid={!!errors.message}
               maxLength={2000}
               style={styles.textarea}
@@ -256,7 +235,7 @@ const ContactForm: React.FC = () => {
           </div>
 
           {/* Server error */}
-          {status === "error" && (
+          {status === 'error' && (
             <div style={styles.serverError} role="alert">
               {serverMessage}
             </div>
@@ -265,11 +244,11 @@ const ContactForm: React.FC = () => {
           <button
             type="submit"
             className="btn"
-            disabled={status === "loading"}
+            disabled={status === 'loading'}
             aria-label="Send message"
             data-testid="contact-send"
           >
-            {status === "loading" ? "Sending..." : "Send Message"}
+            {status === 'loading' ? 'Sending...' : 'Send Message'}
           </button>
         </form>
       )}
@@ -279,70 +258,70 @@ const ContactForm: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   intro: {
-    marginBottom: "40px",
+    marginBottom: '40px',
   },
   introText: {
-    color: "var(--text-secondary)",
-    fontSize: "16px",
+    color: 'var(--text-secondary)',
+    fontSize: '16px',
     lineHeight: 1.7,
-    marginBottom: "12px",
+    marginBottom: '12px',
   },
   introContact: {
-    color: "var(--text-secondary)",
-    fontSize: "15px",
+    color: 'var(--text-secondary)',
+    fontSize: '15px',
   },
   form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
   },
   field: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
   },
   textarea: {
-    resize: "vertical",
-    minHeight: "120px",
+    resize: 'vertical',
+    minHeight: '120px',
   },
   error: {
-    color: "#ff6b6b",
-    fontSize: "13px",
-    fontFamily: "var(--font-mono)",
+    color: '#ff6b6b',
+    fontSize: '13px',
+    fontFamily: 'var(--font-mono)',
   },
   charCount: {
-    marginLeft: "auto",
-    float: "right",
-    color: "var(--text-secondary)",
+    marginLeft: 'auto',
+    float: 'right',
+    color: 'var(--text-secondary)',
     fontWeight: 400,
   },
   serverError: {
-    color: "#ff6b6b",
-    background: "rgba(255, 107, 107, 0.08)",
-    border: "1px solid rgba(255, 107, 107, 0.3)",
-    borderRadius: "4px",
-    padding: "12px 16px",
-    fontSize: "14px",
+    color: '#ff6b6b',
+    background: 'rgba(255, 107, 107, 0.08)',
+    border: '1px solid rgba(255, 107, 107, 0.3)',
+    borderRadius: '4px',
+    padding: '12px 16px',
+    fontSize: '14px',
   },
   successBox: {
-    background: "rgba(100, 255, 218, 0.05)",
-    border: "1px solid var(--accent)",
-    borderRadius: "8px",
-    padding: "32px",
+    background: 'rgba(100, 255, 218, 0.05)',
+    border: '1px solid var(--accent)',
+    borderRadius: '8px',
+    padding: '32px',
   },
   successText: {
-    color: "var(--accent)",
-    fontSize: "18px",
+    color: 'var(--accent)',
+    fontSize: '18px',
     fontWeight: 500,
-    marginBottom: "8px",
+    marginBottom: '8px',
   },
   successSub: {
-    color: "var(--text-secondary)",
-    fontSize: "15px",
-    marginBottom: "24px",
+    color: 'var(--text-secondary)',
+    fontSize: '15px',
+    marginBottom: '24px',
   },
   resetBtn: {
-    marginTop: "0",
+    marginTop: '0',
   },
 };
 

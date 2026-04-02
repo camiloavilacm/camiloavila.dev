@@ -36,6 +36,7 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 | Security Tests | ✅ Implemented | 73 tests | OWASP LLM01/LLM05 covered |
 | Performance Tests | ✅ Implemented | k6 scripts | Load testing (k6) |
 | Accessibility Tests | ✅ Implemented | 17 tests | WCAG 2.1 AA (Playwright) |
+| Visual Regression Tests | ✅ Implemented | Auto | GitHub Actions + pixelmatch + GitHub Pages |
 | CI/CD Automation | ✅ Implemented | Full | PR checks + weekly security |
 
 ---
