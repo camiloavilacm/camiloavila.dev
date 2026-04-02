@@ -478,6 +478,19 @@ jobs:
           pattern: allure-*
           merge-multiple: true
 
+      - name: Download previous Allure report
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-report
+          path: previous-report
+        continue-on-error: true
+
+      - name: Copy history for trend graphs
+        run: |
+          if [ -d "previous-report/allure-report/history" ]; then
+            cp -r previous-report/allure-report/history allure-results/
+          fi
+
       - name: Setup Java for Allure
         uses: actions/setup-java@v4
         with:
