@@ -4,8 +4,10 @@ on:
   pull_request:
     branches:
       - develop
-      - main
     types: [opened, synchronize]
+  push:
+    branches:
+      - develop
 
 jobs:
   visual-diff:
