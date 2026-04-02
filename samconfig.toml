@@ -43,7 +43,7 @@ s3_prefix          = "camiloavila-dev"
 #   arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 parameter_overrides = [
   "CertificateArn=arn:aws:acm:us-east-1:046228935090:certificate/58ff1939-6f3a-44de-964d-4b801bd7b4a1",
-  "BedrockModelId=qwen.qwen3-coder-next",
+  "BedrockModelId=amazon.nova-lite-v1:0",
   "SesSenderEmail=camiloavilainfo@gmail.com",
   "DomainName=camiloavila.dev",
   "Stage=prod"
@@ -73,7 +73,7 @@ s3_prefix          = "camiloavila-dev-staging"
 
 parameter_overrides = [
   "CertificateArn=arn:aws:acm:us-east-1:046228935090:certificate/58ff1939-6f3a-44de-964d-4b801bd7b4a1",
-  "BedrockModelId=qwen.qwen3-coder-next",
+  "BedrockModelId=amazon.nova-lite-v1:0",
   "SesSenderEmail=camiloavilainfo@gmail.com",
   "DomainName=staging.camiloavila.dev",
   "Stage=staging"

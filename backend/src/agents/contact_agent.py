@@ -102,7 +102,7 @@ def process_contact(name: str, email: str, message: str) -> dict:
     if not all([name.strip(), email.strip(), message.strip()]):
         raise ValueError("Name, email, and message are all required.")
 
-    model_id = os.environ.get("BEDROCK_MODEL_ID", "qwen.qwen3-coder-next")
+    model_id = os.environ.get("BEDROCK_MODEL_ID", "amazon.nova-lite-v1:0")
 
     logger.info(
         "ContactAgent processing submission. name=%s email=%s model=%s",

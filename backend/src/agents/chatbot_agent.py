@@ -65,7 +65,7 @@ def create_chatbot_agent() -> Agent:
         >>> response = agent("What are Camilo's AWS certifications?")
         >>> assert "Developer Associate" in str(response)
     """
-    model_id = os.environ.get("BEDROCK_MODEL_ID", "qwen.qwen3-coder-next")
+    model_id = os.environ.get("BEDROCK_MODEL_ID", "amazon.nova-lite-v1:0")
 
     logger.info("Initialising ChatbotAgent with model: %s", model_id)
 

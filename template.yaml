@@ -48,7 +48,7 @@ Parameters:
 
   BedrockModelId:
     Type: String
-    Default: qwen.qwen3-coder-next
+    Default: amazon.nova-lite-v1:0
     Description: >
       Bedrock model ID for the chatbot and email generation.
       Must be enabled in your Bedrock model access settings.
@@ -73,7 +73,7 @@ Parameters:
 # ---------------------------------------------------------------------------
 Globals:
   Function:
-    Runtime: python3.12
+    Runtime: python3.13
     Timeout: 30
     MemorySize: 256
     Environment:
@@ -215,7 +215,7 @@ Resources:
                   - bedrock:InvokeModel
                   - bedrock:Converse
                   - bedrock:InvokeModelWithResponseStream
-                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}"
+                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/*"
 
   # -------------------------------------------------------------------------
   # IAM — Contact Lambda Execution Role
@@ -253,7 +253,7 @@ Resources:
                   - bedrock:InvokeModel
                   - bedrock:Converse
                   - bedrock:InvokeModelWithResponseStream
-                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}"
+                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/*"
               - Sid: AllowDynamoDBWrite
                 Effect: Allow
                 Action: dynamodb:PutItem
