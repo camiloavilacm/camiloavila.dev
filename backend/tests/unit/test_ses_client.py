@@ -1,6 +1,6 @@
 """
 test_ses_client.py — Unit Tests for utils/ses_client.py
-======================================================
+=====================================================
 Tests the SES email sending wrapper using moto to mock AWS SES locally.
 
 Test coverage:
@@ -20,6 +20,7 @@ from unittest.mock import patch
 import boto3
 import moto
 import pytest
+import allure
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src"))
 
@@ -33,6 +34,8 @@ def mock_ses():
         yield client
 
 
+@allure.epic("Email")
+@allure.feature("SES Operations")
 class TestSesClientSend:
     """Tests for send_contact_reply function."""
 

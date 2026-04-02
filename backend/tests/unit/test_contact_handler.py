@@ -1,6 +1,6 @@
 """
 test_contact_handler.py — Unit Tests for contact_handler.py
-============================================================
+===========================================================
 Tests the contact form Lambda entrypoint (contact_handler.lambda_handler)
 in isolation. All AWS services and the ContactAgent are mocked.
 
@@ -16,6 +16,7 @@ Test coverage:
 """
 
 import json
+import allure
 from unittest.mock import MagicMock, patch
 
 import sys
@@ -26,6 +27,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src"))
 import contact_handler
 
 
+@allure.epic("Contact Form")
+@allure.feature("Input Validation")
 class TestContactHandlerValidation:
     """Tests for input validation in contact lambda_handler."""
 
@@ -82,6 +85,8 @@ class TestContactHandlerValidation:
         assert response["statusCode"] == 400
 
 
+@allure.epic("Contact Form")
+@allure.feature("Success Responses")
 class TestContactHandlerSuccess:
     """Tests for successful contact form submissions."""
 
@@ -142,6 +147,8 @@ class TestContactHandlerSuccess:
         )
 
 
+@allure.epic("Contact Form")
+@allure.feature("Error Handling")
 class TestContactHandlerErrors:
     """Tests for error handling in contact lambda_handler."""
 
@@ -160,6 +167,8 @@ class TestContactHandlerErrors:
         assert "Database connection lost" not in body["error"]
 
 
+@allure.epic("Contact Form")
+@allure.feature("CORS Headers")
 class TestContactHandlerCORS:
     """Tests for CORS headers on all contact responses."""
 

@@ -1,6 +1,6 @@
 """
 test_security.py — Security Tests for Chatbot and Contact Form Guardrails
-=========================================================================
+ =========================================================================
 Unit tests for security guardrails in handler.py and contact_handler.py.
 
 These tests validate the multi-layer security defense:
@@ -18,6 +18,7 @@ Test coverage:
 
 import json
 import pytest
+import allure
 from unittest.mock import MagicMock, patch
 
 import sys
@@ -34,6 +35,8 @@ import contact_handler
 # =============================================================================
 
 
+@allure.epic("Security")
+@allure.feature("Chatbot Guardrails")
 class TestPromptInjectionBlocking:
     """Tests for prompt injection detection in _is_question_safe().
 
@@ -92,6 +95,8 @@ class TestPromptInjectionBlocking:
         assert is_safe is False
 
 
+@allure.epic("Security")
+@allure.feature("Chatbot Guardrails")
 class TestOffTopicBlocking:
     """Tests for off-topic question blocking.
 
@@ -143,6 +148,8 @@ class TestOffTopicBlocking:
 # =============================================================================
 
 
+@allure.epic("Security")
+@allure.feature("Contact Form Validation")
 class TestContactFormInputValidation:
     """Tests for contact form input validation in _is_message_safe().
 
@@ -192,6 +199,8 @@ class TestContactFormInputValidation:
 # =============================================================================
 
 
+@allure.epic("Security")
+@allure.feature("Contact Form Validation")
 class TestContactAgentOutputValidation:
     """Tests for output validation in contact_agent.py.
 
@@ -236,6 +245,8 @@ class TestContactAgentOutputValidation:
 # =============================================================================
 
 
+@allure.epic("Security")
+@allure.feature("AI Integration")
 class TestGuardrailsAIIntegration:
     """Tests for Guardrails AI integration.
 
@@ -269,6 +280,8 @@ class TestGuardrailsAIIntegration:
 # =============================================================================
 
 
+@allure.epic("Security")
+@allure.feature("Handler Integration")
 class TestHandlerSecurityIntegration:
     """Integration tests for security in lambda_handler.
 

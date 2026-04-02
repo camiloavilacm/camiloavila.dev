@@ -75,6 +75,17 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
 
+      - name: Setup Allure environment
+        run: |
+          mkdir -p reports/unit/allure-results
+          echo "Environment=staging" > reports/unit/allure-results/environment.properties
+          echo "Python=3.13" >> reports/unit/allure-results/environment.properties
+          echo "Region=us-east-1" >> reports/unit/allure-results/environment.properties
+
+      - name: Create Allure executor info
+        run: |
+          echo '{"name":"GitHub Actions","type":"github","url":"${{ github.server_url }}/${{ github.repository }}","buildOrder":"${{ github.run_number }}","buildName":"${{ github.workflow }}","branch":"${{ github.ref_name }}","commit":"${{ github.sha }}"}' > reports/unit/allure-results/executor.json
+
       - name: Run Pytest unit tests with Allure
         run: |
           mkdir -p reports/unit

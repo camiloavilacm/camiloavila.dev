@@ -1,6 +1,6 @@
 """
 test_kb_loader.py — Unit Tests for utils/kb_loader.py
-======================================================
+=====================================================
 Tests the S3 knowledge base loader and its in-memory caching behaviour.
 
 Key behaviours tested:
@@ -16,6 +16,7 @@ import os
 from unittest.mock import MagicMock, patch
 
 import pytest
+import allure
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src"))
 
@@ -34,6 +35,8 @@ def clear_kb_cache():
     kb_loader.clear_cache()
 
 
+@allure.epic("Knowledge Base")
+@allure.feature("S3 Loader")
 class TestKbLoaderFetch:
     """Tests for S3 fetch behaviour."""
 

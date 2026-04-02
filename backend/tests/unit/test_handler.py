@@ -22,6 +22,7 @@ import json
 from unittest.mock import MagicMock, patch
 
 import pytest
+import allure
 
 # Import the handler module under test
 import sys
@@ -32,6 +33,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src"))
 import handler
 
 
+@allure.epic("Chatbot")
+@allure.feature("Input Validation")
 class TestChatbotHandlerValidation:
     """Tests for input validation in lambda_handler."""
 
@@ -84,6 +87,8 @@ class TestChatbotHandlerValidation:
         assert response["statusCode"] == 400
 
 
+@allure.epic("Chatbot")
+@allure.feature("Success Responses")
 class TestChatbotHandlerSuccess:
     """Tests for successful chatbot responses."""
 
@@ -115,6 +120,8 @@ class TestChatbotHandlerSuccess:
         mock_ask.assert_called_once_with("What is your experience?")
 
 
+@allure.epic("Chatbot")
+@allure.feature("Error Handling")
 class TestChatbotHandlerErrors:
     """Tests for error handling in lambda_handler."""
 
@@ -134,6 +141,8 @@ class TestChatbotHandlerErrors:
         assert "Bedrock connection timeout" not in body["error"]
 
 
+@allure.epic("Chatbot")
+@allure.feature("CORS Headers")
 class TestChatbotHandlerCORS:
     """Tests for CORS headers on all responses."""
 

@@ -66,6 +66,17 @@ jobs:
           pip install -r requirements.txt
           pip install pytest allure-pytest
 
+      - name: Setup Allure environment
+        run: |
+          mkdir -p reports/security/allure-results
+          echo "Environment=staging" > reports/security/allure-results/environment.properties
+          echo "Python=3.13" >> reports/security/allure-results/environment.properties
+          echo "Tests=security" >> reports/security/allure-results/environment.properties
+
+      - name: Create Allure executor info
+        run: |
+          echo '{"name":"GitHub Actions","type":"github","url":"${{ github.server_url }}/${{ github.repository }}","buildOrder":"${{ github.run_number }}","buildName":"${{ github.workflow }}","branch":"${{ github.ref_name }}","commit":"${{ github.sha }}"}' > reports/security/allure-results/executor.json
+
       - name: Run security unit tests with Allure
         id: run-tests
         working-directory: backend

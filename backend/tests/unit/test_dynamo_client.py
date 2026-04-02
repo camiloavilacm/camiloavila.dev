@@ -1,6 +1,6 @@
 """
 test_dynamo_client.py — Unit Tests for utils/dynamo_client.py
-==============================================================
+=============================================================
 Tests DynamoDB save operations using moto to mock AWS DynamoDB locally.
 
 moto intercepts boto3 calls and simulates DynamoDB behaviour in memory —
@@ -19,6 +19,7 @@ import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
+import allure
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src"))
 
@@ -46,6 +47,8 @@ def mock_dynamodb():
         yield table
 
 
+@allure.epic("Database")
+@allure.feature("DynamoDB Operations")
 class TestDynamoClientSave:
     """Tests for save_contact function."""
 
