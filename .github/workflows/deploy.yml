@@ -99,6 +99,8 @@ jobs:
             --clean-alluredir \
             --html=reports/unit/report.html \
             --self-contained-html \
+            --json-report \
+            --json-report-file=reports/unit/report.json \
             --cov=backend/src \
             --cov-report=html:reports/unit/coverage \
             --cov-report=term-missing
@@ -505,6 +507,29 @@ jobs:
       - name: Generate Allure report
         run: |
           allure generate allure-results/ -o allure-report --clean
+
+      - name: Copy additional reports to Allure directory
+        run: |
+          # Copy extent summary if exists
+          if [ -f "reports/unit/extent-summary.html" ]; then
+            cp reports/unit/extent-summary.html allure-report/
+          fi
+          # Copy pytest-html report
+          if [ -f "reports/unit/report.html" ]; then
+            cp -r reports/unit/ allure-report/reports-html
+          fi
+          # Copy coverage dashboard
+          if [ -d "docs/coverage-dashboard" ]; then
+            cp -r docs/coverage-dashboard allure-report/coverage
+          fi
+          # Copy test reports dashboard
+          if [ -d "docs/reports-dashboard" ]; then
+            cp -r docs/reports-dashboard allure-report/test-dashboard
+          fi
+          # Copy json report
+          if [ -f "reports/unit/report.json" ]; then
+            cp reports/unit/report.json allure-report/
+          fi
 
       - name: Upload Allure report artifact
         uses: actions/upload-artifact@v4

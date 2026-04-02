@@ -93,6 +93,10 @@ jobs:
             -v \
             --alluredir=reports/unit/allure-results \
             --clean-alluredir \
+            --html=reports/unit/report.html \
+            --self-contained-html \
+            --json-report \
+            --json-report-file=reports/unit/report.json \
             --cov=backend/src \
             --cov-report=html:reports/unit/coverage \
             --cov-report=term-missing
