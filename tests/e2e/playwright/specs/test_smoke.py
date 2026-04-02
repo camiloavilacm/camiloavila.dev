@@ -65,13 +65,13 @@ class TestKeyElements:
     """Smoke tests for key UI elements that must always be present."""
 
     def test_chatbot_toggle_button_exists(self, page: Page):
-        """The chatbot toggle button must be visible on page load.
+        """The chatbot input must be visible on page load.
 
         Asserts:
-            Element with data-testid='chatbot-toggle' is present and visible.
+            Chatbot input element is present and visible.
         """
-        toggle = page.get_by_test_id("chatbot-toggle")
-        expect(toggle).to_be_visible()
+        chat_input = page.get_by_test_id("chat-input")
+        expect(chat_input).to_be_visible()
 
     def test_contact_section_exists(self, page: Page):
         """The contact form section must be present in the DOM.
@@ -97,7 +97,7 @@ class TestKeyElements:
         Asserts:
             Section with id='skills' is attached to the DOM.
         """
-        skills = page.locator("#skills")
+        skills = page.locator("#skills").first
         expect(skills).to_be_attached()
 
     def test_experience_section_exists(self, page: Page):
@@ -106,7 +106,7 @@ class TestKeyElements:
         Asserts:
             Section with id='experience' is attached to the DOM.
         """
-        exp = page.locator("#experience")
+        exp = page.locator("#experience").first
         expect(exp).to_be_attached()
 
     def test_certifications_section_exists(self, page: Page):
@@ -115,7 +115,7 @@ class TestKeyElements:
         Asserts:
             Section with id='certifications' is attached to the DOM.
         """
-        certs = page.locator("#certifications")
+        certs = page.locator("#certifications").first
         expect(certs).to_be_attached()
 
 
@@ -138,15 +138,15 @@ class TestResponsiveness:
         mobile_page.close()
 
     def test_chatbot_toggle_visible_on_mobile(self, browser_ctx):
-        """Chatbot toggle button must be accessible on mobile viewport.
+        """Chatbot input must be accessible on mobile viewport.
 
         Asserts:
-            Chatbot toggle is visible at 375px width.
+            Chatbot input is visible at 375px width.
         """
         mobile_page = browser_ctx.new_page()
         mobile_page.set_viewport_size({"width": 375, "height": 812})
         mobile_page.goto("/", wait_until="networkidle")
 
-        toggle = mobile_page.get_by_test_id("chatbot-toggle")
-        expect(toggle).to_be_visible()
+        chat_input = mobile_page.get_by_test_id("chat-input")
+        expect(chat_input).to_be_visible()
         mobile_page.close()

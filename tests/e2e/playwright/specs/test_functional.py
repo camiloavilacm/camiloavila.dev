@@ -30,32 +30,26 @@ class TestChatbotFunctional:
     """Functional tests for the AI Resume Chatbot widget."""
 
     def test_chatbot_panel_opens_on_click(self, page: Page):
-        """Clicking the chatbot toggle must open the chat panel.
+        """Chatbot is always visible (inline), so just check it's visible.
 
         Steps:
-            1. Click the chatbot toggle button.
-            2. Assert the chat panel is visible.
+            1. Assert the chat panel is visible.
 
         Asserts:
-            Chat panel with data-testid='chatbot-panel' is visible.
+            Chatbot input element is visible.
         """
-        toggle = page.get_by_test_id("chatbot-toggle")
-        toggle.click()
-
-        panel = page.get_by_test_id("chatbot-panel")
-        expect(panel).to_be_visible()
+        chat_input = page.get_by_test_id("chat-input")
+        expect(chat_input).to_be_visible()
 
     def test_welcome_message_displayed_on_open(self, page: Page):
         """Opening the chat must show the welcome greeting message.
 
         Steps:
-            1. Open the chatbot panel.
-            2. Assert the first AI message contains expected greeting text.
+            1. Assert the first AI message contains expected greeting text.
 
         Asserts:
             At least one AI message bubble is visible containing 'Resume Assistant'.
         """
-        page.get_by_test_id("chatbot-toggle").click()
         first_ai_msg = page.get_by_test_id("message-ai").first
         expect(first_ai_msg).to_be_visible()
         expect(first_ai_msg).to_contain_text("Resume Assistant")
@@ -64,10 +58,9 @@ class TestChatbotFunctional:
         """Chatbot must return AWS certification info when asked.
 
         Steps:
-            1. Open chatbot.
-            2. Type question about AWS certifications.
-            3. Submit.
-            4. Wait for AI response containing 'Developer Associate'.
+            1. Type question about AWS certifications.
+            2. Submit.
+            3. Wait for AI response containing 'Developer Associate'.
 
         Asserts:
             AI response contains 'Developer Associate' within 30 seconds.
@@ -75,7 +68,6 @@ class TestChatbotFunctional:
         Note:
             30s timeout accounts for Bedrock cold start on Lambda.
         """
-        page.get_by_test_id("chatbot-toggle").click()
         page.get_by_test_id("chat-input").fill("What are your AWS certifications?")
         page.get_by_test_id("chat-send").click()
 
@@ -87,14 +79,12 @@ class TestChatbotFunctional:
         """Chatbot must return programming language info when asked.
 
         Steps:
-            1. Open chatbot.
-            2. Ask about programming languages.
-            3. Assert answer contains 'Python'.
+            1. Ask about programming languages.
+            2. Assert answer contains 'Python'.
 
         Asserts:
             AI response contains 'Python' within 30 seconds.
         """
-        page.get_by_test_id("chatbot-toggle").click()
         page.get_by_test_id("chat-input").fill(
             "What programming languages does Camilo know?"
         )
@@ -108,14 +98,12 @@ class TestChatbotFunctional:
         """Chatbot must refuse to answer questions unrelated to the resume.
 
         Steps:
-            1. Open chatbot.
-            2. Ask an off-topic question ("capital of France").
-            3. Assert response contains refusal message.
+            1. Ask an off-topic question ("capital of France").
+            2. Assert response contains refusal message.
 
         Asserts:
             AI response includes the guardrail refusal phrase within 30 seconds.
         """
-        page.get_by_test_id("chatbot-toggle").click()
         page.get_by_test_id("chat-input").fill("What is the capital of France?")
         page.get_by_test_id("chat-send").click()
 
@@ -127,14 +115,12 @@ class TestChatbotFunctional:
         """Input field must be empty after a message is sent.
 
         Steps:
-            1. Open chatbot.
-            2. Type a message and send.
-            3. Assert input value is empty.
+            1. Type a message and send.
+            2. Assert input value is empty.
 
         Asserts:
             chat-input value is '' immediately after sending.
         """
-        page.get_by_test_id("chatbot-toggle").click()
         page.get_by_test_id("chat-input").fill("Test question")
         page.get_by_test_id("chat-send").click()
 
@@ -160,7 +146,7 @@ class TestContactFormFunctional:
             #name-error element is visible with 'required' text.
         """
         self._scroll_to_contact(page)
-        page.get_by_label("Send message").click()
+        page.get_by_test_id("chat-send").click()
 
         error = page.locator("#name-error")
         expect(error).to_be_visible()
@@ -199,7 +185,7 @@ class TestContactFormFunctional:
             #name-error is not visible after user types.
         """
         self._scroll_to_contact(page)
-        page.get_by_label("Send message").click()
+        page.get_by_test_id("chat-send").click()
         expect(page.locator("#name-error")).to_be_visible()
 
         page.locator("#contact-name").fill("A")

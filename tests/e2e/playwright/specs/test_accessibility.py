@@ -173,14 +173,14 @@ class TestAccessibilityNavigation:
         assert contact.count() > 0, "Contact section should exist"
 
     def test_chatbot_toggle_has_aria_label(self, page):
-        """Verify chatbot toggle button has aria-label."""
+        """Verify chatbot input has aria-label."""
         page.goto(BASE_URL, wait_until="networkidle")
 
-        toggle = page.get_by_test_id("chatbot-toggle")
-        if toggle.count() > 0:
-            aria_label = toggle.first.get_attribute("aria-label")
+        chat_input = page.get_by_test_id("chat-input")
+        if chat_input.count() > 0:
+            aria_label = chat_input.first.get_attribute("aria-label")
             assert aria_label is not None and aria_label != "", (
-                "Chatbot toggle must have aria-label"
+                "Chatbot input must have aria-label"
             )
 
 
