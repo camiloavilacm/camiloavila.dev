@@ -6,6 +6,7 @@ on:
       - develop
       - main
     types: [opened, synchronize]
+  workflow_dispatch:
 
 jobs:
   visual-diff:
@@ -76,11 +77,13 @@ jobs:
         run: node scripts/generate-html.js
 
       - name: Upload visual diff to Pages
+        if: github.event_name == 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: visual-diff
 
       - name: Deploy to GitHub Pages
+        if: github.event_name == 'pull_request'
         id: deployment
         uses: actions/deploy-pages@v4
 
