@@ -267,6 +267,7 @@ const ContactForm: React.FC = () => {
             className="btn"
             disabled={status === "loading"}
             aria-label="Send message"
+            data-testid="contact-send"
           >
             {status === "loading" ? "Sending..." : "Send Message"}
           </button>

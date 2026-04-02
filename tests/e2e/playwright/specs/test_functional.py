@@ -146,7 +146,7 @@ class TestContactFormFunctional:
             #name-error element is visible with 'required' text.
         """
         self._scroll_to_contact(page)
-        page.get_by_test_id("chat-send").click()
+        page.get_by_test_id("contact-send").click()
 
         error = page.locator("#name-error")
         expect(error).to_be_visible()
@@ -167,7 +167,7 @@ class TestContactFormFunctional:
         page.locator("#contact-name").fill("Jane Doe")
         page.locator("#contact-email").fill("not-an-email")
         page.locator("#contact-message").fill("Hello")
-        page.get_by_label("Send message").click()
+        page.get_by_test_id("contact-send").click()
 
         error = page.locator("#email-error")
         expect(error).to_be_visible()
@@ -185,7 +185,7 @@ class TestContactFormFunctional:
             #name-error is not visible after user types.
         """
         self._scroll_to_contact(page)
-        page.get_by_test_id("chat-send").click()
+        page.get_by_test_id("contact-send").click()
         expect(page.locator("#name-error")).to_be_visible()
 
         page.locator("#contact-name").fill("A")
@@ -213,7 +213,7 @@ class TestContactFormFunctional:
             "This is a Playwright functional test submission. Please ignore."
         )
 
-        page.get_by_label("Send message").click()
+        page.get_by_test_id("contact-send").click()
 
         # Wait for success state — up to 20s
         success_text = page.get_by_text("Playwright Test")
