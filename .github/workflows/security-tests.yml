@@ -182,6 +182,19 @@ jobs:
           name: security-test-results
           path: allure-results
 
+      - name: Download previous Allure report
+        uses: actions/download-artifact@v4
+        with:
+          name: security-allure-report
+          path: previous-report
+        continue-on-error: true
+
+      - name: Copy history for trend graphs
+        run: |
+          if [ -d "previous-report/security-report/history" ]; then
+            cp -r previous-report/security-report/history allure-results/
+          fi
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
