@@ -11,9 +11,9 @@ Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features
 | Layer          | Technology                                                        |
 | -------------- | ----------------------------------------------------------------- |
 | Frontend       | React 18 + Vite + TypeScript                                      |
-| Backend        | Python 3.12 AWS Lambda + Strands Agents                           |
+| Backend        | Python 3.13 AWS Lambda + Strands Agents                           |
 | API            | POST /chat (chatbot) • POST /contact (form)                      |
-| AI             | Amazon Bedrock — `qwen.qwen3-coder-next` via Converse API        |
+| AI             | Amazon Bedrock — `amazon.nova-lite-v1:0` via Converse API        |
 | Database       | Amazon DynamoDB (contact form submissions)                       |
 | Email          | Amazon SES (automated personalised replies)                      |
 | Infrastructure | AWS SAM (`template.yaml`)                                         |
@@ -211,7 +211,7 @@ For full component diagrams and flow descriptions, see [`docs/architecture.md`](
 
 ### Prerequisites
 
-- Python 3.12
+- Python 3.13
 - Node.js 20+
 - AWS SAM CLI (`brew install aws-sam-cli` or [see docs](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html))
 - AWS CLI configured with your account
@@ -244,7 +244,7 @@ playwright install chromium
 ```bash
 # Backend — set environment variables (or use a .env file with python-dotenv)
 export KNOWLEDGE_BUCKET=your-kb-bucket-name
-export BEDROCK_MODEL_ID=qwen.qwen3-coder-next
+export BEDROCK_MODEL_ID=amazon.nova-lite-v1:0
 export CONTACT_TABLE=camiloavila-contacts
 export SES_SENDER_EMAIL=camiloavilainfo@gmail.com
 export ALLOWED_ORIGIN=http://localhost:5173
@@ -411,7 +411,7 @@ Go to your repo → Settings → Secrets and variables → Actions:
 | `AWS_ROLE_TO_ASSUME`          | IAM role ARN from Step 3                     |
 | `AWS_REGION`                  | `us-east-1`                                  |
 | `ACM_CERTIFICATE_ARN`         | From Step 1                                  |
-| `BEDROCK_MODEL_ID`            | `qwen.qwen3-coder-next`                      |
+| `BEDROCK_MODEL_ID`            | `amazon.nova-lite-v1:0`                      |
 | `SES_SENDER_EMAIL`            | `camiloavilainfo@gmail.com`                  |
 | `PLAYWRIGHT_BASE_URL`         | `https://camiloavila.dev`                    |
 | `STAGING_PLAYWRIGHT_BASE_URL` | `https://staging.camiloavila.dev` (optional) |
