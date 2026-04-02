@@ -5,22 +5,23 @@
  * Shows Layer | Technology table matching the README format.
  */
 
-import React from "react";
+import React from 'react';
 
 const TECH_STACK = [
-  { layer: "Frontend", technology: "React 18 + Vite + TypeScript" },
-  { layer: "Backend", technology: "Python 3.12 AWS Lambda + Strands Agents" },
-  { layer: "API", technology: "POST /chat (chatbot) • POST /contact (form)" },
-  { layer: "AI", technology: "Amazon Bedrock — qwen.qwen3-coder-next via Converse API" },
-  { layer: "Database", technology: "Amazon DynamoDB (contact form submissions)" },
-  { layer: "Email", technology: "Amazon SES (automated personalised replies)" },
-  { layer: "Infrastructure", technology: "AWS SAM (template.yaml)" },
-  { layer: "Hosting", technology: "S3 + CloudFront + camiloavila.dev (Route 53 DNS)" },
-  { layer: "CI/CD", technology: "GitHub Actions (OIDC role assumption — no stored keys)" },
-  { layer: "Unit tests", technology: "Pytest + pytest-html + Allure" },
-  { layer: "E2E tests", technology: "Cypress + Puppeteer + Playwright (Allure reports)" },
-  { layer: "API tests", technology: "Playwright + pytest (functional API validation)" },
-  { layer: "Security tests", technology: "Pytest + Playwright + Guardrails AI" },
+  { layer: 'Frontend', technology: 'React 18 + Vite + TypeScript' },
+  { layer: 'Backend', technology: 'Python 3.12 AWS Lambda + Strands Agents' },
+  { layer: 'API', technology: 'POST /chat (chatbot) • POST /contact (form)' },
+  { layer: 'AI', technology: 'Amazon Bedrock — qwen.qwen3-coder-next via Converse API' },
+  { layer: 'Database', technology: 'Amazon DynamoDB (contact form submissions)' },
+  { layer: 'Email', technology: 'Amazon SES (automated personalised replies)' },
+  { layer: 'Infrastructure', technology: 'AWS SAM (template.yaml)' },
+  { layer: 'Hosting', technology: 'S3 + CloudFront + camiloavila.dev (Route 53 DNS)' },
+  { layer: 'CI/CD', technology: 'GitHub Actions (OIDC role assumption — no stored keys)' },
+  { layer: 'Unit tests', technology: 'Pytest + pytest-html + Allure' },
+  { layer: 'E2E tests', technology: 'Cypress + Puppeteer + Playwright (Allure reports)' },
+  { layer: 'API tests', technology: 'Playwright + pytest (functional API validation)' },
+  { layer: 'Security tests', technology: 'Pytest + Playwright + Guardrails AI' },
+  { layer: 'Visual Regression', technology: 'GitHub Actions + pixelmatch + GitHub Pages' },
 ];
 
 const ThisSite: React.FC = () => {
@@ -54,49 +55,49 @@ const ThisSite: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   section: {
-    paddingTop: "60px",
-    paddingBottom: "100px",
+    paddingTop: '60px',
+    paddingBottom: '100px',
   },
   tableWrapper: {
-    overflowX: "auto",
-    marginTop: "30px",
+    overflowX: 'auto',
+    marginTop: '30px',
   },
   table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    background: "var(--bg-secondary)",
-    border: "1px solid var(--border)",
-    borderRadius: "8px",
-    overflow: "hidden",
+    width: '100%',
+    borderCollapse: 'collapse',
+    background: 'var(--bg-secondary)',
+    border: '1px solid var(--border)',
+    borderRadius: '8px',
+    overflow: 'hidden',
   },
   th: {
-    textAlign: "left",
-    padding: "14px 20px",
-    background: "var(--bg-tertiary)",
-    color: "var(--accent)",
-    fontFamily: "var(--font-mono)",
-    fontSize: "14px",
-    borderBottom: "1px solid var(--border)",
+    textAlign: 'left',
+    padding: '14px 20px',
+    background: 'var(--bg-tertiary)',
+    color: 'var(--accent)',
+    fontFamily: 'var(--font-mono)',
+    fontSize: '14px',
+    borderBottom: '1px solid var(--border)',
   },
   tdLayer: {
-    padding: "12px 20px",
-    color: "var(--text-primary)",
-    fontFamily: "var(--font-mono)",
-    fontSize: "13px",
+    padding: '12px 20px',
+    color: 'var(--text-primary)',
+    fontFamily: 'var(--font-mono)',
+    fontSize: '13px',
     fontWeight: 600,
-    borderBottom: "1px solid var(--border)",
+    borderBottom: '1px solid var(--border)',
   },
   tdTech: {
-    padding: "12px 20px",
-    color: "var(--text-secondary)",
-    fontSize: "14px",
-    borderBottom: "1px solid var(--border)",
+    padding: '12px 20px',
+    color: 'var(--text-secondary)',
+    fontSize: '14px',
+    borderBottom: '1px solid var(--border)',
   },
   trEven: {
-    background: "var(--bg-secondary)",
+    background: 'var(--bg-secondary)',
   },
   trOdd: {
-    background: "var(--bg-tertiary)",
+    background: 'var(--bg-tertiary)',
   },
 };
 

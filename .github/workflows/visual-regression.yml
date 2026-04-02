@@ -1,0 +1,127 @@
+name: Visual Regression
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    types: [opened, synchronize]
+
+jobs:
+  visual-diff:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install comparison tools
+        run: |
+          mkdir -p scripts
+          npm install --save-dev pixelmatch pngjs
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Take production screenshot
+        if: github.event_name == 'pull_request'
+        run: node scripts/screenshot.js
+        env:
+          SCREENSHOT_URL: ${{ secrets.PLAYWRIGHT_BASE_URL }}
+          SCREENSHOT_ENV: production
+
+      - name: Build staging
+        if: github.event_name == 'pull_request'
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+          cd ..
+
+      - name: Deploy staging to S3
+        if: github.event_name == 'pull_request'
+        run: |
+          aws s3 sync frontend/dist/ s3://${{ secrets.STAGING_S3_FRONTEND_BUCKET }} --delete
+
+      - name: Invalidate CloudFront cache
+        if: github.event_name == 'pull_request'
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.STAGING_CLOUDFRONT_DIST_ID }} --paths "/*"
+
+      - name: Wait for deployment
+        if: github.event_name == 'pull_request'
+        run: sleep 30
+
+      - name: Take staging screenshot
+        if: github.event_name == 'pull_request'
+        run: node scripts/screenshot.js
+        env:
+          SCREENSHOT_URL: https://staging.camiloavila.dev
+          SCREENSHOT_ENV: staging
+
+      - name: Compare screenshots
+        if: github.event_name == 'pull_request'
+        run: node scripts/compare.js
+
+      - name: Generate HTML report
+        if: github.event_name == 'pull_request'
+        run: node scripts/generate-html.js
+
+      - name: Upload visual diff to Pages
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: visual-diff
+
+      - name: Deploy to GitHub Pages
+        if: github.event_name == 'pull_request'
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Post PR comment
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const diffResult = fs.existsSync('diff-result.json') 
+              ? JSON.parse(fs.readFileSync('diff-result.json', 'utf8'))
+              : { desktop: 0, mobile: 0, error: true };
+
+            const desktopStatus = diffResult.desktop < 0.5 
+              ? '✅ No changes' 
+              : '⚠️ Changes detected';
+            const mobileStatus = diffResult.mobile < 0.5 
+              ? '✅ No changes' 
+              : '⚠️ Changes detected';
+
+            const body = `## 📸 Visual Change Analysis
+
+| Viewport | Result |
+|----------|--------|
+| Desktop | ${desktopStatus} (${diffResult.desktop.toFixed(2)}% diff) |
+| Mobile | ${mobileStatus} (${diffResult.mobile.toFixed(2)}% diff) |
+
+📊 **Full report**: https://camiloavilacm.github.io/camiloavila.dev/visual-diff/`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

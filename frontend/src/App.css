@@ -23,8 +23,9 @@
   --accent: #64ffda;
   --accent-hover: #4cd8b8;
   --border: #233554;
-  --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
-  --font-sans: "Calibre", "Inter", "San Francisco", "SF Pro Text", -apple-system, system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+  --font-sans:
+    'Calibre', 'Inter', 'San Francisco', 'SF Pro Text', -apple-system, system-ui, sans-serif;
   --transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
   --border-radius: 4px;
   --nav-height: 100px;
@@ -68,7 +69,9 @@ section {
 }
 
 /* ---- Typography ---- */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   color: var(--text-primary);
   font-weight: 600;
 }
@@ -83,7 +86,7 @@ h2.section-heading {
 }
 
 h2.section-heading::after {
-  content: "";
+  content: '';
   display: block;
   height: 1px;
   width: 300px;
@@ -271,7 +274,7 @@ label {
     box-sizing: border-box !important;
   }
 
-  #experience .tab[aria-selected="true"],
+  #experience .tab[aria-selected='true'],
   #experience .tab-active {
     border-left: none !important;
     border-bottom-color: var(--accent) !important;

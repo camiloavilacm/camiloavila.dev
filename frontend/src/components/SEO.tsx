@@ -5,7 +5,7 @@
  * for SEO optimization.
  */
 
-import React from "react";
+import React from 'react';
 
 interface SEOProps {
   title?: string;
@@ -13,10 +13,10 @@ interface SEOProps {
   canonicalUrl?: string;
 }
 
-const DEFAULT_TITLE = "Camilo Avila | QA Automation Engineer";
+const DEFAULT_TITLE = 'Camilo Avila | QA Automation Engineer';
 const DEFAULT_DESCRIPTION =
-  "QA Automation Engineer with 15+ years building enterprise-grade test automation frameworks. Expert in Selenium, Playwright, Cypress, and cloud-native testing pipelines.";
-const CANONICAL_URL = "https://camiloavila.dev";
+  'QA Automation Engineer with 15+ years building enterprise-grade test automation frameworks. Expert in Selenium, Playwright, Cypress, and cloud-native testing pipelines.';
+const CANONICAL_URL = 'https://camiloavila.dev';
 
 const SEO: React.FC<SEOProps> = ({
   title = DEFAULT_TITLE,
@@ -57,32 +57,29 @@ const SEO: React.FC<SEOProps> = ({
       {/* Structured Data - Person Schema */}
       <script type="application/ld+json">
         {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Person",
-          name: "Camilo Avila",
-          url: "https://camiloavila.dev",
-          jobTitle: "QA Automation Engineer",
+          '@context': 'https://schema.org',
+          '@type': 'Person',
+          name: 'Camilo Avila',
+          url: 'https://camiloavila.dev',
+          jobTitle: 'QA Automation Engineer',
           description:
-            "QA Automation Engineer specializing in test automation frameworks, Selenium, Playwright, Cypress, and CI/CD pipelines.",
-          sameAs: [
-            "https://www.linkedin.com/in/camiloavila",
-            "https://github.com/camiloavila",
-          ],
+            'QA Automation Engineer specializing in test automation frameworks, Selenium, Playwright, Cypress, and CI/CD pipelines.',
+          sameAs: ['https://www.linkedin.com/in/camiloavila', 'https://github.com/camiloavila'],
           knowsAbout: [
-            "QA Automation",
-            "Selenium",
-            "Playwright",
-            "Cypress",
-            "Test Automation",
-            "CI/CD",
-            "AWS",
-            "Python",
-            "JavaScript",
+            'QA Automation',
+            'Selenium',
+            'Playwright',
+            'Cypress',
+            'Test Automation',
+            'CI/CD',
+            'AWS',
+            'Python',
+            'JavaScript',
           ],
           address: {
-            "@type": "PostalAddress",
-            addressLocality: "Spain",
-            addressCountry: "ES",
+            '@type': 'PostalAddress',
+            addressLocality: 'Spain',
+            addressCountry: 'ES',
           },
         })}
       </script>
