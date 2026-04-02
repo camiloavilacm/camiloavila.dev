@@ -50,7 +50,7 @@ jobs:
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           cache: pip
 
       - name: Install backend dependencies
@@ -166,7 +166,7 @@ jobs:
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Install AWS SAM CLI
         uses: aws-actions/setup-sam@v2
@@ -380,7 +380,7 @@ jobs:
       - name: Set up Python 3.12 (Playwright)
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Install Playwright dependencies
         run: |
