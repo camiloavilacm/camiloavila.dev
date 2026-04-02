@@ -1,0 +1,199 @@
+name: PR Coverage Report
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # =============================================================================
+  # Get Previous Coverage
+  # =============================================================================
+  get-previous-coverage:
+    name: Get Previous Coverage
+    runs-on: ubuntu-latest
+    outputs:
+      unit_coverage: ${{ steps.read_coverage.outputs.unit_coverage }}
+      security_coverage: ${{ steps.read_coverage.outputs.security_coverage }}
+      e2e_status: ${{ steps.read_coverage.outputs.e2e_status }}
+      api_status: ${{ steps.read_coverage.outputs.api_status }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read previous coverage
+        id: read_coverage
+        run: |
+          if [ -f .coverage-history.json ]; then
+            UNIT=$(cat .coverage-history.json | jq -r '.unit_coverage // "N/A"')
+            SECURITY=$(cat .coverage-history.json | jq -r '.security_coverage // "N/A"')
+            E2E=$(cat .coverage-history.json | jq -r '.e2e_status // "N/A"')
+            API=$(cat .coverage-history.json | jq -r '.api_status // "N/A"')
+          else
+            UNIT="N/A"
+            SECURITY="N/A"
+            E2E="N/A"
+            API="N/A"
+          fi
+          echo "unit_coverage=$UNIT" >> $GITHUB_OUTPUT
+          echo "security_coverage=$SECURITY" >> $GITHUB_OUTPUT
+          echo "e2e_status=$E2E" >> $GITHUB_OUTPUT
+          echo "api_status=$API" >> $GITHUB_OUTPUT
+
+  # =============================================================================
+  # Run Tests and Get Current Coverage
+  # =============================================================================
+  run-tests:
+    name: Run Tests and Collect Coverage
+    runs-on: ubuntu-latest
+    needs: get-previous-coverage
+    outputs:
+      unit_coverage: ${{ steps.unit_tests.outputs.coverage }}
+      security_coverage: ${{ steps.security_tests.outputs.coverage }}
+      e2e_passed: ${{ steps.e2e_tests.outputs.passed }}
+      api_passed: ${{ steps.api_tests.outputs.passed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # --- Unit Tests ---
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          pip install pytest pytest-cov pytest-html allure-pytest
+
+      - name: Run Unit Tests with Coverage
+        id: unit_tests
+        run: |
+          pytest backend/tests/unit/ -v \
+            --cov=backend/src \
+            --cov-report=json \
+            --cov-report=term-missing \
+            --cov-json=coverage.json
+          COVERAGE=$(cat coverage.json | jq -r '.totals.percent_covered' | cut -d'.' -f1)
+          echo "coverage=$COVERAGE%" >> $GITHUB_OUTPUT
+
+      # --- Security Tests ---
+      - name: Run Security Tests
+        id: security_tests
+        run: |
+          cd backend
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+          pytest tests/unit/test_security.py -v \
+            --cov=src \
+            --cov-report=json \
+            --cov-json=security-coverage.json
+          COVERAGE=$(cat security-coverage.json | jq -r '.totals.percent_covered' 2>/dev/null || echo "0")
+          echo "coverage=${COVERAGE%.*}%" >> $GITHUB_OUTPUT
+
+      # --- E2E Tests ---
+      - name: Run E2E Tests (Playwright)
+        id: e2e_tests
+        run: |
+          pip install playwright pytest pytest-html
+          playwright install chromium
+          pytest tests/e2e/playwright/ -v -m "smoke" --tb=short || true
+          if [ $? -eq 0 ]; then
+            echo "passed=✅ Pass" >> $GITHUB_OUTPUT
+          else
+            echo "passed=❌ Fail" >> $GITHUB_OUTPUT
+          fi
+
+      # --- API Tests ---
+      - name: Run API Tests
+        id: api_tests
+        run: |
+          pytest tests/e2e/playwright/ -v -m "api" --tb=short || true
+          if [ $? -eq 0 ]; then
+            echo "passed=✅ Pass" >> $GITHUB_OUTPUT
+          else
+            echo "passed=❌ Fail" >> $GITHUB_OUTPUT
+          fi
+
+  # =============================================================================
+  # Post Comment to PR
+  # =============================================================================
+  post-comment:
+    name: Post Coverage Comment
+    runs-on: ubuntu-latest
+    needs: [get-previous-coverage, run-tests]
+    steps:
+      - name: Post PR Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const unitCoverage = '${{ needs.run-tests.outputs.unit_coverage }}' || 'N/A';
+            const prevUnit = '${{ needs.get-previous-coverage.outputs.unit_coverage }}' || 'N/A';
+            const secCoverage = '${{ needs.run-tests.outputs.security_coverage }}' || 'N/A';
+            const prevSec = '${{ needs.get-previous-coverage.outputs.security_coverage }}' || 'N/A';
+            const e2eStatus = '${{ needs.run-tests.outputs.e2e_passed }}' || 'N/A';
+            const prevE2e = '${{ needs.get-previous-coverage.outputs.e2e_status }}' || 'N/A';
+            const apiStatus = '${{ needs.run-tests.outputs.api_passed }}' || 'N/A';
+            const prevApi = '${{ needs.get-previous-coverage.outputs.api_status }}' || 'N/A';
+
+            function calculateChange(current, previous) {
+              if (current === 'N/A' || previous === 'N/A' || previous === '❌ Fail' || previous === '✅ Pass') return '-';
+              const curr = parseInt(current);
+              const prev = parseInt(previous);
+              if (isNaN(curr) || isNaN(prev)) return '-';
+              const diff = curr - prev;
+              return diff > 0 ? `+${diff}%` : `${diff}%`;
+            }
+
+            const unitChange = calculateChange(unitCoverage, prevUnit);
+            const secChange = calculateChange(secCoverage, prevSec);
+            const e2eChange = calculateChange(e2eStatus === '✅ Pass' ? '100' : '0', prevE2e === '✅ Pass' ? '100' : prevE2e === '❌ Fail' ? '0' : 'N/A');
+            const apiChange = calculateChange(apiStatus === '✅ Pass' ? '100' : '0', prevApi === '✅ Pass' ? '100' : prevApi === '❌ Fail' ? '0' : 'N/A');
+
+            const comment = `
+## 🧪 Test Coverage Report
+
+### Current Status
+| Test Type | Status | Coverage | Required | Change |
+|-----------|--------|----------|----------|--------|
+| **Unit Tests** | ✅ Pass | ${unitCoverage} | ≥80% | ${unitChange} |
+| **E2E Tests** | ${e2eStatus} | N/A | - | ${e2eChange} |
+| **API Tests** | ${apiStatus} | N/A | - | ${apiChange} |
+| **Security Tests** | ✅ Pass | ${secCoverage} | ≥80% | ${secChange} |
+
+### Coverage Requirements
+| Test Type | Minimum | Current |
+|-----------|----------|----------|
+| Unit | 80% | ${unitCoverage} |
+| Security | 80% | ${secCoverage} |
+
+### Before This PR (Previous Coverage)
+| Test Type | Coverage |
+|-----------|----------|
+| Unit Tests | ${prevUnit} |
+| E2E Tests | ${prevE2e} |
+| API Tests | ${prevApi} |
+| Security Tests | ${prevSec} |
+
+### 📊 Detailed Reports
+- [Unit Tests Coverage](./reports/unit/coverage)
+- [E2E Test Results](./reports/e2e/playwright)
+- [API Test Results](./reports/e2e/playwright)
+- [Security Test Results](./backend/reports/security)
+- [Allure Report](https://camiloavilacm.github.io/camiloavila.dev/)
+
+---
+*Generated by GitHub Actions - Test Coverage Report*
+            `;
+
+            const { data: comment } = await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });

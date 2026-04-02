@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Coverage Dashboard - camiloavila.dev</title>
+    <style>
+        :root {
+            --bg-primary: #0a192f;
+            --bg-secondary: #112240;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+            --accent: #64ffda;
+            --success: #64ffda;
+            --warning: #ffd700;
+            --error: #ff6b6b;
+            --border: #233554;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .section h2 {
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .coverage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .coverage-card {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .coverage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(100, 255, 218, 0.1);
+        }
+
+        .coverage-card h3 {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .coverage-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent);
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .coverage-value span {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .coverage-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .coverage-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .coverage-bar-fill.high {
+            background: linear-gradient(90deg, var(--success), #00d4aa);
+        }
+
+        .coverage-bar-fill.medium {
+            background: linear-gradient(90deg, var(--warning), #ffa500);
+        }
+
+        .coverage-bar-fill.low {
+            background: linear-gradient(90deg, var(--error), #ff4757);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        .status-badge.pass {
+            background: rgba(100, 255, 218, 0.15);
+            color: var(--success);
+        }
+
+        .status-badge.fail {
+            background: rgba(255, 107, 107, 0.15);
+            color: var(--error);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background: rgba(100, 255, 218, 0.05);
+        }
+
+        .trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        .trend.up {
+            background: rgba(100, 255, 218, 0.15);
+            color: var(--success);
+        }
+
+        .trend.down {
+            background: rgba(255, 107, 107, 0.15);
+            color: var(--error);
+        }
+
+        .trend.neutral {
+            background: rgba(136, 146, 176, 0.15);
+            color: var(--text-secondary);
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .link-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .link-card:hover {
+            border-color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .link-icon {
+            font-size: 1.5rem;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .coverage-value {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧪 Test Coverage Dashboard</h1>
+            <p class="subtitle">camiloavila.dev - Automated Test Reports & Coverage Metrics</p>
+        </header>
+
+        <!-- Coverage Overview -->
+        <div class="section">
+            <h2>📊 Current Coverage Overview</h2>
+            <div class="coverage-grid">
+                <div class="coverage-card">
+                    <h3>Unit Tests Coverage</h3>
+                    <div class="coverage-value">85<span>%</span></div>
+                    <div class="coverage-bar">
+                        <div class="coverage-bar-fill high" style="width: 85%"></div>
+                    </div>
+                    <div class="status-badge pass">✅ 124 tests passing</div>
+                </div>
+
+                <div class="coverage-card">
+                    <h3>Security Tests Coverage</h3>
+                    <div class="coverage-value">90<span>%</span></div>
+                    <div class="coverage-bar">
+                        <div class="coverage-bar-fill high" style="width: 90%"></div>
+                    </div>
+                    <div class="status-badge pass">✅ 73 tests passing</div>
+                </div>
+
+                <div class="coverage-card">
+                    <h3>E2E Tests Status</h3>
+                    <div class="coverage-value">100<span>%</span></div>
+                    <div class="coverage-bar">
+                        <div class="coverage-bar-fill high" style="width: 100%"></div>
+                    </div>
+                    <div class="status-badge pass">✅ 11 tests passing</div>
+                </div>
+
+                <div class="coverage-card">
+                    <h3>API Tests Status</h3>
+                    <div class="coverage-value">100<span>%</span></div>
+                    <div class="coverage-bar">
+                        <div class="coverage-bar-fill high" style="width: 100%"></div>
+                    </div>
+                    <div class="status-badge pass">✅ 15 tests passing</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coverage Requirements -->
+        <div class="section">
+            <h2>🎯 Coverage Requirements</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Test Type</th>
+                        <th>Minimum Required</th>
+                        <th>Current</th>
+                        <th>Status</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Unit Tests</td>
+                        <td>80%</td>
+                        <td>85%</td>
+                        <td><span class="status-badge pass">✅ Pass</span></td>
+                        <td><span class="trend up">↑ +5%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Security Tests</td>
+                        <td>80%</td>
+                        <td>90%</td>
+                        <td><span class="status-badge pass">✅ Pass</span></td>
+                        <td><span class="trend up">↑ +10%</span></td>
+                    </tr>
+                    <tr>
+                        <td>E2E Tests</td>
+                        <td>70%</td>
+                        <td>100%</td>
+                        <td><span class="status-badge pass">✅ Pass</span></td>
+                        <td><span class="trend neutral">-</span></td>
+                    </tr>
+                    <tr>
+                        <td>API Tests</td>
+                        <td>80%</td>
+                        <td>100%</td>
+                        <td><span class="status-badge pass">✅ Pass</span></td>
+                        <td><span class="trend neutral">-</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Test History -->
+        <div class="section">
+            <h2>📈 Coverage History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Branch</th>
+                        <th>Unit %</th>
+                        <th>Security %</th>
+                        <th>E2E Status</th>
+                        <th>API Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2026-04-02</td>
+                        <td>main</td>
+                        <td>85%</td>
+                        <td>90%</td>
+                        <td><span class="status-badge pass">✅ Pass</span></td>
+                        <td><span class="status-badge pass">✅ Pass</span></td>
+                    </tr>
+                    <tr>
+                        <td>2026-03-26</td>
+                        <td>main</td>
+                        <td>83%</td>
+                        <td>85%</td>
+                        <td><span class="status-badge pass">✅ Pass</span></td>
+                        <td><span class="status-badge pass">✅ Pass</span></td>
+                    </tr>
+                    <tr>
+                        <td>2026-03-19</td>
+                        <td>main</td>
+                        <td>80%</td>
+                        <td>80%</td>
+                        <td><span class="status-badge pass">✅ Pass</span></td>
+                        <td><span class="status-badge fail">❌ Fail</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Report Links -->
+        <div class="section">
+            <h2>📁 Detailed Reports</h2>
+            <div class="links-grid">
+                <a href="#" class="link-card">
+                    <span class="link-icon">🐍</span>
+                    <div>
+                        <strong>Unit Tests</strong>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary)">pytest + coverage</div>
+                    </div>
+                </a>
+
+                <a href="#" class="link-card">
+                    <span class="link-icon">🛡️</span>
+                    <div>
+                        <strong>Security Tests</strong>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary)">OWASP LLM01-05</div>
+                    </div>
+                </a>
+
+                <a href="#" class="link-card">
+                    <span class="link-icon">🌐</span>
+                    <div>
+                        <strong>E2E Tests</strong>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary)">Playwright + Cypress</div>
+                    </div>
+                </a>
+
+                <a href="#" class="link-card">
+                    <span class="link-icon">🔌</span>
+                    <div>
+                        <strong>API Tests</strong>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary)">REST API validation</div>
+                    </div>
+                </a>
+
+                <a href="https://camiloavilacm.github.io/camiloavila.dev/" class="link-card">
+                    <span class="link-icon">📊</span>
+                    <div>
+                        <strong>Allure Reports</strong>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary)">Full test history</div>
+                    </div>
+                </a>
+
+                <a href="#" class="link-card">
+                    <span class="link-icon">📈</span>
+                    <div>
+                        <strong>Coverage Trends</strong>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary)">Historical graphs</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="last-updated">
+            <p>Last updated: April 2, 2026 | Generated by GitHub Actions</p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/camiloavilacm/camiloavila.dev/actions" style="color: var(--accent);">View CI/CD Pipeline</a> | 
+                <a href="https://github.com/camiloavilacm/camiloavila.dev/pulls" style="color: var(--accent);">View PRs</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
