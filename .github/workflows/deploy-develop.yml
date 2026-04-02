@@ -396,16 +396,45 @@ jobs:
       - name: Install Playwright dependencies
         run: |
           python3 -m pip install playwright pytest pytest-html allure-pytest requests
-          playwright install chromium
+          playwright install chromium firefox webkit
 
-      - name: Run Playwright smoke + functional + API tests with Allure
+      - name: Run Playwright smoke tests (Cross-Browser)
         run: |
           mkdir -p reports/e2e/playwright
           python3 -m pytest tests/e2e/playwright/ \
             -v \
-            -m "smoke or functional or api" \
+            -m "smoke" \
+            --browser=chromium \
+            --browser=firefox \
+            --browser=webkit \
             --alluredir=reports/e2e/playwright/allure-results \
             --clean-alluredir \
+            --html=reports/e2e/playwright/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+        continue-on-error: true
+
+      - name: Run Playwright mobile device tests
+        run: |
+          python3 -m pytest tests/e2e/playwright/ \
+            -v \
+            -k "mobile" \
+            --browser=chromium \
+            --alluredir=reports/e2e/playwright/allure-results \
+            --html=reports/e2e/playwright/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+        continue-on-error: true
+
+      - name: Run Playwright functional + API tests
+        run: |
+          python3 -m pytest tests/e2e/playwright/ \
+            -v \
+            -m "functional or api" \
+            --browser=chromium \
+            --alluredir=reports/e2e/playwright/allure-results \
             --html=reports/e2e/playwright/report.html \
             --self-contained-html
         env:
