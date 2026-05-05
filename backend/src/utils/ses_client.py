@@ -26,6 +26,7 @@ Environment variables required:
 import os
 import logging
 
+import bleach
 import boto3
 from botocore.exceptions import ClientError
 
@@ -104,16 +105,21 @@ def send_contact_reply(
             "Check the Lambda environment configuration in template.yaml."
         )
 
-    subject = _SUBJECT_TEMPLATE.format(name=to_name)
+    # Sanitize user-provided content before embedding in HTML email
+    # bleach.clean() strips all HTML tags, preventing XSS injection
+    safe_name = bleach.clean(to_name.strip(), tags=[], strip=True)
+    safe_paragraph = bleach.clean(ai_paragraph.strip(), tags=[], strip=True)
+
+    subject = _SUBJECT_TEMPLATE.format(name=safe_name)
     body_text = (
-        _OPENING.format(name=to_name) + "\n" + ai_paragraph.strip() + "\n" + _FOOTER
+        _OPENING.format(name=safe_name) + "\n" + safe_paragraph + "\n" + _FOOTER
     )
 
     # HTML version — same content with basic formatting
     body_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-      <p>Hi <strong>{to_name}</strong>,</p>
+      <p>Hi <strong>{safe_name}</strong>,</p>
       <p>
         Thank you so much for visiting my portfolio and taking the time to reach out.
         I really appreciate your interest.
@@ -123,7 +129,7 @@ def send_contact_reply(
         in test automation, cloud engineering (AWS), and AI integration. I'm currently
         available for remote roles operating within US working hours.
       </p>
-      <p>{ai_paragraph.strip()}</p>
+      <p>{safe_paragraph}</p>
       <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
       <p>
         I look forward to connecting with you. Feel free to reply directly to this email

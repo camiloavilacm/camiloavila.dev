@@ -111,6 +111,26 @@ const Chatbot: React.FC = () => {
           >
             {msg.role === 'ai' ? (
               <ReactMarkdown
+                allowedElements={[
+                  'p',
+                  'ul',
+                  'ol',
+                  'li',
+                  'strong',
+                  'em',
+                  'code',
+                  'a',
+                  'br',
+                  'h1',
+                  'h2',
+                  'h3',
+                  'h4',
+                  'h5',
+                  'h6',
+                  'blockquote',
+                  'pre',
+                ]}
+                unwrapDisallowed={true}
                 components={{
                   p: ({ children }) => <p style={{ margin: 0 }}>{children}</p>,
                   ul: ({ children }) => (

@@ -43,6 +43,7 @@ Environment variables (set by SAM template.yaml):
 import json
 import logging
 import re
+import unicodedata
 
 from agents.contact_agent import process_contact
 from utils.response_builder import build_response
@@ -51,7 +52,7 @@ from utils.response_builder import build_response
 _build_response = build_response
 
 try:
-    from guardrails import Guard
+    import guardrails
 
     GUARDRAILS_AVAILABLE = True
 except ImportError:
@@ -63,8 +64,61 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Simple email format validation pattern
-_EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
+# Cyrillic to Latin homoglyph mapping (common bypass characters)
+_CYRILLIC_TO_LATIN = {
+    "\u0430": "a",
+    "\u0435": "e",
+    "\u043e": "o",
+    "\u0440": "p",
+    "\u0441": "c",
+    "\u0443": "y",
+    "\u0445": "x",
+    "\u0456": "i",
+    "\u0457": "j",
+    "\u04d3": "e",
+    "\u0410": "A",
+    "\u0415": "E",
+    "\u041e": "O",
+    "\u0420": "P",
+    "\u0421": "C",
+    "\u0423": "Y",
+    "\u0425": "X",
+}
+
+
+def _normalize_input(text: str) -> str:
+    """Normalize input to prevent bypass via encoding tricks.
+
+    Applies Unicode NFKC normalization, converts Cyrillic homoglyphs to Latin,
+    strips combining characters, format characters, and null bytes.
+
+    Args:
+        text: Raw input string from user.
+
+    Returns:
+        Normalized string safe for pattern matching.
+    """
+    normalized = unicodedata.normalize("NFKC", text)
+
+    for cyrillic, latin in _CYRILLIC_TO_LATIN.items():
+        normalized = normalized.replace(cyrillic, latin)
+
+    normalized = normalized.replace("\x00", "")
+
+    normalized = unicodedata.normalize("NFD", normalized)
+    normalized = "".join(
+        c
+        for c in normalized
+        if not unicodedata.combining(c) and unicodedata.category(c) != "Cf"
+    )
+
+    normalized = " ".join(normalized.split())
+    return normalized
+
+
+# Simple email format validation pattern (simplified to prevent ReDoS)
+# Uses negated character classes instead of quantified character sets
+_EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 _MAX_MESSAGE_LENGTH = 2000
 _MAX_NAME_LENGTH = 100
@@ -101,7 +155,7 @@ def _is_message_safe(message: str) -> tuple[bool, str]:
     Returns:
         tuple: (is_safe, error_message)
     """
-    lower_msg = message.lower()
+    lower_msg = _normalize_input(message).lower()
 
     for pattern in _SUSPICIOUS_PATTERNS:
         if pattern in lower_msg:
@@ -117,6 +171,10 @@ def _validate_with_guardrails(message: str) -> tuple[bool, str]:
     This is Layer 1 of defense for contact form - catches common
     attack patterns using Guardrails AI's built-in validators.
 
+    Note: Guardrails AI API changes frequently. This function gracefully
+    degrades if the API is unavailable, relying on Layer 2 (_is_message_safe)
+    as the primary defense.
+
     Args:
         message: The raw message from the contact form.
 
@@ -127,18 +185,19 @@ def _validate_with_guardrails(message: str) -> tuple[bool, str]:
         return True, ""
 
     try:
-        guard = Guard.from_pydantic(
-            schema=None,
-            validators=[
-                "guardrails/validators/no-secure-sql-queries",
-                "guardrails/validators/no-prompt-injection",
-            ],
-        )
-        guard.validate(message)
+        guard = guardrails.Guard()
+
+        result = guard.validate(message)
+        if result.validation_passed:
+            return True, ""
+        else:
+            logger.info("Guardrails blocked message: %s", message[:50])
+            return False, "Security validation failed. Please rephrase your message."
+    except (ImportError, AttributeError, KeyError, TypeError, ValueError):
+        logger.warning("Guardrails AI not available, skipping Layer 1 validation.")
         return True, ""
     except Exception as exc:
         logger.warning("Guardrails validation failed: %s", str(exc))
-        return True, ""
 
 
 def lambda_handler(event: dict, context: object) -> dict:

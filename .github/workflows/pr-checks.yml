@@ -39,10 +39,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318eca82e354496243140350393 # v5
         with:
           python-version: "3.13"
           cache: pip
@@ -90,7 +90,7 @@ jobs:
           ALLOWED_ORIGIN: https://camiloavila.dev
 
       - name: Upload unit test reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd0850491e297787957 # v4
         if: always()   # Upload even if tests fail
         with:
           name: test-reports-unit-${{ github.run_id }}
@@ -106,10 +106,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Set up Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
         with:
           node-version: "20"
           cache: npm
@@ -152,10 +152,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Set up Node.js 20 (Cypress)
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
         with:
           node-version: "20"
           cache: npm
@@ -173,7 +173,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Cypress reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd0850491e297787957 # v4
         if: always()
         with:
           name: cypress-pr-reports-${{ github.run_id }}
@@ -188,7 +188,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Puppeteer reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd0850491e297787957 # v4
         if: always()
         with:
           name: puppeteer-pr-reports-${{ github.run_id }}
@@ -196,7 +196,7 @@ jobs:
           retention-days: 30
 
       - name: Set up Python 3.12 (Playwright)
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318eca82e354496243140350393 # v5
         with:
           python-version: "3.13"
 
@@ -218,9 +218,51 @@ jobs:
         continue-on-error: true
 
       - name: Upload Playwright reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd0850491e297787957 # v4
         if: always()
         with:
           name: playwright-pr-reports-${{ github.run_id }}
           path: reports/e2e/playwright/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Security E2E Tests: Run on PRs to develop branch (security validation)
+  # ---------------------------------------------------------------------------
+  security-e2e-checks:
+    name: Security — E2E Tests (PRs to develop)
+    runs-on: ubuntu-latest
+    if: github.base_ref == 'develop'
+    needs: [backend-checks, frontend-checks]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@0b93645e9fea7318eca82e354496243140350393 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Playwright dependencies
+        run: |
+          python3 -m pip install playwright pytest pytest-html allure-pytest requests
+          playwright install chromium
+
+      - name: Run Playwright security tests
+        run: |
+          mkdir -p reports/e2e/playwright-security
+          python3 -m pytest tests/e2e/playwright/specs/test_security.py \
+            -v \
+            --html=reports/e2e/playwright-security/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+        continue-on-error: true
+
+      - name: Upload security test reports
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd0850491e297787957 # v4
+        if: always()
+        with:
+          name: security-e2e-pr-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-security/
           retention-days: 30
