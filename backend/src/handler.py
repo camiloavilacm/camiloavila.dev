@@ -59,14 +59,33 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Input normalization — prevent bypass via encoding tricks
-# ---------------------------------------------------------------------------
+# Cyrillic to Latin homoglyph mapping (common bypass characters)
+_CYRILLIC_TO_LATIN = {
+    "\u0430": "a",
+    "\u0435": "e",
+    "\u043e": "o",
+    "\u0440": "p",
+    "\u0441": "c",
+    "\u0443": "y",
+    "\u0445": "x",
+    "\u0456": "i",
+    "\u0457": "j",
+    "\u04d3": "e",
+    "\u0410": "A",
+    "\u0415": "E",
+    "\u041e": "O",
+    "\u0420": "P",
+    "\u0421": "C",
+    "\u0423": "Y",
+    "\u0425": "X",
+}
+
+
 def _normalize_input(text: str) -> str:
     """Normalize input to prevent bypass via encoding tricks.
 
-    Applies Unicode NFKC normalization to convert homoglyphs to canonical form,
-    strips null bytes, and collapses whitespace to prevent whitespace-based bypass.
+    Applies Unicode NFKC normalization, converts Cyrillic homoglyphs to Latin,
+    strips combining characters, format characters, and null bytes.
 
     Args:
         text: Raw input string from user.
@@ -74,11 +93,20 @@ def _normalize_input(text: str) -> str:
     Returns:
         Normalized string safe for pattern matching.
     """
-    # Unicode NFKC normalization (converts homoglyphs to canonical form)
     normalized = unicodedata.normalize("NFKC", text)
-    # Strip null bytes
+
+    for cyrillic, latin in _CYRILLIC_TO_LATIN.items():
+        normalized = normalized.replace(cyrillic, latin)
+
     normalized = normalized.replace("\x00", "")
-    # Normalize whitespace (collapse multiple spaces)
+
+    normalized = unicodedata.normalize("NFD", normalized)
+    normalized = "".join(
+        c
+        for c in normalized
+        if not unicodedata.combining(c) and unicodedata.category(c) != "Cf"
+    )
+
     normalized = " ".join(normalized.split())
     return normalized
 
@@ -195,17 +223,16 @@ def _validate_with_guardrails(question: str) -> tuple[bool, str]:
         return True, ""
 
     try:
-        # Attempt to use Guardrails AI with current API
-        # The API changes frequently, so we catch all import/usage errors
         from guardrails import Guard
 
-        # Try the current API - may fail with different signatures
         guard = Guard()
-        guard.validate(question)
-        return True, ""
+        result = guard.validate(question)
+        if result.validation_passed:
+            return True, ""
+        else:
+            logger.info("Guardrails blocked input: %s", question[:50])
+            return False, "Security validation failed. Please rephrase your question."
     except (ImportError, AttributeError, KeyError, TypeError, ValueError):
-        # Guardrails API not available or changed — graceful degradation
-        # The custom validation (_is_question_safe) provides the primary defense
         logger.warning("Guardrails AI not available, skipping Layer 1 validation.")
         return True, ""
     except Exception as exc:
