@@ -1,0 +1,507 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "AI Resume Portfolio for Camilo Avila \u2014 camiloavila.dev. Includes\
+  \ a Bedrock-powered RAG chatbot and a contact form with automated SES email replies.\n"
+Parameters:
+  Stage:
+    Type: String
+    Default: staging
+    AllowedValues:
+    - staging
+    - prod
+    Description: Deployment stage (staging or prod)
+  CertificateArn:
+    Type: String
+    Description: 'ARN of the ACM TLS certificate for camiloavila.dev (must be issued
+      in us-east-1). Request via AWS Certificate Manager and validate via CNAME in
+      Route 53 DNS.
+
+      '
+  BedrockModelId:
+    Type: String
+    Default: amazon.nova-lite-v1:0
+    Description: 'Bedrock model ID for the chatbot and email generation. Must be enabled
+      in your Bedrock model access settings.
+
+      '
+  SesSenderEmail:
+    Type: String
+    Default: camiloavilainfo@gmail.com
+    Description: "Verified SES sender email address. Must be verified in SES before\
+      \ deployment. In SES sandbox mode only verified addresses can receive mail \u2014\
+      \ request production access to send to all visitors.\n"
+  DomainName:
+    Type: String
+    Default: camiloavila.dev
+    Description: 'Custom domain for the CloudFront distribution. DNS (ALIAS record)
+      must be configured in Route 53 after first deploy.
+
+      '
+Globals:
+  Function:
+    Runtime: python3.13
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        KNOWLEDGE_BUCKET:
+          Ref: KnowledgeBaseBucket
+        KNOWLEDGE_KEY: knowledge_base.md
+        BEDROCK_MODEL_ID:
+          Ref: BedrockModelId
+        CONTACT_TABLE:
+          Ref: ContactTable
+        SES_SENDER_EMAIL:
+          Ref: SesSenderEmail
+        ALLOWED_ORIGIN:
+          Fn::Sub: https://${DomainName}
+Resources:
+  KnowledgeBaseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Sub: camiloavila-knowledge-base-${Stage}-${AWS::AccountId}
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+      - Key: Project
+        Value: camiloavila-dev
+      - Key: Purpose
+        Value: RAG knowledge base
+      - Key: Stage
+        Value:
+          Ref: Stage
+    Metadata:
+      SamResourceId: KnowledgeBaseBucket
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Sub: camiloavila-frontend-${Stage}-${AWS::AccountId}
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      Tags:
+      - Key: Project
+        Value: camiloavila-dev
+      - Key: Purpose
+        Value: Frontend static hosting
+      - Key: Stage
+        Value:
+          Ref: Stage
+      - Key: Project
+        Value: camiloavila-dev
+      - Key: Purpose
+        Value: Frontend static hosting
+    Metadata:
+      SamResourceId: FrontendBucket
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: FrontendBucket
+      PolicyDocument:
+        Statement:
+        - Sid: AllowCloudFrontAccess
+          Effect: Allow
+          Principal:
+            Service: cloudfront.amazonaws.com
+          Action: s3:GetObject
+          Resource:
+            Fn::Sub: ${FrontendBucket.Arn}/*
+          Condition:
+            StringEquals:
+              AWS:SourceArn:
+                Fn::Sub: arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+    Metadata:
+      SamResourceId: FrontendBucketPolicy
+  ContactTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: camiloavila-contacts-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      - AttributeName: timestamp
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      - AttributeName: timestamp
+        KeyType: RANGE
+      Tags:
+      - Key: Project
+        Value: camiloavila-dev
+      - Key: Purpose
+        Value: Contact form submissions
+    Metadata:
+      SamResourceId: ContactTable
+  ChatbotFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: camiloavila-chatbot-lambda-role-${Stage}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+      Policies:
+      - PolicyName: ChatbotFunctionPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: AllowKnowledgeBaseRead
+            Effect: Allow
+            Action: s3:GetObject
+            Resource:
+              Fn::Sub: ${KnowledgeBaseBucket.Arn}/knowledge_base.md
+          - Sid: AllowBedrockInvoke
+            Effect: Allow
+            Action:
+            - bedrock:InvokeModel
+            - bedrock:Converse
+            - bedrock:InvokeModelWithResponseStream
+            Resource:
+              Fn::Sub: arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}
+    Metadata:
+      SamResourceId: ChatbotFunctionRole
+  ContactFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: camiloavila-contact-lambda-role-${Stage}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+      Policies:
+      - PolicyName: ContactFunctionPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: AllowKnowledgeBaseRead
+            Effect: Allow
+            Action: s3:GetObject
+            Resource:
+              Fn::Sub: ${KnowledgeBaseBucket.Arn}/knowledge_base.md
+          - Sid: AllowBedrockInvoke
+            Effect: Allow
+            Action:
+            - bedrock:InvokeModel
+            - bedrock:Converse
+            - bedrock:InvokeModelWithResponseStream
+            Resource:
+              Fn::Sub: arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}
+          - Sid: AllowDynamoDBWrite
+            Effect: Allow
+            Action: dynamodb:PutItem
+            Resource:
+              Fn::GetAtt:
+              - ContactTable
+              - Arn
+          - Sid: AllowSESSend
+            Effect: Allow
+            Action: ses:SendEmail
+            Resource: '*'
+            Condition:
+              StringEquals:
+                ses:FromAddress:
+                  Ref: SesSenderEmail
+    Metadata:
+      SamResourceId: ContactFunctionRole
+  StrandsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName:
+        Fn::Sub: camiloavila-strands-layer-${Stage}
+      ContentUri: s3://aws-sam-cli-managed-default-samclisourcebucket-zqkjuwmhr96n/camiloavila-dev-staging/layers/strands/python.zip
+      CompatibleRuntimes:
+      - python3.13
+    Metadata:
+      SamResourceId: StrandsLayer
+  ChatbotFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: camiloavila-chatbot-${Stage}
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-zqkjuwmhr96n/5e87b8b151fa1aa95769936577cdabf4
+      Handler: handler.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - ChatbotFunctionRole
+        - Arn
+      Tracing: Active
+      Layers:
+      - Ref: StrandsLayer
+      Description: 'RAG chatbot backed by Amazon Bedrock and Strands Agents. Answers
+        questions about Camilo Avila''s resume using knowledge_base.md.
+
+        '
+      Events:
+        ChatPost:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: PortfolioApi
+            Path: /chat
+            Method: POST
+        ChatOptions:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: PortfolioApi
+            Path: /chat
+            Method: OPTIONS
+      Tags:
+        Project: camiloavila-dev
+    Metadata:
+      SamResourceId: ChatbotFunction
+  ContactFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: camiloavila-contact-${Stage}
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-zqkjuwmhr96n/5e87b8b151fa1aa95769936577cdabf4
+      Handler: contact_handler.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - ContactFunctionRole
+        - Arn
+      Tracing: Active
+      Layers:
+      - Ref: StrandsLayer
+      Description: 'Handles contact form submissions. Saves to DynamoDB, generates
+        a personalized AI email paragraph via Bedrock, and sends via SES.
+
+        '
+      Events:
+        ContactPost:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: PortfolioApi
+            Path: /contact
+            Method: POST
+        ContactOptions:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: PortfolioApi
+            Path: /contact
+            Method: OPTIONS
+      Tags:
+        Project: camiloavila-dev
+    Metadata:
+      SamResourceId: ContactFunction
+  PortfolioApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
+      Description: "HTTP API for camiloavila.dev \u2014 chatbot and contact form endpoints.\n"
+      CorsConfiguration:
+        AllowOrigins:
+        - Fn::Sub: https://${DomainName}
+        - http://localhost:5173
+        AllowMethods:
+        - POST
+        - OPTIONS
+        AllowHeaders:
+        - Content-Type
+        MaxAge: 300
+      Tags:
+        Project: camiloavila-dev
+    Metadata:
+      SamResourceId: PortfolioApi
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: camiloavila.dev portfolio distribution
+        Aliases:
+        - Ref: DomainName
+        DefaultRootObject: index.html
+        Origins:
+        - Id: FrontendS3Origin
+          DomainName:
+            Fn::GetAtt:
+            - FrontendBucket
+            - RegionalDomainName
+          S3OriginConfig:
+            OriginAccessIdentity: ''
+          OriginAccessControlId:
+            Fn::GetAtt:
+            - CloudFrontOAC
+            - Id
+        DefaultCacheBehavior:
+          TargetOriginId: FrontendS3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          AllowedMethods:
+          - GET
+          - HEAD
+        CustomErrorResponses:
+        - ErrorCode: 404
+          ResponseCode: 200
+          ResponsePagePath: /index.html
+        - ErrorCode: 403
+          ResponseCode: 200
+          ResponsePagePath: /index.html
+        ViewerCertificate:
+          AcmCertificateArn:
+            Ref: CertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        PriceClass: PriceClass_100
+        WebACLId:
+          Fn::GetAtt:
+          - CloudFrontWAF
+          - Arn
+      Tags:
+      - Key: Project
+        Value: camiloavila-dev
+    Metadata:
+      SamResourceId: CloudFrontDistribution
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name:
+          Fn::Sub: camiloavila-oac-${Stage}
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+    Metadata:
+      SamResourceId: CloudFrontOAC
+  CloudFrontWAF:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name:
+        Fn::Sub: camiloavila-waf-${Stage}
+      Scope: CLOUDFRONT
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName:
+          Fn::Sub: camiloavila-waf-${Stage}
+      Rules:
+      - Name: AWSManagedRulesCommonRuleSet
+        Priority: 0
+        Statement:
+          ManagedRuleGroupStatement:
+            VendorName: AWS
+            Name: AWSManagedRulesCommonRuleSet
+        OverrideAction:
+          None: {}
+        VisibilityConfig:
+          SampledRequestsEnabled: true
+          CloudWatchMetricsEnabled: true
+          MetricName: AWSManagedRulesCommonRuleSet
+      - Name: AWSManagedRulesKnownBadInputsRuleSet
+        Priority: 1
+        Statement:
+          ManagedRuleGroupStatement:
+            VendorName: AWS
+            Name: AWSManagedRulesKnownBadInputsRuleSet
+        OverrideAction:
+          None: {}
+        VisibilityConfig:
+          SampledRequestsEnabled: true
+          CloudWatchMetricsEnabled: true
+          MetricName: AWSManagedRulesKnownBadInputsRuleSet
+      - Name: AWSManagedRulesBotControlRuleSet
+        Priority: 2
+        Statement:
+          ManagedRuleGroupStatement:
+            VendorName: AWS
+            Name: AWSManagedRulesBotControlRuleSet
+        OverrideAction:
+          None: {}
+        VisibilityConfig:
+          SampledRequestsEnabled: true
+          CloudWatchMetricsEnabled: true
+          MetricName: AWSManagedRulesBotControlRuleSet
+    Metadata:
+      SamResourceId: CloudFrontWAF
+Outputs:
+  ApiUrl:
+    Description: 'API Gateway base URL. Used as VITE_API_URL in the frontend build.
+      Add /chat and /contact suffixes for the respective endpoints.
+
+      '
+    Value:
+      Fn::Sub: https://${PortfolioApi}.execute-api.${AWS::Region}.amazonaws.com/prod
+    Export:
+      Name:
+        Fn::Sub: CamiloAvilaApiUrl-${Stage}
+  CloudFrontUrl:
+    Description: 'CloudFront distribution domain name. Use this to configure the ALIAS
+      record in Route 53 DNS for camiloavila.dev.
+
+      '
+    Value:
+      Fn::GetAtt:
+      - CloudFrontDistribution
+      - DomainName
+    Export:
+      Name:
+        Fn::Sub: CamiloAvilaCloudFrontUrl-${Stage}
+  CloudFrontDistributionId:
+    Description: 'CloudFront distribution ID. Add as CLOUDFRONT_DISTRIBUTION_ID GitHub
+      Secret so the deploy pipeline can invalidate the CDN cache after each frontend
+      deploy.
+
+      '
+    Value:
+      Ref: CloudFrontDistribution
+    Export:
+      Name:
+        Fn::Sub: CamiloAvilaCloudFrontId-${Stage}
+  FrontendBucketName:
+    Description: 'S3 bucket name for the frontend static files. Add as S3_FRONTEND_BUCKET
+      GitHub Secret so the deploy pipeline can sync the Vite build output to this
+      bucket.
+
+      '
+    Value:
+      Ref: FrontendBucket
+    Export:
+      Name:
+        Fn::Sub: CamiloAvilaFrontendBucket-${Stage}
+  KnowledgeBaseBucketName:
+    Description: 'S3 bucket name for the RAG knowledge base. Upload knowledge_base.md
+      to this bucket after first deploy.
+
+      '
+    Value:
+      Ref: KnowledgeBaseBucket
+    Export:
+      Name:
+        Fn::Sub: CamiloAvilaKnowledgeBucket-${Stage}
+  ContactTableName:
+    Description: DynamoDB table name for contact form submissions.
+    Value:
+      Ref: ContactTable
+    Export:
+      Name:
+        Fn::Sub: CamiloAvilaContactTable-${Stage}
