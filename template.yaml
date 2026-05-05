@@ -200,6 +200,7 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
         - PolicyName: ChatbotFunctionPolicy
           PolicyDocument:
@@ -215,7 +216,7 @@ Resources:
                   - bedrock:InvokeModel
                   - bedrock:Converse
                   - bedrock:InvokeModelWithResponseStream
-                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/*"
+                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}"
 
   # -------------------------------------------------------------------------
   # IAM — Contact Lambda Execution Role
@@ -238,6 +239,7 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
         - PolicyName: ContactFunctionPolicy
           PolicyDocument:
@@ -253,7 +255,7 @@ Resources:
                   - bedrock:InvokeModel
                   - bedrock:Converse
                   - bedrock:InvokeModelWithResponseStream
-                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/*"
+                Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}"
               - Sid: AllowDynamoDBWrite
                 Effect: Allow
                 Action: dynamodb:PutItem
@@ -279,6 +281,7 @@ Resources:
       CodeUri: backend/src/
       Handler: handler.lambda_handler
       Role: !GetAtt ChatbotFunctionRole.Arn
+      Tracing: Active
       Description: >
         RAG chatbot backed by Amazon Bedrock and Strands Agents.
         Answers questions about Camilo Avila's resume using knowledge_base.md.
@@ -310,6 +313,7 @@ Resources:
       CodeUri: backend/src/
       Handler: contact_handler.lambda_handler
       Role: !GetAtt ContactFunctionRole.Arn
+      Tracing: Active
       Description: >
         Handles contact form submissions. Saves to DynamoDB, generates a
         personalized AI email paragraph via Bedrock, and sends via SES.
@@ -398,6 +402,7 @@ Resources:
           SslSupportMethod: sni-only
           MinimumProtocolVersion: TLSv1.2_2021
         PriceClass: PriceClass_100  # US, Canada, Europe only — lowest cost
+        WebACLId: !GetAtt CloudFrontWAF.Arn
       Tags:
         - Key: Project
           Value: camiloavila-dev
@@ -411,6 +416,63 @@ Resources:
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
+
+  # -------------------------------------------------------------------------
+  # WAF — Web Application Firewall for CloudFront
+  # Protects against common web attacks (OWASP Top 10) and bad bot traffic.
+  # Uses AWS Managed Rules for automatic updates without manual maintenance.
+  # -------------------------------------------------------------------------
+  CloudFrontWAF:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub "camiloavila-waf-${Stage}"
+      Scope: CLOUDFRONT
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: !Sub "camiloavila-waf-${Stage}"
+      Rules:
+        # AWS Managed Rules — Common Rule Set (SQLi, XSS, etc.)
+        - Name: AWSManagedRulesCommonRuleSet
+          Priority: 0
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesCommonRuleSet
+        # AWS Managed Rules — Known Bad Inputs (path traversal, etc.)
+        - Name: AWSManagedRulesKnownBadInputsRuleSet
+          Priority: 1
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesKnownBadInputsRuleSet
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesKnownBadInputsRuleSet
+        # AWS Managed Rules — Bot Control (basic bot filtering)
+        - Name: AWSManagedRulesBotControlRuleSet
+          Priority: 2
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesBotControlRuleSet
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesBotControlRuleSet
 
 # ---------------------------------------------------------------------------
 # Outputs — used by GitHub Actions deploy.yml to populate secrets

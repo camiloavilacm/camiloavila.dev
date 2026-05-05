@@ -22,7 +22,7 @@ jobs:
       api_status: ${{ steps.read_coverage.outputs.api_status }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Read previous coverage
         id: read_coverage
@@ -57,7 +57,7 @@ jobs:
       api_passed: ${{ steps.api_tests.outputs.passed }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       # --- Unit Tests ---
       - name: Set up Python
