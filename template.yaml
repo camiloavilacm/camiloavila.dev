@@ -269,6 +269,17 @@ Resources:
                     ses:FromAddress: !Ref SesSenderEmail
 
   # -------------------------------------------------------------------------
+  # Lambda Layer — Strands Agents (heavy dependencies)
+  # -------------------------------------------------------------------------
+  StrandsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "camiloavila-strands-layer-${Stage}"
+      ContentUri: layers/strands/
+      CompatibleRuntimes:
+        - python3.13
+
+  # -------------------------------------------------------------------------
   # Lambda — Chatbot Function
   # Handles POST /chat requests.
   # Uses Strands Agent with search_resume and get_contact_info tools.
@@ -282,6 +293,8 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt ChatbotFunctionRole.Arn
       Tracing: Active
+      Layers:
+        - !Ref StrandsLayer
       Description: >
         RAG chatbot backed by Amazon Bedrock and Strands Agents.
         Answers questions about Camilo Avila's resume using knowledge_base.md.
@@ -314,6 +327,8 @@ Resources:
       Handler: contact_handler.lambda_handler
       Role: !GetAtt ContactFunctionRole.Arn
       Tracing: Active
+      Layers:
+        - !Ref StrandsLayer
       Description: >
         Handles contact form submissions. Saves to DynamoDB, generates a
         personalized AI email paragraph via Bedrock, and sends via SES.
