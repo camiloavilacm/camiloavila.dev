@@ -46,7 +46,7 @@ from utils.response_builder import build_response
 _build_response = build_response
 
 try:
-    from guardrails import Guard
+    import guardrails
 
     GUARDRAILS_AVAILABLE = True
 except ImportError:
@@ -223,9 +223,8 @@ def _validate_with_guardrails(question: str) -> tuple[bool, str]:
         return True, ""
 
     try:
-        from guardrails import Guard
+        guard = guardrails.Guard()
 
-        guard = Guard()
         result = guard.validate(question)
         if result.validation_passed:
             return True, ""
