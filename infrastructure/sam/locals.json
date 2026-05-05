@@ -1,0 +1,16 @@
+{
+  "ChatbotFunction": {
+    "KNOWLEDGE_BUCKET": "test-knowledge-bucket",
+    "KNOWLEDGE_KEY": "knowledge_base.md",
+    "BEDROCK_MODEL_ID": "amazon.nova-lite-v1:0",
+    "ALLOWED_ORIGIN": "http://localhost:5173"
+  },
+  "ContactFunction": {
+    "KNOWLEDGE_BUCKET": "test-knowledge-bucket",
+    "KNOWLEDGE_KEY": "knowledge_base.md",
+    "BEDROCK_MODEL_ID": "amazon.nova-lite-v1:0",
+    "CONTACT_TABLE": "test-contacts",
+    "SES_SENDER_EMAIL": "test@example.com",
+    "ALLOWED_ORIGIN": "http://localhost:5173"
+  }
+}
