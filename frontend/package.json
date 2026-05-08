@@ -37,7 +37,7 @@
     "flatted": "^3.4.1",
     "globals": "^17.4.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.5",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.57.1",
     "vite": "6.4.2"
   }
