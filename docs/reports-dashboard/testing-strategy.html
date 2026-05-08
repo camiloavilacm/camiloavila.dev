@@ -1,0 +1,2196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codebase Testing Strategy Report — camiloavila.dev</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --bg-card: #1c2128;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --border-color: #30363d;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-yellow: #d29922;
+            --accent-purple: #bc8cff;
+            --accent-orange: #f0883e;
+            --hover-bg: rgba(88, 166, 255, 0.1);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --radius: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header h2 {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .header-meta span {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .version-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .version-selector label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .version-selector select {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .version-selector select:hover,
+        .version-selector select:focus {
+            border-color: var(--accent-blue);
+        }
+
+        /* Version History */
+        .version-history {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .version-history h3 {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .version-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .version-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background-color: var(--bg-tertiary);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+        }
+
+        .version-badge {
+            background-color: var(--accent-blue);
+            color: var(--bg-primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .version-date {
+            color: var(--text-secondary);
+        }
+
+        .version-desc {
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        /* Collapsible Sections */
+        .section {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            background-color: var(--bg-tertiary);
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        .section-header:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .section-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .section-toggle {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        .section-toggle svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--text-secondary);
+        }
+
+        .section.collapsed .section-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 1.5rem;
+            max-height: 5000px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+        }
+
+        .section.collapsed .section-content {
+            max-height: 0;
+            padding: 0 1.5rem;
+        }
+
+        /* Code Block Styles */
+        .code-block {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin: 1rem 0;
+        }
+
+        .code-block .folder {
+            color: var(--accent-blue);
+        }
+
+        .code-block .file {
+            color: var(--text-primary);
+        }
+
+        .code-block .comment {
+            color: var(--text-muted);
+        }
+
+        /* Table Styles */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        thead {
+            background-color: var(--bg-tertiary);
+        }
+
+        th {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: var(--hover-bg);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-green {
+            background-color: rgba(63, 185, 80, 0.15);
+            color: var(--accent-green);
+        }
+
+        .badge-red {
+            background-color: rgba(248, 81, 73, 0.15);
+            color: var(--accent-red);
+        }
+
+        .badge-yellow {
+            background-color: rgba(210, 153, 34, 0.15);
+            color: var(--accent-yellow);
+        }
+
+        .badge-blue {
+            background-color: rgba(88, 166, 255, 0.15);
+            color: var(--accent-blue);
+        }
+
+        .badge-purple {
+            background-color: rgba(188, 140, 255, 0.15);
+            color: var(--accent-purple);
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+
+        /* Priority Badges */
+        .priority {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .priority-p0 {
+            background-color: rgba(248, 81, 73, 0.2);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        .priority-p1 {
+            background-color: rgba(240, 136, 62, 0.2);
+            color: var(--accent-orange);
+            border: 1px solid var(--accent-orange);
+        }
+
+        .priority-p2 {
+            background-color: rgba(210, 153, 34, 0.2);
+            color: var(--accent-yellow);
+            border: 1px solid var(--accent-yellow);
+        }
+
+        .priority-p3 {
+            background-color: rgba(139, 148, 158, 0.2);
+            color: var(--text-secondary);
+            border: 1px solid var(--text-secondary);
+        }
+
+        /* Checkmark Styles */
+        .check {
+            color: var(--accent-green);
+        }
+
+        .dash {
+            color: var(--text-muted);
+        }
+
+        /* Architecture Diagram Styles */
+        .architecture-diagram {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+
+        .diagram-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .diagram-layer {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1rem;
+        }
+
+        .diagram-layer-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .diagram-nodes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .diagram-node {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-primary);
+            font-family: 'SF Mono', monospace;
+        }
+
+        .diagram-node.aws {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        .diagram-arrows {
+            display: flex;
+            justify-content: center;
+            padding: 0.5rem 0;
+        }
+
+        .diagram-arrows svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .diagram-arrows svg path {
+            fill: var(--text-muted);
+        }
+
+        /* Flow Diagram Styles */
+        .flow-diagram {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+        }
+
+        .flow-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .flow-step-number {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--accent-blue);
+            color: var(--bg-primary);
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .flow-step-content {
+            flex: 1;
+        }
+
+        .flow-step-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .flow-step-desc {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            padding: 0.25rem 0;
+        }
+
+        /* Subsection Styles */
+        .subsection {
+            margin-bottom: 2rem;
+        }
+
+        .subsection:last-child {
+            margin-bottom: 0;
+        }
+
+        .subsection h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+        }
+
+        /* Strengths/Weaknesses */
+        .assessment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .assessment-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+
+        .assessment-card.strengths {
+            border-left: 3px solid var(--accent-green);
+        }
+
+        .assessment-card.weaknesses {
+            border-left: 3px solid var(--accent-red);
+        }
+
+        .assessment-card h5 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .assessment-card.strengths h5 {
+            color: var(--accent-green);
+        }
+
+        .assessment-card.weaknesses h5 {
+            color: var(--accent-red);
+        }
+
+        .assessment-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .assessment-card li {
+            padding: 0.375rem 0;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            position: relative;
+            padding-left: 1.25rem;
+        }
+
+        .assessment-card.strengths li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent-green);
+        }
+
+        .assessment-card.weaknesses li::before {
+            content: '✗';
+            position: absolute;
+            left: 0;
+            color: var(--accent-red);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-top {
+                flex-direction: column;
+            }
+
+            .header-meta {
+                align-items: flex-start;
+            }
+
+            .section-header {
+                padding: 1rem;
+            }
+
+            .section-content {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .assessment-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.75rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background-color: #fff;
+                color: #000;
+            }
+
+            .section-header {
+                cursor: default;
+            }
+
+            .section.collapsed .section-content {
+                max-height: none;
+                padding: 1.5rem;
+            }
+
+            .section-toggle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top">
+                <div>
+                    <h1>camiloavila.dev</h1>
+                    <h2>Codebase Structure, Testing Strategy & Coverage Report</h2>
+                </div>
+                <div class="header-meta">
+                    <span>Generated: 2026-05-08</span>
+                    <span>Last Coverage: 2026-04-02 (main branch)</span>
+                </div>
+            </div>
+            <div class="version-selector">
+                <label for="version">Version:</label>
+                <select id="version" name="version">
+                    <option value="1.0.0">v1.0.0 — 2026-05-08</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Version History -->
+        <div class="version-history">
+            <h3>Version History</h3>
+            <div class="version-list">
+                <div class="version-item">
+                    <span class="version-badge">v1.0.0</span>
+                    <span class="version-date">2026-05-08</span>
+                    <span class="version-desc">Initial report generation</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Codebase Tree -->
+        <div class="section" id="section-codebase">
+            <div class="section-header" onclick="toggleSection('section-codebase')">
+                <h3>1. Codebase Tree — Deep Structure</h3>
+                <div class="section-toggle">
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">47</div>
+                        <div class="stat-label">Source Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">17</div>
+                        <div class="stat-label">Test Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">25</div>
+                        <div class="stat-label">Config Files</div>
+                    </div>
+                </div>
+                <div class="code-block">
+<span class="folder">camiloavila.dev/</span>
+│
+├── <span class="folder">backend/</span>
+│   ├── requirements.txt                        <span class="comment"># Python dependencies (Lambda layer)</span>
+│   ├── <span class="folder">.lambda_layer/</span>                          <span class="comment"># Lambda layer build output</span>
+│   ├── <span class="folder">src/</span>
+│   │   ├── handler.py                          <span class="comment"># Lambda: POST /chat (Chatbot entrypoint)</span>
+│   │   ├── contact_handler.py                  <span class="comment"># Lambda: POST /contact (Contact form entrypoint)</span>
+│   │   ├── requirements.txt                    <span class="comment"># Lambda function dependencies</span>
+│   │   ├── <span class="folder">agents/</span>
+│   │   │   ├── __init__.py                     <span class="comment"># Agent module init</span>
+│   │   │   ├── chatbot_agent.py                <span class="comment"># Strands Agent: Resume Q&A (Bedrock)</span>
+│   │   │   └── contact_agent.py                <span class="comment"># Strands Agent: Contact email generation</span>
+│   │   ├── <span class="folder">tools/</span>
+│   │   │   ├── __init__.py                     <span class="comment"># Tools module init</span>
+│   │   │   ├── generate_reply.py               <span class="comment"># Strands Tool: AI email paragraph (Bedrock)</span>
+│   │   │   ├── get_contact_info.py             <span class="comment"># Strands Tool: Returns contact details</span>
+│   │   │   └── search_resume.py                <span class="comment"># Strands Tool: Loads knowledge base (S3)</span>
+│   │   └── <span class="folder">utils/</span>
+│   │       ├── __init__.py                     <span class="comment"># Utils module init</span>
+│   │       ├── dynamo_client.py                <span class="comment"># DynamoDB: Save/retrieve contact records</span>
+│   │       ├── kb_loader.py                    <span class="comment"># S3: Knowledge base loader with cache</span>
+│   │       ├── response_builder.py             <span class="comment"># HTTP: Response builder with security headers</span>
+│   │       └── ses_client.py                   <span class="comment"># SES: Email sender with template</span>
+│   └── <span class="folder">tests/</span>
+│       ├── conftest.py                         <span class="comment"># Shared pytest fixtures (all tests)</span>
+│       └── <span class="folder">unit/</span>
+│           ├── conftest.py                     <span class="comment"># Unit test fixtures</span>
+│           ├── test_handler.py                 <span class="comment"># Tests: Chatbot Lambda handler</span>
+│           ├── test_contact_handler.py         <span class="comment"># Tests: Contact Lambda handler</span>
+│           ├── test_tools.py                   <span class="comment"># Tests: All Strands tools (3 tools)</span>
+│           ├── test_dynamo_client.py           <span class="comment"># Tests: DynamoDB operations (moto)</span>
+│           ├── test_kb_loader.py               <span class="comment"># Tests: S3 knowledge base loader</span>
+│           ├── test_ses_client.py              <span class="comment"># Tests: SES email sending (moto)</span>
+│           ├── test_security.py                <span class="comment"># Tests: Security guardrails (OWASP LLM)</span>
+│           └── test_security_headers.py        <span class="comment"># Tests: HTTP security headers</span>
+│
+├── <span class="folder">frontend/</span>
+│   ├── .env.example                            <span class="comment"># Environment variable template</span>
+│   ├── .prettierrc                             <span class="comment"># Code formatting config</span>
+│   ├── eslint.config.js                        <span class="comment"># ESLint configuration</span>
+│   ├── index.html                              <span class="comment"># HTML entry point</span>
+│   ├── package.json                            <span class="comment"># Node.js dependencies</span>
+│   ├── package-lock.json                       <span class="comment"># Dependency lock file</span>
+│   ├── tsconfig.json                           <span class="comment"># TypeScript configuration</span>
+│   ├── tsconfig.node.json                      <span class="comment"># TypeScript node config</span>
+│   ├── vite.config.ts                          <span class="comment"># Vite build configuration</span>
+│   └── <span class="folder">src/</span>
+│       ├── App.css                             <span class="comment"># Global styles</span>
+│       ├── App.tsx                             <span class="comment"># Root component (layout composition)</span>
+│       ├── main.tsx                            <span class="comment"># Application entry point (React 18)</span>
+│       ├── vite-env.d.ts                       <span class="comment"># Vite type declarations</span>
+│       └── <span class="folder">components/</span>
+│           ├── Certifications.tsx              <span class="comment"># Section: AWS certifications display</span>
+│           ├── Chatbot.tsx                     <span class="comment"># Component: AI chat widget (inline)</span>
+│           ├── ContactForm.tsx                 <span class="comment"># Component: Contact form with validation</span>
+│           ├── Experience.tsx                  <span class="comment"># Section: Work history timeline (tabs)</span>
+│           ├── Hero.tsx                        <span class="comment"># Section: Portfolio hero/intro</span>
+│           ├── SEO.tsx                         <span class="comment"># Component: Meta tags + structured data</span>
+│           ├── Skills.tsx                      <span class="comment"># Section: Technical skills grid</span>
+│           └── ThisSite.tsx                    <span class="comment"># Section: Technical stack description</span>
+│
+├── <span class="folder">infrastructure/</span>
+│   ├── app.py                                  <span class="comment"># AWS CDK application entry</span>
+│   ├── cdk.json                                <span class="comment"># CDK context configuration</span>
+│   ├── stack.py                                <span class="comment"># CDK stack definition (alternative to SAM)</span>
+│   ├── requirements.txt                        <span class="comment"># CDK Python dependencies</span>
+│   ├── README.md                               <span class="comment"># Infrastructure documentation</span>
+│   ├── <span class="folder">sam/</span>
+│   │   ├── locals.json                         <span class="comment"># SAM local testing config</span>
+│   │   └── sam.log                             <span class="comment"># SAM deployment logs</span>
+│   └── <span class="folder">cdk.out/</span>                               <span class="comment"># CDK synthesized CloudFormation</span>
+│       ├── camiloavila-portfolio.template.json
+│       ├── camiloavila-portfolio.metadata.json
+│       ├── camiloavila-portfolio.assets.json
+│       ├── manifest.json
+│       └── tree.json
+│
+├── <span class="folder">layers/</span>
+│   └── <span class="folder">strands/</span>
+│       └── python.zip                          <span class="comment"># Lambda layer: Strands Agents SDK</span>
+│       └── <span class="folder">python/lib/python3.13/site-packages/</span>
+│           ├── boto3/                          <span class="comment"># AWS SDK for Python (vendored)</span>
+│           ├── guardrails_hub_types/           <span class="comment"># Guardrails AI type definitions</span>
+│           └── strands/                        <span class="comment"># Strands Agents SDK (vendored)</span>
+│
+├── <span class="folder">tests/</span>
+│   ├── package.json                            <span class="comment"># E2E test dependencies</span>
+│   ├── package-lock.json                       <span class="comment"># E2E dependency lock</span>
+│   └── <span class="folder">e2e/</span>
+│       ├── <span class="folder">cypress/</span>
+│       │   ├── cypress.config.ts               <span class="comment"># Cypress test runner config</span>
+│       │   ├── tsconfig.json                   <span class="comment"># TypeScript config for Cypress</span>
+│       │   └── <span class="folder">specs/</span>
+│       │       ├── chatbot.cy.ts               <span class="comment"># E2E: Chatbot widget tests</span>
+│       │       └── contact_form.cy.ts          <span class="comment"># E2E: Contact form tests</span>
+│       ├── <span class="folder">playwright/</span>
+│       │   ├── conftest.py                     <span class="comment"># Pytest fixtures for Playwright</span>
+│       │   ├── pytest.ini                      <span class="comment"># Pytest configuration</span>
+│       │   └── <span class="folder">specs/</span>
+│       │       ├── test_accessibility.py       <span class="comment"># A11y: WCAG compliance tests</span>
+│       │       ├── test_api.py                 <span class="comment"># API: Backend endpoint tests</span>
+│       │       ├── test_functional.py          <span class="comment"># Functional: User journey tests</span>
+│       │       ├── test_security.py            <span class="comment"># Security: Headers, CSP, CORS tests</span>
+│       │       └── test_smoke.py               <span class="comment"># Smoke: Basic functionality tests</span>
+│       └── <span class="folder">puppeteer/</span>
+│           ├── jest.config.ts                  <span class="comment"># Jest config for Puppeteer</span>
+│           ├── tsconfig.json                   <span class="comment"># TypeScript config</span>
+│           └── <span class="folder">specs/</span>
+│               ├── chatbot.test.ts             <span class="comment"># E2E: Chatbot Puppeteer tests</span>
+│               └── contact_form.test.ts        <span class="comment"># E2E: Contact form Puppeteer tests</span>
+│
+├── <span class="folder">tests/performance/</span>
+│   ├── k6-config.js                            <span class="comment"># k6: General load test config</span>
+│   ├── k6-chat-api.js                          <span class="comment"># k6: Chat API load tests</span>
+│   ├── k6-contact-api.js                       <span class="comment"># k6: Contact API load tests</span>
+│   └── README.md                               <span class="comment"># Performance testing docs</span>
+│
+├── <span class="folder">docs/</span>
+│   ├── architecture.md                         <span class="comment"># System architecture documentation</span>
+│   ├── <span class="folder">coverage-dashboard/</span>index.html           <span class="comment"># Coverage report dashboard</span>
+│   └── <span class="folder">reports-dashboard/</span>index.html           <span class="comment"># Test reports dashboard</span>
+│
+├── <span class="folder">plans/</span>
+│   ├── security-audit-report.md                <span class="comment"># Security audit findings</span>
+│   └── security-fixes-implementation.md        <span class="comment"># Security remediation plan</span>
+│
+├── <span class="folder">scripts/</span>
+│   ├── compare.js                              <span class="comment"># Utility: Compare test results</span>
+│   ├── create_guardrail.py                     <span class="comment"># Utility: Create Bedrock guardrail</span>
+│   ├── generate-html.js                        <span class="comment"># Utility: Generate report HTML</span>
+│   └── screenshot.js                           <span class="comment"># Utility: Take screenshots for testing</span>
+│
+├── template.yaml                               <span class="comment"># AWS SAM: Infrastructure as Code (primary)</span>
+├── packaged.yaml                               <span class="comment"># SAM: Packaged template (deploy output)</span>
+├── samconfig.toml                              <span class="comment"># SAM: Deploy configuration (staging/prod)</span>
+├── env.json                                    <span class="comment"># Local environment variables for SAM</span>
+├── dns-change.json                             <span class="comment"># Route 53 DNS change template</span>
+├── .gitignore                                  <span class="comment"># Git ignore patterns</span>
+├── .coverage-history.json                      <span class="comment"># Coverage history tracking</span>
+├── CHANGELOG.md                                <span class="comment"># Project changelog</span>
+├── CONTRIBUTING.md                             <span class="comment"># Contribution guidelines</span>
+└── README.md                                   <span class="comment"># Project documentation</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: File Categorization -->
+        <div class="section" id="section-categorization">
+            <div class="section-header" onclick="toggleSection('section-categorization')">
+                <h3>2. File Categorization</h3>
+                <div class="section-toggle">
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="subsection">
+                    <h4>2.1 Category Breakdown</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Count</th>
+                                    <th>Files</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Backend — Handlers</strong></td>
+                                    <td>2</td>
+                                    <td><code>handler.py</code>, <code>contact_handler.py</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Backend — Agents</strong></td>
+                                    <td>2</td>
+                                    <td><code>chatbot_agent.py</code>, <code>contact_agent.py</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Backend — Tools</strong></td>
+                                    <td>3</td>
+                                    <td><code>generate_reply.py</code>, <code>get_contact_info.py</code>, <code>search_resume.py</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Backend — Utils</strong></td>
+                                    <td>4</td>
+                                    <td><code>dynamo_client.py</code>, <code>kb_loader.py</code>, <code>response_builder.py</code>, <code>ses_client.py</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Frontend — Components</strong></td>
+                                    <td>8</td>
+                                    <td><code>App.tsx</code>, <code>Chatbot.tsx</code>, <code>ContactForm.tsx</code>, <code>Experience.tsx</code>, <code>Hero.tsx</code>, <code>Certifications.tsx</code>, <code>Skills.tsx</code>, <code>SEO.tsx</code>, <code>ThisSite.tsx</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Frontend — Config</strong></td>
+                                    <td>5</td>
+                                    <td><code>vite.config.ts</code>, <code>tsconfig.json</code>, <code>eslint.config.js</code>, <code>package.json</code>, <code>.prettierrc</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Infrastructure — SAM</strong></td>
+                                    <td>2</td>
+                                    <td><code>template.yaml</code>, <code>samconfig.toml</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Infrastructure — CDK</strong></td>
+                                    <td>3</td>
+                                    <td><code>app.py</code>, <code>stack.py</code>, <code>cdk.json</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Infrastructure — CI/CD</strong></td>
+                                    <td>7</td>
+                                    <td>GitHub Actions workflows</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tests — Unit</strong></td>
+                                    <td>8</td>
+                                    <td><code>test_handler.py</code>, <code>test_contact_handler.py</code>, <code>test_tools.py</code>, <code>test_dynamo_client.py</code>, <code>test_kb_loader.py</code>, <code>test_ses_client.py</code>, <code>test_security.py</code>, <code>test_security_headers.py</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tests — E2E (Cypress)</strong></td>
+                                    <td>2</td>
+                                    <td><code>chatbot.cy.ts</code>, <code>contact_form.cy.ts</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tests — E2E (Playwright)</strong></td>
+                                    <td>5</td>
+                                    <td><code>test_accessibility.py</code>, <code>test_api.py</code>, <code>test_functional.py</code>, <code>test_security.py</code>, <code>test_smoke.py</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tests — E2E (Puppeteer)</strong></td>
+                                    <td>2</td>
+                                    <td><code>chatbot.test.ts</code>, <code>contact_form.test.ts</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tests — Performance</strong></td>
+                                    <td>3</td>
+                                    <td><code>k6-chat-api.js</code>, <code>k6-contact-api.js</code>, <code>k6-config.js</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Documentation</strong></td>
+                                    <td>5</td>
+                                    <td><code>README.md</code>, <code>CHANGELOG.md</code>, <code>CONTRIBUTING.md</code>, <code>architecture.md</code>, security plans</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Scripts/Utilities</strong></td>
+                                    <td>4</td>
+                                    <td><code>compare.js</code>, <code>create_guardrail.py</code>, <code>generate-html.js</code>, <code>screenshot.js</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Lambda Layers</strong></td>
+                                    <td>1</td>
+                                    <td><code>strands/python.zip</code> (vendored dependencies)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>2.2 Layer Classification</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Layer</th>
+                                    <th>Technology</th>
+                                    <th>Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Frontend</strong></td>
+                                    <td>React 18 + TypeScript + Vite</td>
+                                    <td>Portfolio UI, chat widget, contact form</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Backend</strong></td>
+                                    <td>Python 3.13 + AWS Lambda</td>
+                                    <td>API handlers, AI agents, AWS service clients</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>AI/ML</strong></td>
+                                    <td>Amazon Bedrock + Strands Agents</td>
+                                    <td>RAG chatbot, AI email generation</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Infrastructure</strong></td>
+                                    <td>AWS SAM (primary) + CDK (alternative)</td>
+                                    <td>IaC for all AWS resources</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Database</strong></td>
+                                    <td>DynamoDB</td>
+                                    <td>Contact form submission storage</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email</strong></td>
+                                    <td>Amazon SES</td>
+                                    <td>Automated reply emails</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Storage</strong></td>
+                                    <td>Amazon S3</td>
+                                    <td>Knowledge base + frontend hosting</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CDN</strong></td>
+                                    <td>CloudFront + WAF</td>
+                                    <td>Content delivery + web application firewall</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Testing Strategy Analysis -->
+        <div class="section" id="section-testing-strategy">
+            <div class="section-header" onclick="toggleSection('section-testing-strategy')">
+                <h3>3. Testing Strategy Analysis</h3>
+                <div class="section-toggle">
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="subsection">
+                    <h4>3.1 Testing Pyramid</h4>
+                    <div class="flow-diagram">
+                        <div class="diagram-container">
+                            <div class="flow-step">
+                                <div class="flow-step-number">1</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">Unit Tests</div>
+                                    <div class="flow-step-desc">Backend handlers, utils, tools, agents</div>
+                                </div>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step">
+                                <div class="flow-step-number">2</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">Integration Tests</div>
+                                    <div class="flow-step-desc">DynamoDB operations, SES email sending, S3 knowledge loader, API Gateway integration</div>
+                                </div>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step">
+                                <div class="flow-step-number">3</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">E2E Tests</div>
+                                    <div class="flow-step-desc">Cypress (browser), Playwright (cross-browser), Puppeteer (headless Chrome)</div>
+                                </div>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step">
+                                <div class="flow-step-number">4</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">Performance Tests</div>
+                                    <div class="flow-step-desc">k6 API load testing</div>
+                                </div>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step">
+                                <div class="flow-step-number">5</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">Security Tests</div>
+                                    <div class="flow-step-desc">OWASP LLM guardrails, HTTP security headers, input validation, output sanitization</div>
+                                </div>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step">
+                                <div class="flow-step-number">6</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">Accessibility Tests</div>
+                                    <div class="flow-step-desc">WCAG 2.1 AA compliance, ARIA attributes, keyboard navigation</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>3.2 Testing Strategy Matrix</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Component</th>
+                                    <th>Unit</th>
+                                    <th>Integration</th>
+                                    <th>E2E</th>
+                                    <th>Security</th>
+                                    <th>Performance</th>
+                                    <th>Accessibility</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>handler.py</code></td>
+                                    <td><span class="badge badge-green">pytest</span></td>
+                                    <td><span class="badge badge-blue">API Gateway</span></td>
+                                    <td><span class="badge badge-green">Cypress</span></td>
+                                    <td><span class="badge badge-green">Guardrails</span></td>
+                                    <td><span class="badge badge-yellow">k6</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>contact_handler.py</code></td>
+                                    <td><span class="badge badge-green">pytest</span></td>
+                                    <td><span class="badge badge-blue">API Gateway</span></td>
+                                    <td><span class="badge badge-green">Cypress</span></td>
+                                    <td><span class="badge badge-green">Guardrails</span></td>
+                                    <td><span class="badge badge-yellow">k6</span></td>
+                                    <td><span class="badge badge-purple">Playwright</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>chatbot_agent.py</code></td>
+                                    <td><span class="badge badge-green">pytest</span></td>
+                                    <td><span class="badge badge-blue">Bedrock mock</span></td>
+                                    <td><span class="badge badge-green">Cypress</span></td>
+                                    <td><span class="badge badge-yellow">Prompt injection</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>contact_agent.py</code></td>
+                                    <td><span class="badge badge-green">pytest</span></td>
+                                    <td><span class="badge badge-blue">Bedrock mock</span></td>
+                                    <td><span class="badge badge-green">Cypress</span></td>
+                                    <td><span class="badge badge-yellow">Output validation</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>search_resume.py</code></td>
+                                    <td><span class="badge badge-green">pytest</span></td>
+                                    <td><span class="badge badge-blue">S3 mock</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>get_contact_info.py</code></td>
+                                    <td><span class="badge badge-green">pytest</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>generate_reply.py</code></td>
+                                    <td><span class="badge badge-green">pytest</span></td>
+                                    <td><span class="badge badge-blue">Bedrock mock</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>dynamo_client.py</code></td>
+                                    <td><span class="badge badge-green">moto</span></td>
+                                    <td><span class="badge badge-blue">DynamoDB local</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>ses_client.py</code></td>
+                                    <td><span class="badge badge-green">moto</span></td>
+                                    <td><span class="badge badge-blue">SES local</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-yellow">bleach sanitize</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>kb_loader.py</code></td>
+                                    <td><span class="badge badge-green">pytest</span></td>
+                                    <td><span class="badge badge-blue">S3 mock</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>response_builder.py</code></td>
+                                    <td><span class="badge badge-green">pytest</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-green">Headers</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>Chatbot.tsx</code></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-green">Cypress/Puppeteer</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-purple">Playwright</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>ContactForm.tsx</code></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-green">Cypress/Puppeteer</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-purple">Playwright</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>App.tsx</code></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-green">Smoke tests</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-purple">Playwright</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>API Gateway</strong></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-purple">Playwright</span></td>
+                                    <td><span class="badge badge-purple">Playwright</span></td>
+                                    <td><span class="badge badge-purple">Playwright</span></td>
+                                    <td><span class="badge badge-yellow">k6</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CloudFront</strong></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-green">Smoke tests</span></td>
+                                    <td><span class="badge badge-yellow">WAF rules</span></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>3.3 Testing Frameworks in Use</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Framework</th>
+                                    <th>Language</th>
+                                    <th>Purpose</th>
+                                    <th>Test Types</th>
+                                    <th>Test Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>pytest</strong></td>
+                                    <td>Python</td>
+                                    <td>Unit tests + Allure reports</td>
+                                    <td><span class="badge badge-purple">Unit</span> <span class="badge badge-blue">Integration</span></td>
+                                    <td><span class="badge badge-green">124 tests</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>moto</strong></td>
+                                    <td>Python</td>
+                                    <td>AWS service mocking</td>
+                                    <td><span class="badge badge-blue">Integration</span></td>
+                                    <td><span class="badge badge-blue">Used in 4 test files</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cypress</strong></td>
+                                    <td>TypeScript</td>
+                                    <td>Browser E2E (Chrome)</td>
+                                    <td><span class="badge badge-orange">E2E</span> <span class="badge badge-purple">Functional</span></td>
+                                    <td><span class="badge badge-green">11 tests</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Playwright</strong></td>
+                                    <td>Python</td>
+                                    <td>Cross-browser E2E + API</td>
+                                    <td><span class="badge badge-orange">E2E</span> <span class="badge badge-blue">API</span> <span class="badge badge-purple">Functional</span></td>
+                                    <td><span class="badge badge-green">15 tests</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Puppeteer</strong></td>
+                                    <td>TypeScript</td>
+                                    <td>Headless Chrome E2E</td>
+                                    <td><span class="badge badge-orange">E2E</span> <span class="badge badge-purple">Functional</span></td>
+                                    <td><span class="badge badge-green">8 tests</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>k6</strong></td>
+                                    <td>JavaScript</td>
+                                    <td>API load testing</td>
+                                    <td><span class="badge badge-yellow">Performance</span> <span class="badge badge-blue">Load</span></td>
+                                    <td><span class="badge badge-yellow">2 scenarios</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Test-to-Source File Mapping -->
+        <div class="section" id="section-mapping">
+            <div class="section-header" onclick="toggleSection('section-mapping')">
+                <h3>4. Test-to-Source File Mapping</h3>
+                <div class="section-toggle">
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="subsection">
+                    <h4>4.1 Backend Unit Test Coverage Map</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Source File</th>
+                                    <th>Test File</th>
+                                    <th>Test Classes</th>
+                                    <th>Count</th>
+                                    <th>Coverage Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>handler.py</code></td>
+                                    <td><code>test_handler.py</code></td>
+                                    <td>TestChatbotHandlerValidation, TestChatbotHandlerSuccess, TestChatbotHandlerErrors, TestChatbotHandlerCORS</td>
+                                    <td>10</td>
+                                    <td>Input validation, success, error, CORS</td>
+                                </tr>
+                                <tr>
+                                    <td><code>contact_handler.py</code></td>
+                                    <td><code>test_contact_handler.py</code></td>
+                                    <td>TestContactHandlerValidation, TestContactHandlerSuccess, TestContactHandlerErrors, TestContactHandlerCORS</td>
+                                    <td>11</td>
+                                    <td>Input validation, success, error, CORS</td>
+                                </tr>
+                                <tr>
+                                    <td><code>search_resume.py</code></td>
+                                    <td><code>test_tools.py</code></td>
+                                    <td>TestSearchResumeTool</td>
+                                    <td>3</td>
+                                    <td>KB content, error propagation</td>
+                                </tr>
+                                <tr>
+                                    <td><code>get_contact_info.py</code></td>
+                                    <td><code>test_tools.py</code></td>
+                                    <td>TestGetContactInfoTool</td>
+                                    <td>4</td>
+                                    <td>Email, phone, LinkedIn, availability</td>
+                                </tr>
+                                <tr>
+                                    <td><code>generate_reply.py</code></td>
+                                    <td><code>test_tools.py</code></td>
+                                    <td>TestGenerateReplyTool</td>
+                                    <td>4</td>
+                                    <td>Bedrock call, fallback, visitor context</td>
+                                </tr>
+                                <tr>
+                                    <td><code>dynamo_client.py</code></td>
+                                    <td><code>test_dynamo_client.py</code></td>
+                                    <td>TestDynamoClientSave</td>
+                                    <td>5</td>
+                                    <td>Record save, UUID, timestamp, status, error</td>
+                                </tr>
+                                <tr>
+                                    <td><code>kb_loader.py</code></td>
+                                    <td><code>test_kb_loader.py</code></td>
+                                    <td>TestKbLoaderFetch, TestKbLoaderErrors</td>
+                                    <td>6</td>
+                                    <td>Cold start, cache, clear, errors</td>
+                                </tr>
+                                <tr>
+                                    <td><code>ses_client.py</code></td>
+                                    <td><code>test_ses_client.py</code></td>
+                                    <td>TestSesClientSend</td>
+                                    <td>6</td>
+                                    <td>MessageId, subject, body, contact, errors</td>
+                                </tr>
+                                <tr>
+                                    <td><code>response_builder.py</code></td>
+                                    <td><code>test_security_headers.py</code></td>
+                                    <td>TestHandlerSecurityHeaders, TestContactHandlerSecurityHeaders</td>
+                                    <td>16</td>
+                                    <td>All security headers, CORS, status codes</td>
+                                </tr>
+                                <tr>
+                                    <td><code>handler.py</code> (security)</td>
+                                    <td><code>test_security.py</code></td>
+                                    <td>TestPromptInjectionBlocking, TestOffTopicBlocking, TestGuardrailsAIIntegration, TestHandlerSecurityIntegration, TestUnicodeBypassAttempts</td>
+                                    <td>45+</td>
+                                    <td>OWASP LLM01, injection, off-topic, Unicode</td>
+                                </tr>
+                                <tr>
+                                    <td><code>contact_handler.py</code> (security)</td>
+                                    <td><code>test_security.py</code></td>
+                                    <td>TestContactFormInputValidation, TestContactAgentOutputValidation</td>
+                                    <td>15+</td>
+                                    <td>XSS, injection, output sanitization</td>
+                                </tr>
+                                <tr>
+                                    <td><code>contact_agent.py</code></td>
+                                    <td><code>test_security.py</code></td>
+                                    <td>TestContactAgentOutputValidation</td>
+                                    <td>7</td>
+                                    <td>AI output safety validation</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>4.2 E2E Test Coverage Map</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Source Component</th>
+                                    <th>Cypress</th>
+                                    <th>Playwright</th>
+                                    <th>Puppeteer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>Chatbot.tsx</code></td>
+                                    <td><code>chatbot.cy.ts</code> — send message, receive answer, loading state, error state</td>
+                                    <td><code>test_functional.py</code> — chat interaction</td>
+                                    <td><code>chatbot.test.ts</code> — send/receive flow</td>
+                                </tr>
+                                <tr>
+                                    <td><code>ContactForm.tsx</code></td>
+                                    <td><code>contact_form.cy.ts</code> — fill form, submit, validation, success</td>
+                                    <td><code>test_functional.py</code> — form submission</td>
+                                    <td><code>contact_form.test.ts</code> — form flow</td>
+                                </tr>
+                                <tr>
+                                    <td><code>App.tsx</code></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><code>test_smoke.py</code> — page load, navigation</td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>handler.py</code> (API)</td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><code>test_api.py</code> — POST /chat, POST /contact</td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td>All components</td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><code>test_accessibility.py</code> — ARIA, keyboard, contrast</td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                                <tr>
+                                    <td>All components</td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><code>test_security.py</code> — headers, CSP, CORS</td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>4.3 Performance Test Coverage Map</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>API Endpoint</th>
+                                    <th>k6 Test File</th>
+                                    <th>Scenarios</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>POST /chat</code></td>
+                                    <td><code>k6-chat-api.js</code></td>
+                                    <td>Load test, stress test, spike test</td>
+                                </tr>
+                                <tr>
+                                    <td><code>POST /contact</code></td>
+                                    <td><code>k6-contact-api.js</code></td>
+                                    <td>Load test, stress test</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Coverage Metrics -->
+        <div class="section" id="section-coverage">
+            <div class="section-header" onclick="toggleSection('section-coverage')">
+                <h3>5. Coverage Metrics</h3>
+                <div class="section-toggle">
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="subsection">
+                    <h4>5.1 Overall Coverage Summary</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Unit Test Coverage</strong></td>
+                                    <td>85%</td>
+                                    <td><span class="badge badge-green">Good</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Security Test Coverage</strong></td>
+                                    <td>90%</td>
+                                    <td><span class="badge badge-green">Excellent</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>E2E Tests</strong></td>
+                                    <td>11 tests, all passing</td>
+                                    <td><span class="badge badge-green">Pass</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>API Tests</strong></td>
+                                    <td>15 tests, all passing</td>
+                                    <td><span class="badge badge-green">Pass</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total Test Count</strong></td>
+                                    <td>223</td>
+                                    <td><span class="dash">—</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>5.2 Per-File Coverage Analysis</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Source File</th>
+                                    <th>Estimated Coverage</th>
+                                    <th>Tested Functions</th>
+                                    <th>Missing Coverage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>handler.py</code></td>
+                                    <td><span class="badge badge-green">~90%</span></td>
+                                    <td><code>lambda_handler</code>, <code>_is_question_safe</code>, <code>_normalize_input</code>, <code>_build_response</code></td>
+                                    <td><code>_validate_with_guardrails</code> (graceful degradation path)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>contact_handler.py</code></td>
+                                    <td><span class="badge badge-green">~88%</span></td>
+                                    <td><code>lambda_handler</code>, <code>_is_message_safe</code>, <code>_normalize_input</code>, <code>_build_response</code></td>
+                                    <td><code>_validate_with_guardrails</code> (graceful degradation path)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>chatbot_agent.py</code></td>
+                                    <td><span class="badge badge-yellow">~75%</span></td>
+                                    <td><code>create_chatbot_agent</code>, <code>ask</code></td>
+                                    <td>Error path in <code>ask()</code> (RuntimeError branch)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>contact_agent.py</code></td>
+                                    <td><span class="badge badge-yellow">~70%</span></td>
+                                    <td><code>process_contact</code>, <code>_is_ai_output_safe</code></td>
+                                    <td>Fallback paragraph path (Bedrock failure)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>search_resume.py</code></td>
+                                    <td><span class="badge badge-green">~95%</span></td>
+                                    <td><code>search_resume</code></td>
+                                    <td><span class="badge badge-green">Full coverage</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>get_contact_info.py</code></td>
+                                    <td><span class="badge badge-green">~95%</span></td>
+                                    <td><code>get_contact_info</code></td>
+                                    <td><span class="badge badge-green">Full coverage</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>generate_reply.py</code></td>
+                                    <td><span class="badge badge-green">~90%</span></td>
+                                    <td><code>generate_reply</code></td>
+                                    <td>Temperature/config edge cases</td>
+                                </tr>
+                                <tr>
+                                    <td><code>dynamo_client.py</code></td>
+                                    <td><span class="badge badge-green">~92%</span></td>
+                                    <td><code>save_contact</code></td>
+                                    <td>ClientError with different error codes</td>
+                                </tr>
+                                <tr>
+                                    <td><code>kb_loader.py</code></td>
+                                    <td><span class="badge badge-green">~95%</span></td>
+                                    <td><code>get_knowledge_base</code>, <code>clear_cache</code></td>
+                                    <td><span class="badge badge-green">Full coverage</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>ses_client.py</code></td>
+                                    <td><span class="badge badge-green">~88%</span></td>
+                                    <td><code>send_contact_reply</code></td>
+                                    <td>HTML body rendering edge cases</td>
+                                </tr>
+                                <tr>
+                                    <td><code>response_builder.py</code></td>
+                                    <td><span class="badge badge-green">~95%</span></td>
+                                    <td><code>build_response</code>, <code>build_error_response</code>, <code>build_success_response</code></td>
+                                    <td><span class="badge badge-green">Full coverage</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>5.3 Frontend Coverage (No Unit Tests)</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Component</th>
+                                    <th>E2E Coverage</th>
+                                    <th>Accessibility Coverage</th>
+                                    <th>Missing</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>Chatbot.tsx</code></td>
+                                    <td><span class="badge badge-green">Cypress + Puppeteer</span></td>
+                                    <td><span class="badge badge-purple">Playwright a11y</span></td>
+                                    <td><span class="badge badge-red">No unit tests (RTL)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>ContactForm.tsx</code></td>
+                                    <td><span class="badge badge-green">Cypress + Puppeteer</span></td>
+                                    <td><span class="badge badge-purple">Playwright a11y</span></td>
+                                    <td><span class="badge badge-red">No unit tests (RTL)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>Hero.tsx</code></td>
+                                    <td><span class="badge badge-green">Smoke tests</span></td>
+                                    <td><span class="badge badge-purple">Playwright a11y</span></td>
+                                    <td><span class="badge badge-yellow">No dedicated tests</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>Experience.tsx</code></td>
+                                    <td><span class="badge badge-green">Smoke tests</span></td>
+                                    <td><span class="badge badge-purple">Playwright a11y</span></td>
+                                    <td><span class="badge badge-yellow">No dedicated tests</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>Certifications.tsx</code></td>
+                                    <td><span class="badge badge-green">Smoke tests</span></td>
+                                    <td><span class="badge badge-purple">Playwright a11y</span></td>
+                                    <td><span class="badge badge-yellow">No dedicated tests</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>Skills.tsx</code></td>
+                                    <td><span class="badge badge-green">Smoke tests</span></td>
+                                    <td><span class="badge badge-purple">Playwright a11y</span></td>
+                                    <td><span class="badge badge-yellow">No dedicated tests</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>SEO.tsx</code></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-purple">Playwright a11y</span></td>
+                                    <td><span class="badge badge-red">No dedicated tests</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>ThisSite.tsx</code></td>
+                                    <td><span class="dash">—</span></td>
+                                    <td><span class="badge badge-purple">Playwright a11y</span></td>
+                                    <td><span class="badge badge-red">No dedicated tests</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>App.tsx</code></td>
+                                    <td><span class="badge badge-green">Smoke tests</span></td>
+                                    <td><span class="badge badge-purple">Playwright a11y</span></td>
+                                    <td><span class="badge badge-red">No unit tests</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>5.4 Coverage Gaps</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Gap</th>
+                                    <th>Priority</th>
+                                    <th>Recommendation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Frontend unit tests</td>
+                                    <td><span class="priority priority-p0">P0</span></td>
+                                    <td>Add React Testing Library for <code>Chatbot.tsx</code>, <code>ContactForm.tsx</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>chatbot_agent.py</code> error paths</td>
+                                    <td><span class="priority priority-p2">P2</span></td>
+                                    <td>Mock Strands Agent exceptions</td>
+                                </tr>
+                                <tr>
+                                    <td><code>contact_agent.py</code> fallback path</td>
+                                    <td><span class="priority priority-p2">P2</span></td>
+                                    <td>Mock Bedrock failure in <code>process_contact()</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>Hero.tsx</code> dedicated tests</td>
+                                    <td><span class="priority priority-p3">P3</span></td>
+                                    <td>Add snapshot or rendering tests</td>
+                                </tr>
+                                <tr>
+                                    <td><code>SEO.tsx</code> tests</td>
+                                    <td><span class="priority priority-p3">P3</span></td>
+                                    <td>Add meta tag verification tests</td>
+                                </tr>
+                                <tr>
+                                    <td>Guardrails AI integration tests</td>
+                                    <td><span class="priority priority-p2">P2</span></td>
+                                    <td>Test with actual Guardrails mock</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Testing Strategy Recommendations -->
+        <div class="section" id="section-recommendations">
+            <div class="section-header" onclick="toggleSection('section-recommendations')">
+                <h3>6. Testing Strategy Recommendations</h3>
+                <div class="section-toggle">
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="subsection">
+                    <h4>6.1 Current State Assessment</h4>
+                    <div class="assessment-grid">
+                        <div class="assessment-card strengths">
+                            <h5>Strengths</h5>
+                            <ul>
+                                <li>Comprehensive backend unit testing with pytest (124 tests)</li>
+                                <li>Multi-framework E2E strategy (Cypress + Playwright + Puppeteer)</li>
+                                <li>Security testing aligned with OWASP Top 10 for LLMs</li>
+                                <li>Performance testing with k6</li>
+                                <li>Allure reporting integration with trend history</li>
+                                <li>moto for realistic AWS service mocking</li>
+                            </ul>
+                        </div>
+                        <div class="assessment-card weaknesses">
+                            <h5>Weaknesses</h5>
+                            <ul>
+                                <li>No frontend unit tests (React components untested in isolation)</li>
+                                <li>No integration tests for full request flow (Lambda → Agent → Bedrock → Response)</li>
+                                <li>Limited coverage of error paths in agent modules</li>
+                                <li>No visual regression tests actively running</li>
+                                <li>No contract testing between frontend and API</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>6.2 Recommended Testing Pipeline</h4>
+                    <div class="flow-diagram">
+                        <div class="diagram-container">
+                            <div class="flow-step">
+                                <div class="flow-step-number">1</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">Pre-commit Hooks</div>
+                                    <div class="flow-step-desc">ESLint, flake8, TypeScript check</div>
+                                </div>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step">
+                                <div class="flow-step-number">2</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">CI Pipeline</div>
+                                    <div class="flow-step-desc">Unit Tests (pytest), Unit Tests (RTL), Security Tests, Build Check</div>
+                                </div>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step">
+                                <div class="flow-step-number">3</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">Staging Deploy</div>
+                                    <div class="flow-step-desc">SAM Deploy, Frontend Deploy, KB Upload</div>
+                                </div>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step">
+                                <div class="flow-step-number">4</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">E2E Validation</div>
+                                    <div class="flow-step-desc">Cypress E2E, Playwright Cross-Browser, Puppeteer Smoke, k6 Load Test, A11y Audit</div>
+                                </div>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step">
+                                <div class="flow-step-number">5</div>
+                                <div class="flow-step-content">
+                                    <div class="flow-step-title">Production Deploy</div>
+                                    <div class="flow-step-desc">Automated deployment after all validation gates pass</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>6.3 Priority Action Items</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Priority</th>
+                                    <th>Action</th>
+                                    <th>Effort</th>
+                                    <th>Impact</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="priority priority-p0">P0</span></td>
+                                    <td>Add React Testing Library unit tests for <code>Chatbot.tsx</code> and <code>ContactForm.tsx</code></td>
+                                    <td>Medium</td>
+                                    <td><span class="badge badge-red">High</span> — catches UI bugs before E2E</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="priority priority-p1">P1</span></td>
+                                    <td>Add integration tests for full Lambda → Agent → Bedrock flow</td>
+                                    <td>Medium</td>
+                                    <td><span class="badge badge-red">High</span> — validates end-to-end backend</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="priority priority-p1">P1</span></td>
+                                    <td>Add contract tests for API Gateway responses</td>
+                                    <td>Low</td>
+                                    <td><span class="badge badge-red">High</span> — prevents API breaking changes</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="priority priority-p2">P2</span></td>
+                                    <td>Add error path coverage for <code>chatbot_agent.py</code> and <code>contact_agent.py</code></td>
+                                    <td>Low</td>
+                                    <td><span class="badge badge-yellow">Medium</span> — improves backend coverage to 90%+</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="priority priority-p2">P2</span></td>
+                                    <td>Add snapshot tests for <code>Hero.tsx</code>, <code>Experience.tsx</code>, <code>Skills.tsx</code></td>
+                                    <td>Low</td>
+                                    <td><span class="badge badge-yellow">Medium</span> — prevents visual regressions</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="priority priority-p3">P3</span></td>
+                                    <td>Add API response schema validation tests</td>
+                                    <td>Low</td>
+                                    <td><span class="badge badge-blue">Low</span> — ensures type safety</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="priority priority-p3">P3</span></td>
+                                    <td>Add load test baselines for k6 with thresholds</td>
+                                    <td>Low</td>
+                                    <td><span class="badge badge-blue">Low</span> — performance regression detection</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h4>6.4 Coverage Targets</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Layer</th>
+                                    <th>Current</th>
+                                    <th>Target</th>
+                                    <th>Timeline</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Backend Unit</td>
+                                    <td><span class="badge badge-yellow">85%</span></td>
+                                    <td><span class="badge badge-green">92%</span></td>
+                                    <td>Next sprint</td>
+                                </tr>
+                                <tr>
+                                    <td>Backend Security</td>
+                                    <td><span class="badge badge-green">90%</span></td>
+                                    <td><span class="badge badge-green">95%</span></td>
+                                    <td>Next sprint</td>
+                                </tr>
+                                <tr>
+                                    <td>Frontend Unit</td>
+                                    <td><span class="badge badge-red">0%</span></td>
+                                    <td><span class="badge badge-yellow">70%</span></td>
+                                    <td>2 sprints</td>
+                                </tr>
+                                <tr>
+                                    <td>E2E Critical Paths</td>
+                                    <td><span class="badge badge-yellow">60%</span></td>
+                                    <td><span class="badge badge-green">90%</span></td>
+                                    <td>1 sprint</td>
+                                </tr>
+                                <tr>
+                                    <td>API Contract</td>
+                                    <td><span class="badge badge-red">0%</span></td>
+                                    <td><span class="badge badge-green">80%</span></td>
+                                    <td>1 sprint</td>
+                                </tr>
+                                <tr>
+                                    <td>Performance</td>
+                                    <td><span class="badge badge-blue">Baseline</span></td>
+                                    <td><span class="badge badge-yellow">Thresholds</span></td>
+                                    <td>1 sprint</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 7: Architecture Diagram -->
+        <div class="section" id="section-architecture">
+            <div class="section-header" onclick="toggleSection('section-architecture')">
+                <h3>7. Architecture Diagram</h3>
+                <div class="section-toggle">
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="architecture-diagram">
+                    <div class="diagram-container">
+                        <!-- Frontend Layer -->
+                        <div class="diagram-layer">
+                            <div class="diagram-layer-title">Frontend — React/Vite (CloudFront + S3)</div>
+                            <div class="diagram-nodes">
+                                <div class="diagram-node">App.tsx</div>
+                                <div class="diagram-node">Hero.tsx</div>
+                                <div class="diagram-node">Chatbot.tsx</div>
+                                <div class="diagram-node">ContactForm.tsx</div>
+                                <div class="diagram-node">Experience.tsx</div>
+                                <div class="diagram-node">Skills.tsx</div>
+                                <div class="diagram-node">Certifications.tsx</div>
+                                <div class="diagram-node">SEO.tsx</div>
+                                <div class="diagram-node">ThisSite.tsx</div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-arrows">
+                            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+
+                        <!-- Backend Layer -->
+                        <div class="diagram-layer">
+                            <div class="diagram-layer-title">Backend — AWS Lambda (API Gateway)</div>
+                            <div class="diagram-nodes">
+                                <div class="diagram-node">handler.py — POST /chat</div>
+                                <div class="diagram-node">contact_handler.py — POST /contact</div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-arrows">
+                            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+
+                        <!-- Agents Layer -->
+                        <div class="diagram-layer">
+                            <div class="diagram-layer-title">Agents — Strands Agents (Bedrock AI)</div>
+                            <div class="diagram-nodes">
+                                <div class="diagram-node">chatbot_agent.py</div>
+                                <div class="diagram-node">contact_agent.py</div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-arrows">
+                            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+
+                        <!-- Tools Layer -->
+                        <div class="diagram-layer">
+                            <div class="diagram-layer-title">Tools — Strands Tools</div>
+                            <div class="diagram-nodes">
+                                <div class="diagram-node">search_resume.py</div>
+                                <div class="diagram-node">get_contact_info.py</div>
+                                <div class="diagram-node">generate_reply.py</div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-arrows">
+                            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+
+                        <!-- Utils Layer -->
+                        <div class="diagram-layer">
+                            <div class="diagram-layer-title">Utils — AWS Service Clients</div>
+                            <div class="diagram-nodes">
+                                <div class="diagram-node">dynamo_client.py</div>
+                                <div class="diagram-node">ses_client.py</div>
+                                <div class="diagram-node">kb_loader.py</div>
+                                <div class="diagram-node">response_builder.py</div>
+                            </div>
+                        </div>
+
+                        <div class="diagram-arrows">
+                            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+
+                        <!-- AWS Services Layer -->
+                        <div class="diagram-layer">
+                            <div class="diagram-layer-title">AWS Services</div>
+                            <div class="diagram-nodes">
+                                <div class="diagram-node aws">DynamoDB</div>
+                                <div class="diagram-node aws">SES Email</div>
+                                <div class="diagram-node aws">S3 Knowledge Base</div>
+                                <div class="diagram-node aws">Bedrock AI</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection" style="margin-top: 1.5rem;">
+                    <h4>Data Flow</h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Flow</th>
+                                    <th>Path</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Chat Request</strong></td>
+                                    <td>Chatbot.tsx → handler.py → chatbot_agent.py → search_resume.py → kb_loader.py → S3 → Bedrock AI → Response</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Contact Request</strong></td>
+                                    <td>ContactForm.tsx → contact_handler.py → contact_agent.py → generate_reply.py → Bedrock AI → ses_client.py → SES → dynamo_client.py → DynamoDB</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Contact Info</strong></td>
+                                    <td>Chatbot.tsx → handler.py → chatbot_agent.py → get_contact_info.py → Response</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Report generated by automated codebase analysis. For questions, refer to the project <a href="https://github.com/camiloavila/camiloavila.dev" style="color: var(--accent-blue); text-decoration: none;">README</a> or <a href="https://github.com/camiloavila/camiloavila.dev/blob/main/docs/architecture.md" style="color: var(--accent-blue); text-decoration: none;">architecture documentation</a>.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Toggle section collapse
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.toggle('collapsed');
+            }
+        }
+
+        // Version selector handler
+        document.getElementById('version').addEventListener('change', function() {
+            // In future versions, this could load different report data
+            console.log('Selected version:', this.value);
+        });
+
+        // Initialize all sections as expanded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth scrolling
+            document.querySelectorAll('.section-header').forEach(header => {
+                header.addEventListener('click', function(e) {
+                    if (e.target.closest('.section-toggle') || e.target === this) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

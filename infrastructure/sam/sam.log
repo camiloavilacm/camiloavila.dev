@@ -1,0 +1,45 @@
+Cannot detect function id from aws:cdk:path metadata 'camiloavila-portfolio/ChatbotFunctionRole/DefaultPolicy/Resource', using default logical id
+Cannot detect function id from aws:cdk:path metadata 'camiloavila-portfolio/ContactFunctionRole/DefaultPolicy/Resource', using default logical id
+Cannot detect function id from aws:cdk:path metadata 'camiloavila-portfolio/ChatbotFunctionRole/DefaultPolicy/Resource', using default logical id
+Cannot detect function id from aws:cdk:path metadata 'camiloavila-portfolio/ContactFunctionRole/DefaultPolicy/Resource', using default logical id
+Mounting ContactFunction at http://127.0.0.1:3000/contact [OPTIONS, POST]
+Mounting ChatbotFunction at http://127.0.0.1:3000/chat [OPTIONS, POST]
+You can now browse to the above endpoints to invoke your functions. You do not need to restart/reload SAM CLI while working on your functions, changes will be reflected instantly/automatically. If you used sam build before running local commands, you will need to re-run sam build for the changes to be picked up. You only need to restart SAM CLI if you update your AWS SAM template
+2026-05-05 10:06:46 [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:3000
+2026-05-05 10:06:46 [33mPress CTRL+C to quit[0m
+Invoking handler.lambda_handler (python3.13)
+Local image is out of date and will be updated to the latest runtime. To skip this, pass in the parameter --skip-pull-image
+Building image...............................................................................................................................................................................................................................................................
+Using local image: public.ecr.aws/lambda/python:3.13-rapid-x86_64.
+
+Mounting /Users/camiloavila/Documents/website/infrastructure/sam/.aws-sam/build/ChatbotFunction as /var/task:ro,delegated, inside runtime container
+SAM_CONTAINER_ID: ecf797619fc51b1bcd57807ce0ccfc870c2f758b1646e4a537c0083df8f06a5d
+START RequestId: f3fb6750-7bc6-4a4f-b1ae-efa2ce56dd86 Version: $LATEST
+<thinking>I need to search Camilo Avila's resume for his AWS certifications.</thinking>
+
+Tool #1: search_resume
+[ERROR]	2026-05-05T08:07:35.990Z	f3fb6750-7bc6-4a4f-b1ae-efa2ce56dd86	Failed to fetch knowledge base from S3. Code: AccessDenied | Bucket: test-knowledge-bucket | Key: knowledge_base.md
+<thinking>There was an error loading the knowledge base. I will inform the user that I cannot provide the requested information at this moment.</thinking>
+
+I'm sorry, but I can't provide the information about Camilo Avila's AWS certifications at the moment due to a technical error. Please try again later.END RequestId: f3fb6750-7bc6-4a4f-b1ae-efa2ce56dd86
+REPORT RequestId: f3fb6750-7bc6-4a4f-b1ae-efa2ce56dd86	Init Duration: 0.39 ms	Duration: 7338.56 ms	Billed Duration: 7339 ms	Memory Size: 256 MB	Max Memory Used: 256 MB	
+
+2026-05-05 10:07:37 127.0.0.1 - - [05/May/2026 10:07:37] "POST /chat HTTP/1.1" 200 -
+Invoking contact_handler.lambda_handler (python3.13)
+Building image....................
+Using local image: public.ecr.aws/lambda/python:3.13-rapid-x86_64.
+
+Mounting /Users/camiloavila/Documents/website/infrastructure/sam/.aws-sam/build/ContactFunction as /var/task:ro,delegated, inside runtime container
+SAM_CONTAINER_ID: a3fc35f98922d741421d3ba7ff0d289aecff2c52603c46648c179f70045d4b74
+START RequestId: aeced359-705d-4fb4-b4a5-89a9404c38f1 Version: $LATEST
+[WARNING]	2026-05-05T08:07:47.954Z		LAMBDA_WARNING: Unhandled exception. The most likely cause is an issue in the function code. However, in rare cases, a Lambda runtime update can cause unexpected function behavior. For functions using managed runtimes, runtime updates can be triggered by a function change, or can be applied automatically. To determine if the runtime has been updated, check the runtime version in the INIT_START log entry. If this error correlates with a change in the runtime version, you may be able to mitigate this error by temporarily rolling back to the previous runtime version. For more information, see https://docs.aws.amazon.com/lambda/latest/dg/runtimes-update.html
+
+[ERROR] Runtime.ImportModuleError: Unable to import module 'contact_handler': No module named 'bleach'
+Traceback (most recent call last):
+05 May 2026 08:07:48,053 [ERROR] (rapid) Init failed error=Runtime exited with error: exit status 1 InvokeID=
+05 May 2026 08:07:48,055 [ERROR] (rapid) Invoke failed error=Runtime exited with error: exit status 1 InvokeID=aeced359-705d-4fb4-b4a5-89a9404c38f1
+05 May 2026 08:07:48,056 [ERROR] (rapid) Invoke DONE failed: Sandbox.Failure
+
+No Content-Type given. Defaulting to 'application/json'.
+2026-05-05 10:07:49 127.0.0.1 - - [05/May/2026 10:07:49] "POST /contact HTTP/1.1" 200 -

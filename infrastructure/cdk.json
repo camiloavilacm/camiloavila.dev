@@ -1,0 +1,9 @@
+{
+  "app": "python3 app.py",
+  "version": "2",
+  "context": {
+    "@aws-cdk/core/stackName": "camiloavila-portfolio",
+    "@aws-cdk/core/asset-parallelism-unrestricted": "",
+    "dockerignore-relative-paths": "true"
+  }
+}

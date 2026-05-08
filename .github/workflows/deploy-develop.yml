@@ -196,7 +196,7 @@ jobs:
         run: sam build --parallel
 
       - name: SAM Deploy to Staging
-        run: sam deploy --config-env staging --stack-name camiloavila-dev-staging --force-upload
+        run: sam deploy --config-env staging --stack-name camiloavila-dev-staging --force-upload --parameter-overrides "CertificateArn=arn:aws:acm:us-east-1:046228935090:certificate/58ff1939-6f3a-44de-964d-4b801bd7b4a1"
 
       - name: Get API Gateway URL from stack outputs
         id: get-outputs

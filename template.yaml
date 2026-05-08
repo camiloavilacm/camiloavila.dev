@@ -68,14 +68,15 @@ Parameters:
       Custom domain for the CloudFront distribution.
       DNS (ALIAS record) must be configured in Route 53 after first deploy.
 
-# ---------------------------------------------------------------------------
-# Globals — shared settings applied to all Lambda functions
-# ---------------------------------------------------------------------------
+# =========================================================================
+# Globals
+# =========================================================================
+
 Globals:
   Function:
     Runtime: python3.13
-    Timeout: 30
-    MemorySize: 256
+    Timeout: 60
+    MemorySize: 1024  # Increased for larger packages
     Environment:
       Variables:
         KNOWLEDGE_BUCKET: !Ref KnowledgeBaseBucket
@@ -269,22 +270,30 @@ Resources:
                     ses:FromAddress: !Ref SesSenderEmail
 
   # -------------------------------------------------------------------------
+  # Lambda Layer — Strands Agents (heavy dependencies)
+  # -------------------------------------------------------------------------
+  StrandsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "camiloavila-strands-layer-${Stage}"
+      ContentUri: s3://aws-sam-cli-managed-default-samclisourcebucket-zqkjuwmhr96n/camiloavila-dev-staging/layers/strands/python.zip
+      CompatibleRuntimes:
+        - python3.13
+
+  # -------------------------------------------------------------------------
   # Lambda — Chatbot Function
-  # Handles POST /chat requests.
-  # Uses Strands Agent with search_resume and get_contact_info tools.
-  # Reads knowledge_base.md from S3 (cached in memory after cold start).
   # -------------------------------------------------------------------------
   ChatbotFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "camiloavila-chatbot-${Stage}"
-      CodeUri: backend/src/
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-zqkjuwmhr96n/camiloavila-dev-staging/chatbot-function.zip
       Handler: handler.lambda_handler
       Role: !GetAtt ChatbotFunctionRole.Arn
       Tracing: Active
+      Layers:
+        - !Ref StrandsLayer
       Description: >
-        RAG chatbot backed by Amazon Bedrock and Strands Agents.
-        Answers questions about Camilo Avila's resume using knowledge_base.md.
       Events:
         ChatPost:
           Type: HttpApi
@@ -303,17 +312,17 @@ Resources:
 
   # -------------------------------------------------------------------------
   # Lambda — Contact Function
-  # Handles POST /contact requests.
-  # Saves submission to DynamoDB, generates AI reply, sends email via SES.
   # -------------------------------------------------------------------------
   ContactFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "camiloavila-contact-${Stage}"
-      CodeUri: backend/src/
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-zqkjuwmhr96n/camiloavila-dev-staging/contact-function.zip
       Handler: contact_handler.lambda_handler
       Role: !GetAtt ContactFunctionRole.Arn
       Tracing: Active
+      Layers:
+        - !Ref StrandsLayer
       Description: >
         Handles contact form submissions. Saves to DynamoDB, generates a
         personalized AI email paragraph via Bedrock, and sends via SES.

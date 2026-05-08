@@ -1,0 +1,249 @@
+{
+  "/camiloavila-portfolio": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "Kernel._Kernel_create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:61273)",
+        "Kernel.create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:52004)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/PortfolioApi": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PortfolioApi"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "Kernel._Kernel_create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:61273)",
+        "Kernel.create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:52004)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/ChatbotFunction": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ChatbotFunction"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "Kernel._Kernel_create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:61273)",
+        "Kernel.create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:52004)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/ContactFunction": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ContactFunction"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "Kernel._Kernel_create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:61273)",
+        "Kernel.create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:52004)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/ApiUrl": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiUrl"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "Kernel._Kernel_create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:61273)",
+        "Kernel.create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:52004)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/KnowledgeBaseBucketName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "KnowledgeBaseBucketName"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "Kernel._Kernel_create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:61273)",
+        "Kernel.create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:52004)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...App.synth in aws-cdk-lib...",
+        "/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:543 (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:5434)",
+        "Kernel._Kernel_ensureSync (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:69992)",
+        "Kernel.invoke (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:54294)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...App.synth in aws-cdk-lib...",
+        "/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:543 (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:5434)",
+        "Kernel._Kernel_ensureSync (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:69992)",
+        "Kernel.invoke (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:54294)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/KnowledgeBaseBucket/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "KnowledgeBaseBucketC011DD60"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Bucket2 in aws-cdk-lib...",
+        "Kernel._Kernel_create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:61273)",
+        "Kernel.create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:52004)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/ChatbotFunctionRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ChatbotFunctionRoleCC00CB4C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Role2 in aws-cdk-lib...",
+        "Kernel._Kernel_create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:61273)",
+        "Kernel.create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:52004)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/ContactFunctionRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ContactFunctionRole2F5A8504"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Role2 in aws-cdk-lib...",
+        "Kernel._Kernel_create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:61273)",
+        "Kernel.create (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:52004)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...App.synth in aws-cdk-lib...",
+        "/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:543 (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:5434)",
+        "Kernel._Kernel_ensureSync (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:69992)",
+        "Kernel.invoke (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:54294)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/ChatbotFunctionRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ChatbotFunctionRoleDefaultPolicy261BD951"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:543 (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:5434)",
+        "Kernel._Kernel_ensureSync (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:69992)",
+        "Kernel.invoke (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:54294)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/camiloavila-portfolio/ContactFunctionRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ContactFunctionRoleDefaultPolicy10D59EBB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.<anonymous> in aws-cdk-lib...",
+        "/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:543 (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:5434)",
+        "Kernel._Kernel_ensureSync (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:69992)",
+        "Kernel.invoke (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:54294)",
+        "KernelHost.processRequest (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:212888)",
+        "KernelHost.run (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211943)",
+        "Immediate._onImmediate (/private/var/folders/_3/10m7xtq97r916_mrqdcv241h0000gn/T/tmps28stoea/lib/program.js:1:211987)",
+        "...node internals..."
+      ]
+    }
+  ]
+}

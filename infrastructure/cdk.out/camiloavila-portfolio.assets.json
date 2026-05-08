@@ -1,0 +1,21 @@
+{
+  "version": "53.0.0",
+  "files": {
+    "e483f4bb5fa4ab94603bfc5a9f0723a43c324f55a3a10e71c6cc639184138058": {
+      "displayName": "camiloavila-portfolio Template",
+      "source": {
+        "path": "camiloavila-portfolio.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "123456789012-us-east-1-fa2094c6": {
+          "bucketName": "cdk-hnb659fds-assets-123456789012-us-east-1",
+          "objectKey": "e483f4bb5fa4ab94603bfc5a9f0723a43c324f55a3a10e71c6cc639184138058.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::123456789012:role/cdk-hnb659fds-file-publishing-role-123456789012-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
