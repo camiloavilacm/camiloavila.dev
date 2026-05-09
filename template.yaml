@@ -76,15 +76,7 @@ Globals:
   Function:
     Runtime: python3.13
     Timeout: 60
-    MemorySize: 1024  # Increased for larger packages
-    Environment:
-      Variables:
-        KNOWLEDGE_BUCKET: !Ref KnowledgeBaseBucket
-        KNOWLEDGE_KEY: knowledge_base.md
-        BEDROCK_MODEL_ID: !Ref BedrockModelId
-        CONTACT_TABLE: !Ref ContactTable
-        SES_SENDER_EMAIL: !Ref SesSenderEmail
-        ALLOWED_ORIGIN: !Sub "https://${DomainName}"
+    MemorySize: 1024
 
 # ---------------------------------------------------------------------------
 # Resources
@@ -100,7 +92,6 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "camiloavila-knowledge-base-${Stage}-${AWS::AccountId}"
-      AccessControl: Private
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -123,9 +114,6 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "camiloavila-frontend-${Stage}-${AWS::AccountId}"
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: index.html
       Tags:
         - Key: Project
           Value: camiloavila-dev
@@ -133,10 +121,6 @@ Resources:
           Value: Frontend static hosting
         - Key: Stage
           Value: !Ref Stage
-        - Key: Project
-          Value: camiloavila-dev
-        - Key: Purpose
-          Value: Frontend static hosting
 
   FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -271,14 +255,17 @@ Resources:
 
   # -------------------------------------------------------------------------
   # Lambda Layer — Strands Agents (heavy dependencies)
+  # Build: cd backend && pip install --target .lambda_layer/python/lib/python3.13/site-packages -r requirements-layer.txt
+  # Excludes: .lambdaignore (removes __pycache__, .dist-info, tests, etc.)
   # -------------------------------------------------------------------------
   StrandsLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: !Sub "camiloavila-strands-layer-${Stage}"
-      ContentUri: s3://aws-sam-cli-managed-default-samclisourcebucket-zqkjuwmhr96n/camiloavila-dev-staging/layers/strands/python.zip
+      ContentUri: backend/.lambda_layer/
       CompatibleRuntimes:
         - python3.13
+      RetentionPolicy: Retain
 
   # -------------------------------------------------------------------------
   # Lambda — Chatbot Function
@@ -287,13 +274,21 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "camiloavila-chatbot-${Stage}"
-      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-zqkjuwmhr96n/camiloavila-dev-staging/chatbot-function.zip
+      CodeUri: backend/src/
       Handler: handler.lambda_handler
       Role: !GetAtt ChatbotFunctionRole.Arn
       Tracing: Active
       Layers:
         - !Ref StrandsLayer
       Description: >
+        RAG chatbot backed by Amazon Bedrock. Provides Q&A about Camilo Avila's
+        resume, skills, experience, and projects using a strands-agent with search tools.
+      Environment:
+        Variables:
+          KNOWLEDGE_BUCKET: !Ref KnowledgeBaseBucket
+          KNOWLEDGE_KEY: knowledge_base.md
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
+          ALLOWED_ORIGIN: !Sub "https://${DomainName}"
       Events:
         ChatPost:
           Type: HttpApi
@@ -317,7 +312,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "camiloavila-contact-${Stage}"
-      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-zqkjuwmhr96n/camiloavila-dev-staging/contact-function.zip
+      CodeUri: backend/src/
       Handler: contact_handler.lambda_handler
       Role: !GetAtt ContactFunctionRole.Arn
       Tracing: Active
@@ -326,6 +321,14 @@ Resources:
       Description: >
         Handles contact form submissions. Saves to DynamoDB, generates a
         personalized AI email paragraph via Bedrock, and sends via SES.
+      Environment:
+        Variables:
+          KNOWLEDGE_BUCKET: !Ref KnowledgeBaseBucket
+          KNOWLEDGE_KEY: knowledge_base.md
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
+          CONTACT_TABLE: !Ref ContactTable
+          SES_SENDER_EMAIL: !Ref SesSenderEmail
+          ALLOWED_ORIGIN: !Sub "https://${DomainName}"
       Events:
         ContactPost:
           Type: HttpApi
@@ -388,8 +391,6 @@ Resources:
         Origins:
           - Id: FrontendS3Origin
             DomainName: !GetAtt FrontendBucket.RegionalDomainName
-            S3OriginConfig:
-              OriginAccessIdentity: ""
             OriginAccessControlId: !GetAtt CloudFrontOAC.Id
         DefaultCacheBehavior:
           TargetOriginId: FrontendS3Origin
@@ -411,12 +412,21 @@ Resources:
           SslSupportMethod: sni-only
           MinimumProtocolVersion: TLSv1.2_2021
         PriceClass: PriceClass_100  # US, Canada, Europe only — lowest cost
-        WebACLId: !GetAtt CloudFrontWAF.Arn
       Tags:
         - Key: Project
           Value: camiloavila-dev
 
-  # CloudFront Origin Access Control — restricts S3 to CloudFront only
+  # -------------------------------------------------------------------------
+  # WAF Association — links the CloudFront distribution to the WebACL
+  # -------------------------------------------------------------------------
+  # CloudFrontWAFAssociation:
+  #   Type: AWS::WAFv2::WebACLAssociation
+  #   Properties:
+  #     WebACLArn: !GetAtt CloudFrontWAF.Arn
+  #     ResourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
+
+  # -------------------------------------------------------------------------
+  # WAF — Web Application Firewall for CloudFront
   CloudFrontOAC:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
@@ -431,57 +441,57 @@ Resources:
   # Protects against common web attacks (OWASP Top 10) and bad bot traffic.
   # Uses AWS Managed Rules for automatic updates without manual maintenance.
   # -------------------------------------------------------------------------
-  CloudFrontWAF:
-    Type: AWS::WAFv2::WebACL
-    Properties:
-      Name: !Sub "camiloavila-waf-${Stage}"
-      Scope: CLOUDFRONT
-      DefaultAction:
-        Allow: {}
-      VisibilityConfig:
-        SampledRequestsEnabled: true
-        CloudWatchMetricsEnabled: true
-        MetricName: !Sub "camiloavila-waf-${Stage}"
-      Rules:
-        # AWS Managed Rules — Common Rule Set (SQLi, XSS, etc.)
-        - Name: AWSManagedRulesCommonRuleSet
-          Priority: 0
-          Statement:
-            ManagedRuleGroupStatement:
-              VendorName: AWS
-              Name: AWSManagedRulesCommonRuleSet
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            SampledRequestsEnabled: true
-            CloudWatchMetricsEnabled: true
-            MetricName: AWSManagedRulesCommonRuleSet
-        # AWS Managed Rules — Known Bad Inputs (path traversal, etc.)
-        - Name: AWSManagedRulesKnownBadInputsRuleSet
-          Priority: 1
-          Statement:
-            ManagedRuleGroupStatement:
-              VendorName: AWS
-              Name: AWSManagedRulesKnownBadInputsRuleSet
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            SampledRequestsEnabled: true
-            CloudWatchMetricsEnabled: true
-            MetricName: AWSManagedRulesKnownBadInputsRuleSet
-        # AWS Managed Rules — Bot Control (basic bot filtering)
-        - Name: AWSManagedRulesBotControlRuleSet
-          Priority: 2
-          Statement:
-            ManagedRuleGroupStatement:
-              VendorName: AWS
-              Name: AWSManagedRulesBotControlRuleSet
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            SampledRequestsEnabled: true
-            CloudWatchMetricsEnabled: true
-            MetricName: AWSManagedRulesBotControlRuleSet
+  # CloudFrontWAF:
+  #   Type: AWS::WAFv2::WebACL
+  #   Properties:
+  #     Name: !Sub "camiloavila-waf-${Stage}"
+  #     Scope: CLOUDFRONT
+  #     DefaultAction:
+  #       Allow: {}
+  #     VisibilityConfig:
+  #       SampledRequestsEnabled: true
+  #       CloudWatchMetricsEnabled: true
+  #       MetricName: !Sub "camiloavila-waf-${Stage}"
+  #     Rules:
+  #       # AWS Managed Rules — Common Rule Set (SQLi, XSS, etc.)
+  #       - Name: AWSManagedRulesCommonRuleSet
+  #         Priority: 0
+  #         Statement:
+  #           ManagedRuleGroupStatement:
+  #             VendorName: AWS
+  #             Name: AWSManagedRulesCommonRuleSet
+  #         OverrideAction:
+  #           None: {}
+  #         VisibilityConfig:
+  #           SampledRequestsEnabled: true
+  #           CloudWatchMetricsEnabled: true
+  #           MetricName: AWSManagedRulesCommonRuleSet
+  #       # AWS Managed Rules — Known Bad Inputs (path traversal, etc.)
+  #       - Name: AWSManagedRulesKnownBadInputsRuleSet
+  #         Priority: 1
+  #         Statement:
+  #           ManagedRuleGroupStatement:
+  #             VendorName: AWS
+  #             Name: AWSManagedRulesKnownBadInputsRuleSet
+  #         OverrideAction:
+  #           None: {}
+  #         VisibilityConfig:
+  #           SampledRequestsEnabled: true
+  #           CloudWatchMetricsEnabled: true
+  #           MetricName: AWSManagedRulesKnownBadInputsRuleSet
+  #       # AWS Managed Rules — Bot Control (basic bot filtering)
+  #       - Name: AWSManagedRulesBotControlRuleSet
+  #         Priority: 2
+  #         Statement:
+  #           ManagedRuleGroupStatement:
+  #             VendorName: AWS
+  #             Name: AWSManagedRulesBotControlRuleSet
+  #         OverrideAction:
+  #           None: {}
+  #         VisibilityConfig:
+  #           SampledRequestsEnabled: true
+  #           CloudWatchMetricsEnabled: true
+  #           MetricName: AWSManagedRulesBotControlRuleSet
 
 # ---------------------------------------------------------------------------
 # Outputs — used by GitHub Actions deploy.yml to populate secrets
