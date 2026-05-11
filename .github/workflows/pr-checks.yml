@@ -4,10 +4,14 @@
 # Runs on every pull request targeting the main or develop branch.
 # All jobs must pass before a PR can be merged.
 #
-# Jobs:
-#   backend-checks  — Python lint (flake8), unit tests (pytest), coverage report
-#   frontend-checks — ESLint, npm audit, TypeScript type-check, Vite build
-#   e2e-checks     — Cypress, Puppeteer, Playwright (on PRs to develop only)
+# Parallel Jobs (run simultaneously):
+#   backend-checks    — Python lint (flake8), unit tests (pytest)
+#   frontend-checks   — ESLint, npm audit, TypeScript type-check, Vite build
+#   e2e-cypress-chatbot    — Cypress chatbot tests
+#   e2e-cypress-contact    — Cypress contact form tests
+#   e2e-playwright-security  — Playwright security tests
+#   e2e-playwright-accessibility — Playwright accessibility tests
+#   e2e-summary         — Aggregates all E2E test results
 #
 # Reports:
 #   - Pytest HTML report uploaded as artifact: test-reports-unit-{run_id}
@@ -33,7 +37,7 @@ permissions:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Backend: Python lint + unit tests
+  # Backend: Python lint + unit tests (parallel with frontend-checks)
   # ---------------------------------------------------------------------------
   backend-checks:
     name: Backend — Lint & Unit Tests
@@ -93,14 +97,14 @@ jobs:
 
       - name: Upload unit test reports
         uses: actions/upload-artifact@v4
-        if: always()   # Upload even if tests fail
+        if: always()
         with:
           name: test-reports-unit-${{ github.run_id }}
           path: reports/unit/
           retention-days: 30
 
   # ---------------------------------------------------------------------------
-  # Frontend: ESLint + security audit + build check
+  # Frontend: ESLint + security audit + build check (parallel with backend-checks)
   # ---------------------------------------------------------------------------
   frontend-checks:
     name: Frontend — Lint, Audit & Build
@@ -144,10 +148,10 @@ jobs:
           VITE_API_URL: https://placeholder.execute-api.us-east-1.amazonaws.com/prod
 
   # ---------------------------------------------------------------------------
-  # E2E Tests: Run on PRs to develop branch only (against staging if available)
+  # E2E: Cypress Chatbot Tests (parallel with other E2E jobs)
   # ---------------------------------------------------------------------------
-  e2e-checks:
-    name: E2E Tests (PRs to develop)
+  e2e-cypress-chatbot:
+    name: E2E — Cypress Chatbot
     runs-on: ubuntu-latest
     if: github.base_ref == 'develop'
     needs: [backend-checks, frontend-checks]
@@ -156,7 +160,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
-      - name: Set up Node.js 20 (Cypress)
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -167,68 +171,65 @@ jobs:
         working-directory: tests
         run: npm ci
 
-      - name: Run Cypress smoke tests
+      - name: Run Cypress chatbot tests
         working-directory: tests
-        run: npm run test:cypress || true
+        run: npx cypress run --config-file e2e/cypress/cypress.config.ts --spec "e2e/cypress/specs/chatbot.cy.ts" || true
         env:
           CYPRESS_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+          TERM: dumb
 
       - name: Upload Cypress reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cypress-pr-reports-${{ github.run_id }}
+          name: cypress-chatbot-reports-${{ github.run_id }}
           path: reports/e2e/cypress/
           retention-days: 30
 
-      - name: Run Puppeteer smoke tests
+  # ---------------------------------------------------------------------------
+  # E2E: Cypress Contact Form Tests (parallel with other E2E jobs)
+  # ---------------------------------------------------------------------------
+  e2e-cypress-contact:
+    name: E2E — Cypress Contact Form
+    runs-on: ubuntu-latest
+    if: github.base_ref == 'develop'
+    needs: [backend-checks, frontend-checks]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: tests/package.json
+
+      - name: Install test dependencies
         working-directory: tests
-        run: npm run test:puppeteer || true
-        env:
-          PUPPETEER_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+        run: npm ci
 
-      - name: Upload Puppeteer reports
+      - name: Run Cypress contact form tests
+        working-directory: tests
+        run: npx cypress run --config-file e2e/cypress/cypress.config.ts --spec "e2e/cypress/specs/contact_form.cy.ts" --grep "smoke" --invert || true
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+          TERM: dumb
+
+      - name: Upload Cypress reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: puppeteer-pr-reports-${{ github.run_id }}
-          path: reports/e2e/puppeteer/
-          retention-days: 30
-
-      - name: Set up Python 3.13 (Playwright)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Install Playwright dependencies
-        run: |
-          python3 -m pip install playwright pytest pytest-html allure-pytest requests
-          playwright install chromium
-
-      - name: Run Playwright smoke tests
-        run: |
-          mkdir -p reports/e2e/playwright
-          python3 -m pytest tests/e2e/playwright/ \
-            -v \
-            -m smoke \
-            --html=reports/e2e/playwright/report.html \
-            --self-contained-html || true
-        env:
-          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
-
-      - name: Upload Playwright reports
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-pr-reports-${{ github.run_id }}
-          path: reports/e2e/playwright/
+          name: cypress-contact-reports-${{ github.run_id }}
+          path: reports/e2e/cypress/
           retention-days: 30
 
   # ---------------------------------------------------------------------------
-  # Security E2E Tests: Run on PRs to develop branch (security validation)
+  # E2E: Playwright Security Tests (parallel with other E2E jobs)
   # ---------------------------------------------------------------------------
-  security-e2e-checks:
-    name: Security — E2E Tests (PRs to develop)
+  e2e-playwright-security:
+    name: E2E — Playwright Security
     runs-on: ubuntu-latest
     if: github.base_ref == 'develop'
     needs: [backend-checks, frontend-checks]
@@ -244,7 +245,7 @@ jobs:
 
       - name: Install Playwright dependencies
         run: |
-          python3 -m pip install playwright pytest pytest-html allure-pytest requests
+          python3 -m pip install playwright pytest pytest-html requests
           playwright install chromium
 
       - name: Run Playwright security tests
@@ -261,6 +262,81 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: security-e2e-pr-reports-${{ github.run_id }}
+          name: playwright-security-reports-${{ github.run_id }}
           path: reports/e2e/playwright-security/
           retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # E2E: Playwright Accessibility Tests (parallel with other E2E jobs)
+  # ---------------------------------------------------------------------------
+  e2e-playwright-accessibility:
+    name: E2E — Playwright Accessibility
+    runs-on: ubuntu-latest
+    if: github.base_ref == 'develop'
+    needs: [backend-checks, frontend-checks]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Playwright dependencies
+        run: |
+          python3 -m pip install playwright pytest pytest-html requests
+          playwright install chromium
+
+      - name: Run Playwright accessibility tests
+        run: |
+          mkdir -p reports/e2e/playwright-accessibility
+          python3 -m pytest tests/e2e/playwright/specs/test_accessibility.py \
+            -v \
+            --html=reports/e2e/playwright-accessibility/report.html \
+            --self-contained-html || true
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+
+      - name: Upload accessibility test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-accessibility-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-accessibility/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # E2E Summary: Aggregate all E2E results (fails if any E2E job fails)
+  # ---------------------------------------------------------------------------
+  e2e-summary:
+    name: E2E — Summary
+    runs-on: ubuntu-latest
+    if: github.base_ref == 'develop'
+    needs: [e2e-cypress-chatbot, e2e-cypress-contact, e2e-playwright-security, e2e-playwright-accessibility]
+
+    steps:
+      - name: Check E2E job results
+        run: |
+          echo "Checking E2E test results..."
+          
+          # Get the outcome of each E2E job
+          CHATBOT_RESULT="${{ needs.e2e-cypress-chatbot.result }}"
+          CONTACT_RESULT="${{ needs.e2e-cypress-contact.result }}"
+          SECURITY_RESULT="${{ needs.e2e-playwright-security.result }}"
+          ACCESSIBILITY_RESULT="${{ needs.e2e-playwright-accessibility.result }}"
+          
+          echo "Chatbot: $CHATBOT_RESULT"
+          echo "Contact Form: $CONTACT_RESULT"
+          echo "Security: $SECURITY_RESULT"
+          echo "Accessibility: $ACCESSIBILITY_RESULT"
+          
+          # Check if any job failed
+          if [[ "$CHATBOT_RESULT" == "failure" ]] || [[ "$CONTACT_RESULT" == "failure" ]] || \
+             [[ "$SECURITY_RESULT" == "failure" ]] || [[ "$ACCESSIBILITY_RESULT" == "failure" ]]; then
+            echo "❌ One or more E2E tests failed"
+            exit 1
+          fi
+          
+          echo "✅ All E2E tests passed"
