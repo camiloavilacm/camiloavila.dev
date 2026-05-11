@@ -1,0 +1,28 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "description": "Personal portfolio for **Camilo Avila**, Senior QA Automation Engineer. Features an AI-powered chatbot backed by Amazon Bedrock that answers questions about the resume, and a contact form with automated personalised email replies via SES.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camiloavilacm/camiloavila.dev.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/camiloavilacm/camiloavila.dev/issues"
+  },
+  "homepage": "https://github.com/camiloavilacm/camiloavila.dev#readme",
+  "dependencies": {
+    "playwright": "^1.59.1"
+  }
+}
