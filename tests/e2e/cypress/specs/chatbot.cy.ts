@@ -30,8 +30,8 @@ describe("AI Resume Chatbot — E2E", () => {
       cy.log("Skipping chat tests - requires staging or production API");
       return;
     }
+    // Chatbot is now inline (always visible, no toggle button)
     cy.visit("/");
-    cy.get("[data-testid='chatbot-toggle']").click();
   });
 
   // -------------------------------------------------------------------------
