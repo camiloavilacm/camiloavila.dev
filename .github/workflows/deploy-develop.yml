@@ -322,10 +322,12 @@ jobs:
           echo "Staging CloudFront cache invalidated."
 
   # ---------------------------------------------------------------------------
-  # Stage 6: Smoke tests against staging site
+  # Stage 6: Parallel E2E Smoke Tests against staging site
   # ---------------------------------------------------------------------------
-  smoke-tests:
-    name: Smoke Tests (Staging Site)
+
+  # --- Cypress chatbot tests ---
+  e2e-cypress-chatbot:
+    name: E2E — Cypress Chatbot (Staging)
     runs-on: ubuntu-latest
     needs: [deploy-frontend, upload-kb]
 
@@ -336,8 +338,321 @@ jobs:
       - name: Wait for CloudFront propagation
         run: sleep 30
 
-      # --- Cypress smoke tests ---
-      - name: Set up Node.js 20 (Cypress)
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: tests/package.json
+
+      - name: Install test dependencies
+        working-directory: tests
+        run: npm ci
+
+      - name: Run Cypress chatbot tests
+        working-directory: tests
+        run: npx cypress run --config-file e2e/cypress/cypress.config.ts --spec "e2e/cypress/specs/chatbot.cy.ts"
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+          TERM: dumb
+
+      - name: Upload Cypress reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-chatbot-reports-${{ github.run_id }}
+          path: reports/e2e/cypress/
+          retention-days: 30
+
+  # --- Cypress contact form tests ---
+  e2e-cypress-contact:
+    name: E2E — Cypress Contact Form (Staging)
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, upload-kb]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Wait for CloudFront propagation
+        run: sleep 30
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: tests/package.json
+
+      - name: Install test dependencies
+        working-directory: tests
+        run: npm ci
+
+      - name: Run Cypress contact form tests
+        working-directory: tests
+        run: npx cypress run --config-file e2e/cypress/cypress.config.ts --spec "e2e/cypress/specs/contact_form.cy.ts"
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+          TERM: dumb
+
+      - name: Upload Cypress reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-contact-reports-${{ github.run_id }}
+          path: reports/e2e/cypress/
+          retention-days: 30
+
+  # --- Playwright smoke tests (Chromium) ---
+  e2e-playwright-chromium:
+    name: E2E — Playwright Chromium (Staging)
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, upload-kb]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Wait for CloudFront propagation
+        run: sleep 30
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Playwright dependencies
+        run: |
+          python3 -m pip install playwright pytest pytest-html requests
+          playwright install chromium
+
+      - name: Run Playwright smoke tests (Chromium)
+        run: |
+          mkdir -p reports/e2e/playwright-chromium
+          python3 -m pytest tests/e2e/playwright/ \
+            -v \
+            -m "smoke" \
+            --browser=chromium \
+            --html=reports/e2e/playwright-chromium/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+
+      - name: Upload Playwright reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-chromium-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-chromium/
+          retention-days: 30
+
+  # --- Playwright smoke tests (Firefox) ---
+  e2e-playwright-firefox:
+    name: E2E — Playwright Firefox (Staging)
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, upload-kb]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Wait for CloudFront propagation
+        run: sleep 30
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Playwright dependencies
+        run: |
+          python3 -m pip install playwright pytest pytest-html requests
+          playwright install firefox
+
+      - name: Run Playwright smoke tests (Firefox)
+        run: |
+          mkdir -p reports/e2e/playwright-firefox
+          python3 -m pytest tests/e2e/playwright/ \
+            -v \
+            -m "smoke" \
+            --browser=firefox \
+            --html=reports/e2e/playwright-firefox/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+
+      - name: Upload Playwright reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-firefox-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-firefox/
+          retention-days: 30
+
+  # --- Playwright smoke tests (WebKit) ---
+  e2e-playwright-webkit:
+    name: E2E — Playwright WebKit (Staging)
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, upload-kb]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Wait for CloudFront propagation
+        run: sleep 30
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Playwright dependencies
+        run: |
+          python3 -m pip install playwright pytest pytest-html requests
+          playwright install webkit
+
+      - name: Run Playwright smoke tests (WebKit)
+        run: |
+          mkdir -p reports/e2e/playwright-webkit
+          python3 -m pytest tests/e2e/playwright/ \
+            -v \
+            -m "smoke" \
+            --browser=webkit \
+            --html=reports/e2e/playwright-webkit/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+
+      - name: Upload Playwright reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-webkit-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-webkit/
+          retention-days: 30
+
+  # --- Playwright security tests ---
+  e2e-playwright-security:
+    name: E2E — Playwright Security (Staging)
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, upload-kb]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Wait for CloudFront propagation
+        run: sleep 30
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Playwright dependencies
+        run: |
+          python3 -m pip install playwright pytest pytest-html requests
+          playwright install chromium
+
+      - name: Run Playwright security tests
+        run: |
+          mkdir -p reports/e2e/playwright-security
+          python3 -m pytest tests/e2e/playwright/specs/test_security.py \
+            -v \
+            --html=reports/e2e/playwright-security/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+
+      - name: Upload security test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-security-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-security/
+          retention-days: 30
+
+  # --- Playwright accessibility tests ---
+  e2e-playwright-accessibility:
+    name: E2E — Playwright Accessibility (Staging)
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, upload-kb]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Wait for CloudFront propagation
+        run: sleep 30
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Playwright dependencies
+        run: |
+          python3 -m pip install playwright pytest pytest-html requests
+          playwright install chromium
+
+      - name: Run Playwright accessibility tests
+        run: |
+          mkdir -p reports/e2e/playwright-accessibility
+          python3 -m pytest tests/e2e/playwright/specs/test_accessibility.py \
+            -v \
+            --html=reports/e2e/playwright-accessibility/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+
+      - name: Upload accessibility test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-accessibility-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-accessibility/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # E2E Summary: Aggregate all E2E results (fails if any E2E job fails)
+  # ---------------------------------------------------------------------------
+  e2e-summary:
+    name: E2E — Summary
+    runs-on: ubuntu-latest
+    needs: [e2e-cypress-chatbot, e2e-cypress-contact, e2e-playwright-chromium, e2e-playwright-firefox, e2e-playwright-webkit, e2e-playwright-security, e2e-playwright-accessibility]
+
+    steps:
+      - name: Check E2E job results
+        run: |
+          echo "Checking E2E test results..."
+          
+          CHATBOT_RESULT="${{ needs.e2e-cypress-chatbot.result }}"
+          CONTACT_RESULT="${{ needs.e2e-cypress-contact.result }}"
+          CHROMIUM_RESULT="${{ needs.e2e-playwright-chromium.result }}"
+          FIREFOX_RESULT="${{ needs.e2e-playwright-firefox.result }}"
+          WEBKIT_RESULT="${{ needs.e2e-playwright-webkit.result }}"
+          SECURITY_RESULT="${{ needs.e2e-playwright-security.result }}"
+          ACCESSIBILITY_RESULT="${{ needs.e2e-playwright-accessibility.result }}"
+          
+          echo "Chatbot: $CHATBOT_RESULT"
+          echo "Contact: $CONTACT_RESULT"
+          echo "Chromium: $CHROMIUM_RESULT"
+          echo "Firefox: $FIREFOX_RESULT"
+          echo "WebKit: $WEBKIT_RESULT"
+          echo "Security: $SECURITY_RESULT"
+          echo "Accessibility: $ACCESSIBILITY_RESULT"
+          
+          # Check if any job failed
+          if [[ "$CHATBOT_RESULT" == "failure" ]] || [[ "$CONTACT_RESULT" == "failure" ]] || \
+             [[ "$CHROMIUM_RESULT" == "failure" ]] || [[ "$FIREFOX_RESULT" == "failure" ]] || \
+             [[ "$WEBKIT_RESULT" == "failure" ]] || [[ "$SECURITY_RESULT" == "failure" ]] || \
+             [[ "$ACCESSIBILITY_RESULT" == "failure" ]]; then
+            echo "❌ One or more E2E tests failed"
+            exit 1
+          fi
+          
+          echo "✅ All E2E tests passed"
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -508,7 +823,7 @@ jobs:
   publish-reports:
     name: Publish Allure Reports to GitHub Pages
     runs-on: ubuntu-latest
-    needs: smoke-tests
+    needs: e2e-summary
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
