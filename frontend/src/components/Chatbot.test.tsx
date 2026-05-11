@@ -12,7 +12,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Chatbot from './Chatbot';
 
@@ -77,7 +77,8 @@ describe('Chatbot', () => {
     await userEvent.click(sendBtn);
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
-    const callBody = JSON.parse((global.fetch as any).mock.calls[0][1].body);
+    const fetchCall = global.fetch.mock.calls[0] as [string, { body: string }];
+    const callBody = JSON.parse(fetchCall[1].body);
     expect(callBody).toEqual({ question: 'Test question' });
   });
 

@@ -128,8 +128,6 @@ describe('ContactForm', () => {
     it('clears field error when user types in that field', async () => {
       render(<ContactForm />);
       const nameInput = screen.getByLabelText(/Name/i);
-      const emailInput = screen.getByLabelText(/Email/i);
-      const messageInput = screen.getByRole('textbox', { name: /Message/i });
 
       // Submit empty form to trigger errors
       await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
@@ -182,7 +180,8 @@ describe('ContactForm', () => {
         })
       );
 
-      const callBody = JSON.parse((global.fetch as any).mock.calls[0][1].body);
+      const fetchCall = global.fetch.mock.calls[0] as [string, { body: string }];
+      const callBody = JSON.parse(fetchCall[1].body);
       expect(callBody).toEqual({
         name: 'John Doe',
         email: 'john@example.com',
