@@ -191,13 +191,12 @@ class TestAccessibilityContrast:
     def test_dark_theme_elements_have_contrast(self, page):
         """Verify key elements on dark background have readable colors."""
         page.goto(BASE_URL, wait_until="networkidle")
+        # Wait for h1 to be in DOM
+        page.wait_for_selector("h1")
 
-        # Check that primary text is visible on background
-        # This is a basic test - full contrast testing requires axe-core
         body_bg = page.evaluate("getComputedStyle(document.body).backgroundColor")
-        h1_color = page.locator("h1").first.evaluate("getComputedStyle(this).color")
+        h1_color = page.evaluate("getComputedStyle(document.querySelector('h1')).color")
 
-        # Just verify colors are computed (not transparent/inherit default)
         assert body_bg != "rgba(0, 0, 0, 0)", "Body should have background color"
         assert h1_color != "rgba(0, 0, 0, 0)", "H1 should have text color"
 

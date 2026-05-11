@@ -157,7 +157,7 @@ class TestKeyElements:
 class TestMobileDeviceSmoke:
     """Smoke tests running on mobile device emulators."""
 
-    def test_page_renders_on_mobile_device(self, page: Page):
+    def test_page_renders_on_mobile_device(self, page: Page, device):
         """Portfolio must render without layout issues on mobile device.
 
         Asserts:
@@ -166,12 +166,12 @@ class TestMobileDeviceSmoke:
         heading = page.locator("h1", has_text="Camilo Avila")
         expect(heading).to_be_visible()
 
-    def test_chatbot_visible_on_mobile(self, page: Page):
+    def test_chatbot_visible_on_mobile(self, page: Page, device):
         """Chatbot must be accessible on mobile viewport."""
         chat_input = page.get_by_test_id("chat-input")
         expect(chat_input).to_be_visible()
 
-    def test_contact_form_accessible_on_mobile(self, page: Page):
+    def test_contact_form_accessible_on_mobile(self, page: Page, device):
         """Contact form must be accessible on mobile device."""
         contact_section = page.locator("#contact")
         expect(contact_section).to_be_attached()

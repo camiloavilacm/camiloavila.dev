@@ -432,11 +432,11 @@ jobs:
           python3 -m pytest tests/e2e/playwright/ \
             -v \
             -m "smoke" \
-            --browser=chromium \
             --html=reports/e2e/playwright-chromium/report.html \
             --self-contained-html
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+          PLAYWRIGHT_BROWSER: chromium
 
       # --- Playwright security tests ---
       - name: Run Playwright security tests
@@ -513,10 +513,10 @@ jobs:
           python3 -m pytest tests/e2e/playwright/ \
             -v \
             -m "smoke" \
-            --browser=firefox \
             --html=reports/e2e/playwright-firefox/report.html \
             --self-contained-html
         env:
+          PLAYWRIGHT_BROWSER: firefox
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
       - name: Upload Playwright reports
@@ -556,11 +556,11 @@ jobs:
           python3 -m pytest tests/e2e/playwright/ \
             -v \
             -m "smoke" \
-            --browser=webkit \
             --html=reports/e2e/playwright-webkit/report.html \
             --self-contained-html
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+          PLAYWRIGHT_BROWSER: webkit
 
       - name: Upload Playwright reports
         uses: actions/upload-artifact@v4

@@ -202,3 +202,9 @@ def network_failures(page):
         ),
     )
     yield failures
+
+
+@pytest.fixture
+def device(request):
+    """Return the device name for mobile device emulation tests."""
+    return getattr(request, "param", None)
