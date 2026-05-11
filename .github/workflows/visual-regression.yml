@@ -16,10 +16,6 @@ jobs:
       pages: write
       id-token: write
 
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
@@ -33,10 +29,18 @@ jobs:
       - name: Install comparison tools
         run: |
           mkdir -p scripts
-          npm install --save-dev pixelmatch pngjs
+          npm install --save-dev pixelmatch pngjs playwright
 
-      - name: Install Playwright
+      - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+
+      - name: Configure AWS credentials
+        if: github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
       - name: Take production screenshot
         if: github.event_name == 'pull_request'
@@ -46,7 +50,7 @@ jobs:
           SCREENSHOT_ENV: production
 
       - name: Build staging
-        if: github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/main'
         run: |
           cd frontend
           npm ci
@@ -54,17 +58,17 @@ jobs:
           cd ..
 
       - name: Deploy staging to S3
-        if: github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/main'
         run: |
           aws s3 sync frontend/dist/ s3://${{ secrets.STAGING_S3_FRONTEND_BUCKET }} --delete
 
       - name: Invalidate CloudFront cache
-        if: github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/main'
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ secrets.STAGING_CLOUDFRONT_DIST_ID }} --paths "/*"
 
       - name: Wait for deployment
-        if: github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/main'
         run: sleep 30
 
       - name: Take staging screenshot
@@ -83,13 +87,13 @@ jobs:
         run: node scripts/generate-html.js
 
       - name: Upload visual diff to Pages
-        if: github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: visual-diff
 
       - name: Deploy to GitHub Pages
-        if: github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/main'
         id: deployment
         uses: actions/deploy-pages@v4
 
@@ -110,14 +114,7 @@ jobs:
               ? '✅ No changes' 
               : '⚠️ Changes detected';
 
-            const body = `## 📸 Visual Change Analysis
-
-| Viewport | Result |
-|----------|--------|
-| Desktop | ${desktopStatus} (${diffResult.desktop.toFixed(2)}% diff) |
-| Mobile | ${mobileStatus} (${diffResult.mobile.toFixed(2)}% diff) |
-
-📊 **Full report**: https://camiloavilacm.github.io/camiloavila.dev/visual-diff/`;
+            const body = "## 📸 Visual Change Analysis\n\n| Viewport | Result |\n|----------|--------|\n| Desktop | " + desktopStatus + " (" + diffResult.desktop.toFixed(2) + "% diff) |\n| Mobile | " + mobileStatus + " (" + diffResult.mobile.toFixed(2) + "% diff) |\n\n📊 **Full report**: https://camiloavilacm.github.io/camiloavila.dev/visual-diff/";
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,

@@ -46,49 +46,26 @@ describe("AI Resume Chatbot — E2E", () => {
   });
 
   // -------------------------------------------------------------------------
-  // Chatbot Widget Visibility
+  // Chatbot Widget Visibility (Inline - always visible)
   // -------------------------------------------------------------------------
-  it("shows the chatbot toggle button", () => {
-    cy.get("[data-testid='chatbot-toggle']")
-      .should("be.visible")
-      .and("have.attr", "aria-label");
+  it("shows the chatbot input field", () => {
+    cy.get("[data-testid='chat-input']").should("be.visible");
   });
 
-  it("opens the chat panel when toggle is clicked", () => {
-    cy.get("[data-testid='chatbot-toggle']").click();
-    cy.get("[data-testid='chatbot-panel']").should("be.visible");
+  it("shows the send button", () => {
+    cy.get("[data-testid='chat-send']").should("be.visible");
   });
 
-  it("shows the welcome message when panel opens", () => {
-    cy.get("[data-testid='chatbot-toggle']").click();
-    cy.get("[data-testid='chatbot-panel']")
-      .should("be.visible")
-      .within(() => {
-        cy.get("[data-testid='message-ai']")
-          .first()
-          .should("contain.text", "Resume Assistant");
-      });
-  });
-
-  it("closes the chat panel when toggle is clicked again", () => {
-    cy.get("[data-testid='chatbot-toggle']").click();
-    cy.get("[data-testid='chatbot-panel']").should("be.visible");
-    cy.get("[data-testid='chatbot-toggle']").click();
-    cy.get("[data-testid='chatbot-panel']").should("not.exist");
-  });
-
-  it("closes the chat panel on Escape key", () => {
-    cy.get("[data-testid='chatbot-toggle']").click();
-    cy.get("[data-testid='chatbot-panel']").should("be.visible");
-    cy.get("body").type("{esc}");
-    cy.get("[data-testid='chatbot-panel']").should("not.exist");
+  it("shows the welcome message on page load", () => {
+    cy.get("[data-testid='message-ai']")
+      .first()
+      .should("contain.text", "Resume Assistant");
   });
 
   // -------------------------------------------------------------------------
   // Chat Interaction — Valid Question
   // -------------------------------------------------------------------------
   it("shows loading indicator after sending a question", () => {
-    cy.get("[data-testid='chatbot-toggle']").click();
     cy.get("[data-testid='chat-input']").type("What are your AWS certifications?");
     cy.get("[data-testid='chat-send']").click();
 
@@ -97,7 +74,6 @@ describe("AI Resume Chatbot — E2E", () => {
   });
 
   it("returns an answer containing AWS certification info", () => {
-    cy.get("[data-testid='chatbot-toggle']").click();
     cy.get("[data-testid='chat-input']").type("What are your AWS certifications?");
     cy.get("[data-testid='chat-send']").click();
 
@@ -108,7 +84,6 @@ describe("AI Resume Chatbot — E2E", () => {
   });
 
   it("sends message on Enter key press", () => {
-    cy.get("[data-testid='chatbot-toggle']").click();
     cy.get("[data-testid='chat-input']").type(
       "What programming languages do you know?{enter}"
     );
@@ -119,13 +94,11 @@ describe("AI Resume Chatbot — E2E", () => {
   });
 
   it("clears the input field after sending", () => {
-    cy.get("[data-testid='chatbot-toggle']").click();
     cy.get("[data-testid='chat-input']").type("What is your experience?{enter}");
     cy.get("[data-testid='chat-input']").should("have.value", "");
   });
 
   it("shows the user message in the chat thread", () => {
-    cy.get("[data-testid='chatbot-toggle']").click();
     cy.get("[data-testid='chat-input']").type("Tell me about your Python skills");
     cy.get("[data-testid='chat-send']").click();
 
@@ -138,7 +111,6 @@ describe("AI Resume Chatbot — E2E", () => {
   // Chat Interaction — Off-topic Question (Guardrail)
   // -------------------------------------------------------------------------
   it("refuses to answer off-topic questions", () => {
-    cy.get("[data-testid='chatbot-toggle']").click();
     cy.get("[data-testid='chat-input']").type("What is the capital of France?");
     cy.get("[data-testid='chat-send']").click();
 
