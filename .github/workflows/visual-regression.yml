@@ -29,9 +29,9 @@ jobs:
       - name: Install comparison tools
         run: |
           mkdir -p scripts
-          npm install --save-dev pixelmatch pngjs
+          npm install --save-dev pixelmatch pngjs playwright
 
-      - name: Install Playwright
+      - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
       - name: Take production screenshot
