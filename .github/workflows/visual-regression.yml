@@ -110,14 +110,7 @@ jobs:
               ? '✅ No changes' 
               : '⚠️ Changes detected';
 
-            const body = `## 📸 Visual Change Analysis
-
-| Viewport | Result |
-|----------|--------|
-| Desktop | ${desktopStatus} (${diffResult.desktop.toFixed(2)}% diff) |
-| Mobile | ${mobileStatus} (${diffResult.mobile.toFixed(2)}% diff) |
-
-📊 **Full report**: https://camiloavilacm.github.io/camiloavila.dev/visual-diff/`;
+            const body = "## 📸 Visual Change Analysis\n\n| Viewport | Result |\n|----------|--------|\n| Desktop | " + desktopStatus + " (" + diffResult.desktop.toFixed(2) + "% diff) |\n| Mobile | " + mobileStatus + " (" + diffResult.mobile.toFixed(2) + "% diff) |\n\n📊 **Full report**: https://camiloavilacm.github.io/camiloavila.dev/visual-diff/";
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,

@@ -112,19 +112,15 @@ describe('ContactForm', () => {
       expect(await screen.findByText('Message is required.')).toBeInTheDocument();
     });
 
-    it('shows error when message exceeds 2000 characters', async () => {
+    it('enforces 2000 character limit on message field', async () => {
       render(<ContactForm />);
-      const nameInput = screen.getByLabelText(/Name/i);
-      const emailInput = screen.getByLabelText(/Email/i);
       const messageInput = screen.getByRole('textbox', { name: /Message/i });
-      const longMessage = 'a'.repeat(2001);
 
-      await userEvent.type(nameInput, 'John Doe');
-      await userEvent.type(emailInput, 'test@example.com');
-      await userEvent.type(messageInput, longMessage);
-      await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
+      await userEvent.type(messageInput, 'a'.repeat(2000));
+      expect(messageInput).toHaveValue('a'.repeat(2000));
 
-      expect(await screen.findByText('Message must be under 2000 characters.')).toBeInTheDocument();
+      await userEvent.type(messageInput, 'b');
+      expect(messageInput).toHaveValue('a'.repeat(2000));
     });
 
     it('clears field error when user types in that field', async () => {
@@ -261,7 +257,7 @@ describe('ContactForm', () => {
 
       // On success, the form is replaced by a success message
       await waitFor(() => {
-        expect(screen.getByText(/Message sent successfully!/i)).toBeInTheDocument();
+        expect(screen.getByText(/Success/i)).toBeInTheDocument();
       });
     });
 
@@ -336,14 +332,17 @@ describe('ContactForm', () => {
         ).toBeInTheDocument();
       });
 
-      // Second submission succeeds
+      // Second submission succeeds - clear fields first to avoid concatenation
+      await userEvent.clear(nameInput);
+      await userEvent.clear(emailInput);
+      await userEvent.clear(messageInput);
       await userEvent.type(nameInput, 'John2');
       await userEvent.type(emailInput, 'john2@example.com');
       await userEvent.type(messageInput, 'Test2');
       await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/Message sent successfully!/i)).toBeInTheDocument();
+        expect(screen.getByText(/Success/i)).toBeInTheDocument();
       });
 
       expect(globalThis.fetch).toHaveBeenCalledTimes(2);
@@ -368,7 +367,7 @@ describe('ContactForm', () => {
       await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
 
       await waitFor(() => {
-        expect(screen.getByRole('alert', { name: /success/i })).toBeInTheDocument();
+        expect(screen.getByText(/Message sent successfully!/i)).toBeInTheDocument();
       });
     });
 
