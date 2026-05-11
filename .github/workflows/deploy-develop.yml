@@ -345,7 +345,6 @@ jobs:
         run: npm run test:cypress
         env:
           CYPRESS_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
-        continue-on-error: true
 
       - name: Upload Cypress reports
         uses: actions/upload-artifact@v4
@@ -373,7 +372,6 @@ jobs:
         run: npm run test:puppeteer
         env:
           PUPPETEER_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
-        continue-on-error: true
 
       - name: Upload Puppeteer reports
         uses: actions/upload-artifact@v4
@@ -417,7 +415,6 @@ jobs:
             --self-contained-html
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
-        continue-on-error: true
 
       - name: Run Playwright mobile device tests
         run: |
@@ -430,7 +427,6 @@ jobs:
             --self-contained-html
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
-        continue-on-error: true
 
       - name: Run Playwright functional + API tests
         run: |
@@ -443,7 +439,6 @@ jobs:
             --self-contained-html
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
-        continue-on-error: true
 
       - name: Upload Playwright reports
         uses: actions/upload-artifact@v4
