@@ -68,6 +68,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pytest pytest-cov pytest-html allure-pytest
+          pip install -r backend/requirements.txt
 
       - name: Run Unit Tests with Coverage
         id: unit_tests
