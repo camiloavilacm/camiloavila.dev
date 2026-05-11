@@ -23,7 +23,7 @@ vi.stubEnv('VITE_API_URL', mockApiUrl);
 describe('ContactForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = vi.fn();
+    globalThis.fetch = vi.fn();
   });
 
   describe('Initial Render', () => {
@@ -34,7 +34,9 @@ describe('ContactForm', () => {
 
     it('renders intro text', () => {
       render(<ContactForm />);
-      expect(screen.getByText(/currently available for Senior QA Automation Engineer roles/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/currently available for Senior QA Automation Engineer roles/i)
+      ).toBeInTheDocument();
     });
 
     it('renders empty form fields', () => {
@@ -128,8 +130,6 @@ describe('ContactForm', () => {
     it('clears field error when user types in that field', async () => {
       render(<ContactForm />);
       const nameInput = screen.getByLabelText(/Name/i);
-      const emailInput = screen.getByLabelText(/Email/i);
-      const messageInput = screen.getByRole('textbox', { name: /Message/i });
 
       // Submit empty form to trigger errors
       await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
@@ -159,7 +159,7 @@ describe('ContactForm', () => {
 
   describe('Form Submission', () => {
     it('submits form with correct data', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ message: 'Success' }),
       });
@@ -174,7 +174,7 @@ describe('ContactForm', () => {
       await userEvent.type(messageInput, 'Test message');
       await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/contact'),
         expect.objectContaining({
           method: 'POST',
@@ -182,7 +182,9 @@ describe('ContactForm', () => {
         })
       );
 
-      const callBody = JSON.parse((global.fetch as any).mock.calls[0][1].body);
+      const mockedFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
+      const fetchCall = mockedFetch.mock.calls[0] as [string, { body: string }];
+      const callBody = JSON.parse(fetchCall[1].body);
       expect(callBody).toEqual({
         name: 'John Doe',
         email: 'john@example.com',
@@ -191,11 +193,18 @@ describe('ContactForm', () => {
     });
 
     it('shows loading state during submission', async () => {
-      global.fetch = vi.fn().mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve({
-          ok: true,
-          json: () => Promise.resolve({ message: 'Success' })
-        }), 100))
+      globalThis.fetch = vi.fn().mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  ok: true,
+                  json: () => Promise.resolve({ message: 'Success' }),
+                }),
+              100
+            )
+          )
       );
 
       render(<ContactForm />);
@@ -214,7 +223,7 @@ describe('ContactForm', () => {
     });
 
     it('shows success message on successful submission', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ message: 'Message sent successfully!' }),
       });
@@ -235,7 +244,7 @@ describe('ContactForm', () => {
     });
 
     it('clears form after successful submission', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ message: 'Success' }),
       });
@@ -257,7 +266,7 @@ describe('ContactForm', () => {
     });
 
     it('shows server error message on API error', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: false,
         json: () => Promise.resolve({ error: 'Server error occurred' }),
       });
@@ -278,7 +287,7 @@ describe('ContactForm', () => {
     });
 
     it('shows generic error on network failure', async () => {
-      global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
       render(<ContactForm />);
       const nameInput = screen.getByLabelText(/Name/i);
@@ -291,12 +300,17 @@ describe('ContactForm', () => {
       await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Could not reach the server. Please check your connection and try again.')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Could not reach the server. Please check your connection and try again.'
+          )
+        ).toBeInTheDocument();
       });
     });
 
     it('allows resubmission after error', async () => {
-      global.fetch = vi.fn()
+      globalThis.fetch = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Network error'))
         .mockResolvedValueOnce({
           ok: true,
@@ -315,7 +329,11 @@ describe('ContactForm', () => {
       await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Could not reach the server. Please check your connection and try again.')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Could not reach the server. Please check your connection and try again.'
+          )
+        ).toBeInTheDocument();
       });
 
       // Second submission succeeds
@@ -328,13 +346,13 @@ describe('ContactForm', () => {
         expect(screen.getByText(/Message sent successfully!/i)).toBeInTheDocument();
       });
 
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('Success State', () => {
     it('shows success box with message after successful submission', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ message: 'Message sent successfully!' }),
       });
@@ -355,7 +373,7 @@ describe('ContactForm', () => {
     });
 
     it('shows "Send another message" button in success state', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ message: 'Success' }),
       });
@@ -376,7 +394,7 @@ describe('ContactForm', () => {
     });
 
     it('resets to idle state when "Send another message" is clicked', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ message: 'Success' }),
       });
