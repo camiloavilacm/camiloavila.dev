@@ -24,7 +24,7 @@ describe('Chatbot', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock fetch
-    global.fetch = vi.fn();
+    globalThis.fetch = vi.fn();
   });
 
   it('renders welcome message on mount', () => {
@@ -59,7 +59,7 @@ describe('Chatbot', () => {
 
     await userEvent.type(input, 'Test question{Enter}');
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/chat'),
       expect.objectContaining({
         method: 'POST',
@@ -76,8 +76,8 @@ describe('Chatbot', () => {
     await userEvent.type(input, 'Test question');
     await userEvent.click(sendBtn);
 
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    const mockedFetch = global.fetch as ReturnType<typeof vi.fn>;
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    const mockedFetch = globalThis.fetch as ReturnType<typeof vi.fn>;
     const fetchCall = mockedFetch.mock.calls[0] as [string, { body: string }];
     const callBody = JSON.parse(fetchCall[1].body);
     expect(callBody).toEqual({ question: 'Test question' });
@@ -105,7 +105,7 @@ describe('Chatbot', () => {
 
   it('shows loading indicator while waiting for response', async () => {
     // Delay the fetch resolution
-    global.fetch = vi.fn().mockImplementation(
+    globalThis.fetch = vi.fn().mockImplementation(
       () =>
         new Promise((resolve) =>
           setTimeout(
@@ -129,7 +129,7 @@ describe('Chatbot', () => {
   });
 
   it('displays AI answer on successful response', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ answer: 'Here is the answer.' }),
     });
@@ -146,7 +146,7 @@ describe('Chatbot', () => {
   });
 
   it('displays error message when API returns non-ok', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       json: () => Promise.resolve({ error: 'Something went wrong' }),
     });
@@ -163,7 +163,7 @@ describe('Chatbot', () => {
   });
 
   it('displays generic error when fetch fails', async () => {
-    global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
     render(<Chatbot />);
     const input = screen.getByTestId('chat-input');
@@ -185,11 +185,11 @@ describe('Chatbot', () => {
     await userEvent.type(input, '   ');
     await userEvent.click(screen.getByTestId('chat-send'));
 
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
   it('disables input and button while loading', async () => {
-    global.fetch = vi.fn().mockImplementation(
+    globalThis.fetch = vi.fn().mockImplementation(
       () =>
         new Promise((resolve) =>
           setTimeout(
@@ -214,7 +214,7 @@ describe('Chatbot', () => {
   });
 
   it('renders markdown content in AI messages', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ answer: '**Bold** and *italic* text' }),
     });
