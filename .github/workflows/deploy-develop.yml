@@ -438,6 +438,44 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
+      # --- Playwright security tests ---
+      - name: Run Playwright security tests
+        run: |
+          mkdir -p reports/e2e/playwright-security
+          python3 -m pytest tests/e2e/playwright/specs/test_security.py \
+            -v \
+            --html=reports/e2e/playwright-security/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+
+      - name: Upload Playwright security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-security-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-security/
+          retention-days: 30
+
+      # --- Playwright accessibility tests ---
+      - name: Run Playwright accessibility tests
+        run: |
+          mkdir -p reports/e2e/playwright-accessibility
+          python3 -m pytest tests/e2e/playwright/specs/test_accessibility.py \
+            -v \
+            --html=reports/e2e/playwright-accessibility/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
+
+      - name: Upload Playwright accessibility reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-accessibility-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-accessibility/
+          retention-days: 30
+
       - name: Upload Playwright reports
         uses: actions/upload-artifact@v4
         if: always()

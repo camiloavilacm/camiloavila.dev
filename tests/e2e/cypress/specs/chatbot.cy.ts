@@ -66,10 +66,8 @@ describe("AI Resume Chatbot — E2E", () => {
   });
 
   // -------------------------------------------------------------------------
-  // Chat Interaction — requires deployed backend
+  // Chat Interaction — UI tests (don't require AI response)
   // -------------------------------------------------------------------------
-  // These tests require staging to be deployed - they run in deploy-develop.yml
-  // In pr-checks.yml, they may timeout if staging isn't available yet
 
   it("shows loading indicator after sending a question", () => {
     cy.get("[data-testid='chat-input']").type("What are your AWS certifications?");
