@@ -154,6 +154,10 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
+      - name: Check code formatting with Prettier
+        working-directory: frontend
+        run: npm run format:check
+
       - name: TypeScript type check
         working-directory: frontend
         run: npm run type-check
@@ -167,6 +171,10 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: https://placeholder.execute-api.us-east-1.amazonaws.com/prod
+
+      - name: Run frontend unit tests (Vitest)
+        working-directory: frontend
+        run: npm run test
 
   # ---------------------------------------------------------------------------
   # Stage 2.5: Verify staging tests passed before production deploy
@@ -480,6 +488,44 @@ jobs:
             --self-contained-html
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.PLAYWRIGHT_BASE_URL }}
+
+      # --- Playwright security tests ---
+      - name: Run Playwright security tests
+        run: |
+          mkdir -p reports/e2e/playwright-security
+          python3 -m pytest tests/e2e/playwright/specs/test_security.py \
+            -v \
+            --html=reports/e2e/playwright-security/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.PLAYWRIGHT_BASE_URL }}
+
+      - name: Upload Playwright security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-security-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-security/
+          retention-days: 30
+
+      # --- Playwright accessibility tests ---
+      - name: Run Playwright accessibility tests
+        run: |
+          mkdir -p reports/e2e/playwright-accessibility
+          python3 -m pytest tests/e2e/playwright/specs/test_accessibility.py \
+            -v \
+            --html=reports/e2e/playwright-accessibility/report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.PLAYWRIGHT_BASE_URL }}
+
+      - name: Upload Playwright accessibility reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-accessibility-reports-${{ github.run_id }}
+          path: reports/e2e/playwright-accessibility/
+          retention-days: 30
 
       - name: Upload Playwright reports
         uses: actions/upload-artifact@v4
