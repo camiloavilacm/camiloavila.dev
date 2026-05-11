@@ -83,13 +83,13 @@ jobs:
         run: node scripts/generate-html.js
 
       - name: Upload visual diff to Pages
-        if: github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: visual-diff
 
       - name: Deploy to GitHub Pages
-        if: github.event_name == 'pull_request'
+        if: github.ref == 'refs/heads/main'
         id: deployment
         uses: actions/deploy-pages@v4
 

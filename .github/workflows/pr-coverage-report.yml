@@ -73,6 +73,7 @@ jobs:
       - name: Run Unit Tests with Coverage
         id: unit_tests
         run: |
+          export AWS_DEFAULT_REGION=us-east-1
           pytest backend/tests/unit/ -v \
             --cov=backend/src \
             --cov-report=json \
@@ -84,6 +85,7 @@ jobs:
       - name: Run Security Tests
         id: security_tests
         run: |
+          export AWS_DEFAULT_REGION=us-east-1
           cd backend
           python -m venv venv
           source venv/bin/activate
