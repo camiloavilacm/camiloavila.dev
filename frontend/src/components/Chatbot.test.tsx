@@ -105,10 +105,17 @@ describe('Chatbot', () => {
   it('shows loading indicator while waiting for response', async () => {
     // Delay the fetch resolution
     global.fetch = vi.fn().mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({
-        ok: true,
-        json: () => Promise.resolve({ answer: 'Test answer' })
-      }), 100))
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                ok: true,
+                json: () => Promise.resolve({ answer: 'Test answer' }),
+              }),
+            100
+          )
+        )
     );
 
     render(<Chatbot />);
@@ -164,7 +171,9 @@ describe('Chatbot', () => {
     await userEvent.click(screen.getByTestId('chat-send'));
 
     await waitFor(() => {
-      expect(screen.getByText('Could not reach the server. Please check your connection.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Could not reach the server. Please check your connection.')
+      ).toBeInTheDocument();
     });
   });
 
@@ -180,10 +189,17 @@ describe('Chatbot', () => {
 
   it('disables input and button while loading', async () => {
     global.fetch = vi.fn().mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({
-        ok: true,
-        json: () => Promise.resolve({ answer: 'Answer' })
-      }), 100))
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                ok: true,
+                json: () => Promise.resolve({ answer: 'Answer' }),
+              }),
+            100
+          )
+        )
     );
 
     render(<Chatbot />);

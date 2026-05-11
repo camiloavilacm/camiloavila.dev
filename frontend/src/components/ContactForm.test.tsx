@@ -34,7 +34,9 @@ describe('ContactForm', () => {
 
     it('renders intro text', () => {
       render(<ContactForm />);
-      expect(screen.getByText(/currently available for Senior QA Automation Engineer roles/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/currently available for Senior QA Automation Engineer roles/i)
+      ).toBeInTheDocument();
     });
 
     it('renders empty form fields', () => {
@@ -191,10 +193,17 @@ describe('ContactForm', () => {
 
     it('shows loading state during submission', async () => {
       global.fetch = vi.fn().mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve({
-          ok: true,
-          json: () => Promise.resolve({ message: 'Success' })
-        }), 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  ok: true,
+                  json: () => Promise.resolve({ message: 'Success' }),
+                }),
+              100
+            )
+          )
       );
 
       render(<ContactForm />);
@@ -290,12 +299,17 @@ describe('ContactForm', () => {
       await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Could not reach the server. Please check your connection and try again.')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Could not reach the server. Please check your connection and try again.'
+          )
+        ).toBeInTheDocument();
       });
     });
 
     it('allows resubmission after error', async () => {
-      global.fetch = vi.fn()
+      global.fetch = vi
+        .fn()
         .mockRejectedValueOnce(new Error('Network error'))
         .mockResolvedValueOnce({
           ok: true,
@@ -314,7 +328,11 @@ describe('ContactForm', () => {
       await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('Could not reach the server. Please check your connection and try again.')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Could not reach the server. Please check your connection and try again.'
+          )
+        ).toBeInTheDocument();
       });
 
       // Second submission succeeds
