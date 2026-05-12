@@ -47,18 +47,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
-      - name: Set up Python 3.12
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Upgrade pip
         run: python3 -m pip install --upgrade pip
 
       - name: Install backend dependencies
         run: |
-          python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install --index-url https://pypi.org/simple/ guardrails-ai
+          python3 -m pip install --upgrade pip
+          python3 -m pip install git+https://github.com/guardrails-ai/guardrails.git@v0.9.3
           python3 -m pip install boto3 strands-agents strands-agents-tools bleach pytest flake8 moto jinja2
 
       - name: Lint with flake8
