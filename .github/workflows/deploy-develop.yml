@@ -426,7 +426,7 @@ jobs:
 
       - name: Install Playwright dependencies
         run: |
-          python3 -m pip install playwright pytest pytest-html requests
+          python3 -m pip install playwright pytest pytest-html allure-pytest requests
           playwright install chromium
 
       - name: Run Playwright smoke tests (Chromium)
@@ -507,7 +507,7 @@ jobs:
 
       - name: Install Playwright dependencies
         run: |
-          python3 -m pip install playwright pytest pytest-html requests
+          python3 -m pip install playwright pytest pytest-html allure-pytest requests
           playwright install firefox
 
       - name: Run Playwright smoke tests (Firefox)
@@ -550,7 +550,7 @@ jobs:
 
       - name: Install Playwright dependencies
         run: |
-          python3 -m pip install playwright pytest pytest-html requests
+          python3 -m pip install playwright pytest pytest-html allure-pytest requests
           playwright install webkit
 
       - name: Run Playwright smoke tests (WebKit)
@@ -593,7 +593,7 @@ jobs:
 
       - name: Install Playwright dependencies
         run: |
-          python3 -m pip install playwright pytest pytest-html requests
+          python3 -m pip install playwright pytest pytest-html allure-pytest requests
           playwright install chromium
 
       - name: Run Playwright security tests
@@ -634,7 +634,7 @@ jobs:
 
       - name: Install Playwright dependencies
         run: |
-          python3 -m pip install playwright pytest pytest-html requests
+          python3 -m pip install playwright pytest pytest-html allure-pytest requests
           playwright install chromium
 
       - name: Run Playwright accessibility tests

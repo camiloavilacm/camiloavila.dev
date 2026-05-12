@@ -181,22 +181,64 @@ The Lambda picks up the new content on the next cold start. To force an immediat
 
 ## Running the full test suite locally before pushing
 
+> **⚠️ Rule: Never commit without running the local test suite first.**
+> This applies to ALL changes — workflow edits, test fixes, backend, frontend, everything.
+
+### 1. Install test dependencies
 ```bash
-# 1. Unit tests (fast — no AWS required)
+pip install playwright pytest pytest-html allure-pytest requests
+playwright install chromium firefox webkit
+```
+
+### 2. Unit tests (fast — no AWS required)
+```bash
 pytest backend/tests/unit/ -v
+```
 
-# 2. Frontend build check
+### 3. Frontend build check
+```bash
 cd frontend && npm run lint && npm run type-check && npm run build
+```
 
-# 3. E2E tests (requires local dev server + sam local start-api)
+### 4. E2E tests against STAGING (before pushing)
+```bash
+# Playwright smoke tests (Chromium, Firefox, WebKit)
+PLAYWRIGHT_BASE_URL=https://staging.camiloavila.dev \
+  pytest tests/e2e/playwright/specs/test_smoke.py -v -m smoke
+
+# Playwright accessibility tests
+PLAYWRIGHT_BASE_URL=https://staging.camiloavila.dev \
+  pytest tests/e2e/playwright/specs/test_accessibility.py -v
+
+# Playwright functional tests
+PLAYWRIGHT_BASE_URL=https://staging.camiloavila.dev \
+  pytest tests/e2e/playwright/specs/test_functional.py -v
+
+# Security tests (will be SKIPPED — these only run weekly in CI)
+PLAYWRIGHT_BASE_URL=https://staging.camiloavila.dev \
+  pytest tests/e2e/playwright/specs/test_security.py -v
+
+# Cypress tests
+CYPRESS_BASE_URL=https://staging.camiloavila.dev npm run test:cypress
+```
+
+### 5. E2E tests against local dev (optional — requires sam local)
+```bash
 sam local start-api &           # Terminal background
 cd frontend && npm run dev &     # Terminal background
 
-cd tests
 CYPRESS_BASE_URL=http://localhost:5173 npm run test:cypress
-PUPPETEER_BASE_URL=http://localhost:5173 npm run test:puppeteer
 PLAYWRIGHT_BASE_URL=http://localhost:5173 pytest tests/e2e/playwright/ -v
 ```
+
+---
+
+### CI-only tests (do NOT run locally unless you have the secrets)
+| Test Suite | When It Runs | Reason |
+|---|---|---|
+| Security tests (`test_security.py`) | Weekly (Sunday, 3am UTC) | Requires `ENV=production` + `API_URL` secret |
+| PR Coverage Report | On every PR | Runs in CI only |
+| Visual Regression | On every PR | Requires Percy API key |
 
 ---
 
