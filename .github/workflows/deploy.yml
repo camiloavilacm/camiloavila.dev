@@ -62,7 +62,7 @@ jobs:
       - name: Install backend dependencies
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install --no-deps guardrails-ai || python3 -m pip install guardrails-ai==0.10.0
+          python3 -m pip install --index-url https://pypi.org/simple/ guardrails-ai
           python3 -m pip install boto3 strands-agents strands-agents-tools bleach pytest flake8 moto jinja2
 
       - name: Lint with flake8
