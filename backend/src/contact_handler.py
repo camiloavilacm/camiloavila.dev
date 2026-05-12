@@ -198,6 +198,7 @@ def _validate_with_guardrails(message: str) -> tuple[bool, str]:
         return True, ""
     except Exception as exc:
         logger.warning("Guardrails validation failed: %s", str(exc))
+        return False, "Security validation failed. Please rephrase your message."
 
 
 def lambda_handler(event: dict, context: object) -> dict:

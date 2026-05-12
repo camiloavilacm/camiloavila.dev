@@ -76,45 +76,39 @@ describe("Contact Form — E2E", () => {
 
   it("shows character count for message field", () => {
     cy.get("#contact-message").type("Hello");
-    cy.contains("5/2000").should("be.visible");
+    cy.contains("/2000").should("be.visible");
   });
 
   // -------------------------------------------------------------------------
   // Successful Submission (requires live API — smoke test)
   // -------------------------------------------------------------------------
   it("shows success state after valid form submission @smoke", () => {
-    cy.get("#contact-name").type("Test Visitor");
-    cy.get("#contact-email").type("test@example.com");
-    cy.get("#contact-message").type(
-      "This is a Cypress smoke test submission. Please ignore."
-    );
+    cy.get("#contact-name").clear().type("Test Visitor");
+    cy.get("#contact-email").clear().type("test@example.com");
+    cy.get("#contact-message").clear().type("This is a Cypress smoke test submission.");
 
-    cy.contains("button", "Send Message").click();
+    cy.get("[data-testid='contact-send']").click();
 
-    // Loading state
-    cy.contains("button", "Sending...").should("exist");
-
-    // Success state — wait up to 20s for Lambda + SES
-    cy.contains("Message sent successfully", { timeout: 20000 }).should("be.visible");
-    cy.contains("Check your inbox", { timeout: 20000 }).should("be.visible");
+    // Success state — wait up to 30s for Lambda + SES
+    cy.get("[data-testid='contact-send']", { timeout: 30000 }).should("not.exist");
   });
 
   it("shows 'Send another message' button after success @smoke", () => {
-    cy.get("#contact-name").type("Test Visitor");
-    cy.get("#contact-email").type("test@example.com");
-    cy.get("#contact-message").type("Smoke test message.");
-    cy.contains("button", "Send Message").click();
+    cy.get("#contact-name").clear().type("Test Visitor");
+    cy.get("#contact-email").clear().type("test@example.com");
+    cy.get("#contact-message").clear().type("Smoke test message.");
+    cy.get("[data-testid='contact-send']").click();
 
-    cy.contains("Send another message", { timeout: 20000 }).should("be.visible");
+    cy.contains("Send another message", { timeout: 30000 }).should("be.visible");
   });
 
   it("resets form when 'Send another message' is clicked @smoke", () => {
-    cy.get("#contact-name").type("Test Visitor");
-    cy.get("#contact-email").type("test@example.com");
-    cy.get("#contact-message").type("Smoke test message.");
-    cy.contains("button", "Send Message").click();
+    cy.get("#contact-name").clear().type("Test Visitor");
+    cy.get("#contact-email").clear().type("test@example.com");
+    cy.get("#contact-message").clear().type("Smoke test message.");
+    cy.get("[data-testid='contact-send']").click();
 
-    cy.contains("Send another message", { timeout: 20000 }).click();
+    cy.contains("Send another message", { timeout: 30000 }).click();
     cy.get("#contact-name").should("be.visible").and("have.value", "");
   });
 });

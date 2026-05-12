@@ -29,7 +29,6 @@ Run locally:
 import os
 import pytest
 from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page
-from playwright._driver import BrowserType
 
 
 BASE_URL = os.environ.get("PLAYWRIGHT_BASE_URL", "https://camiloavila.dev")
@@ -92,7 +91,7 @@ def playwright_instance():
         yield pw
 
 
-def get_browser_launcher(playwright, browser_name: str) -> BrowserType:
+def get_browser_launcher(playwright, browser_name: str):
     """Get the browser launcher based on browser name."""
     browsers = {
         "chromium": playwright.chromium,
@@ -203,3 +202,9 @@ def network_failures(page):
         ),
     )
     yield failures
+
+
+@pytest.fixture
+def device(request):
+    """Return the device name for mobile device emulation tests."""
+    return getattr(request, "param", None)

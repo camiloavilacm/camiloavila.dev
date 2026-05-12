@@ -63,8 +63,9 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -r requirements.txt
-          pip install pytest allure-pytest
+          pip install --upgrade pip
+          pip install git+https://github.com/guardrails-ai/guardrails.git@v0.9.3
+          pip install boto3 strands-agents strands-agents-tools bleach pytest allure-pytest
 
       - name: Setup Allure environment
         run: |

@@ -430,6 +430,7 @@ Resources:
   # WAF — Web Application Firewall for CloudFront
   # Protects against common web attacks (OWASP Top 10) and bad bot traffic.
   # Uses AWS Managed Rules for automatic updates without manual maintenance.
+
   # Disabled to reduce costs
   # -------------------------------------------------------------------------
   # CloudFrontWAF:
@@ -483,6 +484,7 @@ Resources:
   #           SampledRequestsEnabled: true
   #           CloudWatchMetricsEnabled: true
   #           MetricName: AWSManagedRulesBotControlRuleSet
+
 
 # ---------------------------------------------------------------------------
 # Outputs — used by GitHub Actions deploy.yml to populate secrets

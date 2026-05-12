@@ -1,0 +1,56 @@
+# =============================================================================
+# protect-branches.yml — Enforce staging → production workflow
+# =============================================================================
+# This workflow blocks direct pushes to main that don't come from develop.
+# It ensures all production deployments go through staging first.
+#
+# Flow: develop → staging → main → production
+# =============================================================================
+
+name: Branch Protection
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-merge-source:
+    name: Verify PR merges from develop
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check PR source branch
+        run: |
+          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+          if [ "$HEAD_BRANCH" != "develop" ]; then
+            echo "Error: PR to main must come from develop branch"
+            echo "Current source: $HEAD_BRANCH"
+            echo "Expected: develop"
+            exit 1
+          fi
+          echo "PR correctly merges develop into ${{ github.event.pull_request.base.ref }}"
+
+  check-push-source:
+    name: Verify direct push comes from develop
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Check if commit is in develop history
+        run: |
+          # Get the commit hash that was pushed to main
+          COMMIT_SHA="${{ github.sha }}"
+          
+          # Check if this commit exists in develop branch
+          git fetch origin develop
+          if git merge-base --is-ancestor "$COMMIT_SHA" origin/develop; then
+            echo "Commit $COMMIT_SHA is in develop history - allowing"
+          else
+            echo "Error: Direct push to main without going through develop"
+            echo "Commit: $COMMIT_SHA"
+            echo "Please merge from develop branch instead"
+            exit 1
+          fi

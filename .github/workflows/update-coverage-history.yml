@@ -35,7 +35,9 @@ jobs:
           cd backend
           python -m venv venv
           source venv/bin/activate
-          pip install -r requirements.txt pytest pytest-cov 2>/dev/null || true
+          pip install --upgrade pip
+          pip install git+https://github.com/guardrails-ai/guardrails.git@v0.9.3
+          pip install boto3 strands-agents strands-agents-tools bleach pytest pytest-cov 2>/dev/null || true
           pytest tests/unit/test_security.py -v --cov=src --cov-report=json 2>/dev/null || true
           cd ..
           SECURITY_COVERAGE=$(cat backend/security-coverage.json 2>/dev/null | jq -r '.totals.percent_covered // "0"' 2>/dev/null || echo "0")
