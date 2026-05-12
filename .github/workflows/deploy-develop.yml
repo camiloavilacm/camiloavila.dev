@@ -450,6 +450,7 @@ jobs:
             -v \
             --html=reports/e2e/playwright-security/report.html \
             --self-contained-html
+          sleep 2
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
@@ -602,6 +603,7 @@ jobs:
             -v \
             --html=reports/e2e/playwright-security/report.html \
             --self-contained-html
+          sleep 2
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
