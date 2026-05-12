@@ -469,6 +469,7 @@ jobs:
             -v \
             --html=reports/e2e/playwright-accessibility/report.html \
             --self-contained-html
+          sleep 2
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
@@ -519,6 +520,7 @@ jobs:
             -m "smoke" \
             --html=reports/e2e/playwright-firefox/report.html \
             --self-contained-html
+          sleep 2
         env:
           PLAYWRIGHT_BROWSER: firefox
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
