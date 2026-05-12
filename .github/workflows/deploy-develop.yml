@@ -479,9 +479,10 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-accessibility-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          name: playwright-chromium-accessibility-reports-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/e2e/playwright-accessibility/
           retention-days: 30
+          overwrite: true
 
       - name: Upload Playwright reports
         uses: actions/upload-artifact@v4
@@ -490,6 +491,7 @@ jobs:
           name: playwright-chromium-reports-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/e2e/playwright-chromium/
           retention-days: 30
+          overwrite: true
 
   # --- Playwright smoke tests (Firefox) ---
   e2e-playwright-firefox:
