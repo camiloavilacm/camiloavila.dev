@@ -89,8 +89,9 @@ jobs:
           cd backend
           python -m venv venv
           source venv/bin/activate
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
+          pip install --upgrade pip
+          pip install git+https://github.com/guardrails-ai/guardrails.git@v0.9.3
+          pip install boto3 strands-agents strands-agents-tools bleach pytest pytest-cov
           pytest tests/unit/test_security.py -v \
             --cov=src \
             --cov-report=json \
