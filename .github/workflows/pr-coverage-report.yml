@@ -69,7 +69,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install git+https://github.com/guardrails-ai/guardrails.git@v0.9.3
-          pip install boto3 strands-agents strands-agents-tools bleach pytest pytest-cov pytest-html allure-pytest
+          pip install boto3 strands-agents strands-agents-tools bleach pytest pytest-cov pytest-html allure-pytest moto jinja2
 
       - name: Run Unit Tests with Coverage
         id: unit_tests
