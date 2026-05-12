@@ -16,14 +16,11 @@ Mark: @pytest.mark.accessibility
 """
 
 import os
+import sys
 import pytest
 
-import sys
-
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "../../../tests/e2e/playwright")
-)
-
+# Add the playwright directory to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from conftest import BASE_URL
 
 

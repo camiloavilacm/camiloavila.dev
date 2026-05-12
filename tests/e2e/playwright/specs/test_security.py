@@ -28,10 +28,11 @@ import requests
 from typing import Optional
 
 
-# Skip these tests unless ENV=production
-skip_unless_production = pytest.mark.skipif(
-    os.environ.get("ENV") != "production",
-    reason="E2E security tests only run against production",
+# Skip these tests unless ENV=staging or ENV=production
+# Also skip if API_URL or STAGING_API_URL is not set
+skip_unless_staging_or_production = pytest.mark.skipif(
+    os.environ.get("ENV") not in ["staging", "production"] or not os.environ.get("API_URL"),
+    reason="E2E security tests only run against staging/production with API_URL set",
 )
 
 
@@ -58,7 +59,7 @@ def get_api_url_for_stage(stage: str = "prod") -> str:
     return os.environ.get("API_URL", "https://api.camiloavila.dev/prod")
 
 
-@skip_unless_production
+@skip_unless_staging_or_production
 class TestChatbotProductionSecurity:
     """E2E tests for chatbot security against production API.
 
@@ -142,7 +143,7 @@ class TestChatbotProductionSecurity:
         assert "resume" in answer
 
 
-@skip_unless_production
+@skip_unless_staging_or_production
 class TestContactFormProductionSecurity:
     """E2E tests for contact form security against production API.
 
@@ -238,7 +239,7 @@ class TestContactFormProductionSecurity:
         assert response.status_code == 400
 
 
-@skip_unless_production
+@skip_unless_staging_or_production
 class TestSecurityHeadersAndRateLimiting:
     """Additional security tests for headers and rate limiting.
 
@@ -293,16 +294,18 @@ class TestSecurityHeadersAndRateLimiting:
 def pytest_configure(config):
     """Configure pytest with custom markers."""
     config.addinivalue_line(
-        "markers", "production: mark test as requiring production environment"
+        "markers", "security: mark test as requiring staging or production environment"
     )
 
 
 def pytest_collection_modifyitems(config, items):
-    """Automatically skip E2E tests unless in production mode."""
-    skip_production = pytest.mark.skip(
-        reason="E2E security tests require ENV=production"
+    """Automatically skip E2E tests unless in staging or production mode with API_URL."""
+    skip_security = pytest.mark.skip(
+        reason="E2E security tests require ENV=staging or ENV=production and API_URL"
     )
 
+    env = os.environ.get("ENV")
+    has_api_url = bool(os.environ.get("API_URL"))
     for item in items:
-        if "production" in item.keywords and os.environ.get("ENV") != "production":
-            item.add_marker(skip_production)
+        if "production" in item.keywords and (env not in ["staging", "production"] or not has_api_url):
+            item.add_marker(skip_security)

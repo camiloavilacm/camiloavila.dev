@@ -62,7 +62,7 @@ describe("AI Resume Chatbot — E2E", () => {
   it("shows the welcome message on page load", () => {
     cy.get("[data-testid='message-ai']")
       .first()
-      .should("contain.text", "Resume Assistant");
+      .should("contain.text", "AI Resume Assistant");
   });
 
   // -------------------------------------------------------------------------
@@ -79,7 +79,7 @@ describe("AI Resume Chatbot — E2E", () => {
     cy.get("[data-testid='chat-input']").type("Tell me about your Python skills");
     cy.get("[data-testid='chat-send']").click();
     cy.get("[data-testid='message-user']")
-      .last()
+      .first()
       .should("contain.text", "Python skills");
   });
 
@@ -93,7 +93,7 @@ describe("AI Resume Chatbot — E2E", () => {
       "What programming languages do you know?{enter}"
     );
     cy.get("[data-testid='message-user']")
-      .last()
+      .first()
       .should("contain.text", "programming languages");
   });
 });
