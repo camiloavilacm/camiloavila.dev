@@ -461,6 +461,7 @@ jobs:
           name: playwright-security-reports-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/e2e/playwright-security/
           retention-days: 30
+          overwrite: true
 
       # --- Playwright accessibility tests ---
       - name: Run Playwright accessibility tests
