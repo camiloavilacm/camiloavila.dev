@@ -33,6 +33,7 @@ Run with mobile device:
   pytest tests/e2e/playwright/ -v -k "mobile" --browser chromium
 """
 
+import os
 import pytest
 import allure
 from playwright.sync_api import Page, expect
@@ -187,6 +188,10 @@ class TestDevTools:
         page.goto("/", wait_until="networkidle")
         assert len(network_failures) == 0, f"Network failures: {network_failures}"
 
+    @pytest.mark.skipif(
+        os.environ.get("PLAYWRIGHT_BROWSER") in ["firefox", "webkit"],
+        reason="CDP session only available in Chromium",
+    )
     def test_cdp_session_available(self, page, devtools_session):
         """Verify CDP (DevTools) session can be created."""
         assert devtools_session is not None

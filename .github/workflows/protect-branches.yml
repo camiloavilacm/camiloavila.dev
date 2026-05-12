@@ -23,16 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - name: Check PR base branch
+      - name: Check PR source branch
         run: |
-          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-          if [ "$BASE_BRANCH" != "develop" ]; then
+          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+          if [ "$HEAD_BRANCH" != "develop" ]; then
             echo "Error: PR to main must come from develop branch"
-            echo "Current base: $BASE_BRANCH"
+            echo "Current source: $HEAD_BRANCH"
             echo "Expected: develop"
             exit 1
           fi
-          echo "PR correctly targets main from develop"
+          echo "PR correctly merges develop into ${{ github.event.pull_request.base.ref }}"
 
   check-push-source:
     name: Verify direct push comes from develop
