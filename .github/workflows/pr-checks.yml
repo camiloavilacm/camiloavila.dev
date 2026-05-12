@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload unit test reports
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always()   # Upload even if tests fail
         with:
           name: test-reports-unit-${{ github.run_id }}
           path: reports/unit/
@@ -217,14 +217,15 @@ jobs:
           CYPRESS_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
           TERM: dumb
 
-      - name: Upload Cypress reports
+
+      - name: Upload Puppeteer reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cypress-contact-reports-${{ github.run_id }}
           path: reports/e2e/cypress/
           retention-days: 30
-
+          
   # ---------------------------------------------------------------------------
   # E2E: Playwright Security Tests (parallel with other E2E jobs)
   # ---------------------------------------------------------------------------
@@ -238,7 +239,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
-      - name: Set up Python 3.13
+      - name: Set up Python 3.13 (Playwright)
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
@@ -258,7 +259,8 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
-      - name: Upload security test reports
+      - name: Upload Playwright reports
+
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -299,7 +301,7 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
-      - name: Upload accessibility test reports
+      - name: Upload security test reports
         uses: actions/upload-artifact@v4
         if: always()
         with:

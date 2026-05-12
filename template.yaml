@@ -430,56 +430,61 @@ Resources:
   # WAF — Web Application Firewall for CloudFront
   # Protects against common web attacks (OWASP Top 10) and bad bot traffic.
   # Uses AWS Managed Rules for automatic updates without manual maintenance.
-  # DISABLED: Association removed to reduce costs. WAF resource kept for manual deletion.
+
+  # Disabled to reduce costs
   # -------------------------------------------------------------------------
-  CloudFrontWAF:
-    Type: AWS::WAFv2::WebACL
-    Properties:
-      Name: !Sub "camiloavila-waf-${Stage}"
-      Scope: CLOUDFRONT
-      DefaultAction:
-        Allow: {}
-      VisibilityConfig:
-        SampledRequestsEnabled: true
-        CloudWatchMetricsEnabled: true
-        MetricName: !Sub "camiloavila-waf-${Stage}"
-      Rules:
-        - Name: AWSManagedRulesCommonRuleSet
-          Priority: 0
-          Statement:
-            ManagedRuleGroupStatement:
-              VendorName: AWS
-              Name: AWSManagedRulesCommonRuleSet
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            SampledRequestsEnabled: true
-            CloudWatchMetricsEnabled: true
-            MetricName: AWSManagedRulesCommonRuleSet
-        - Name: AWSManagedRulesKnownBadInputsRuleSet
-          Priority: 1
-          Statement:
-            ManagedRuleGroupStatement:
-              VendorName: AWS
-              Name: AWSManagedRulesKnownBadInputsRuleSet
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            SampledRequestsEnabled: true
-            CloudWatchMetricsEnabled: true
-            MetricName: AWSManagedRulesKnownBadInputsRuleSet
-        - Name: AWSManagedRulesBotControlRuleSet
-          Priority: 2
-          Statement:
-            ManagedRuleGroupStatement:
-              VendorName: AWS
-              Name: AWSManagedRulesBotControlRuleSet
-          OverrideAction:
-            None: {}
-          VisibilityConfig:
-            SampledRequestsEnabled: true
-            CloudWatchMetricsEnabled: true
-            MetricName: AWSManagedRulesBotControlRuleSet
+  # CloudFrontWAF:
+  #   Type: AWS::WAFv2::WebACL
+  #   Properties:
+  #     Name: !Sub "camiloavila-waf-${Stage}"
+  #     Scope: CLOUDFRONT
+  #     DefaultAction:
+  #       Allow: {}
+  #     VisibilityConfig:
+  #       SampledRequestsEnabled: true
+  #       CloudWatchMetricsEnabled: true
+  #       MetricName: !Sub "camiloavila-waf-${Stage}"
+  #     Rules:
+  #       # AWS Managed Rules — Common Rule Set (SQLi, XSS, etc.)
+  #       - Name: AWSManagedRulesCommonRuleSet
+  #         Priority: 0
+  #         Statement:
+  #           ManagedRuleGroupStatement:
+  #             VendorName: AWS
+  #             Name: AWSManagedRulesCommonRuleSet
+  #         OverrideAction:
+  #           None: {}
+  #         VisibilityConfig:
+  #           SampledRequestsEnabled: true
+  #           CloudWatchMetricsEnabled: true
+  #           MetricName: AWSManagedRulesCommonRuleSet
+  #       # AWS Managed Rules — Known Bad Inputs (path traversal, etc.)
+  #       - Name: AWSManagedRulesKnownBadInputsRuleSet
+  #         Priority: 1
+  #         Statement:
+  #           ManagedRuleGroupStatement:
+  #             VendorName: AWS
+  #             Name: AWSManagedRulesKnownBadInputsRuleSet
+  #         OverrideAction:
+  #           None: {}
+  #         VisibilityConfig:
+  #           SampledRequestsEnabled: true
+  #           CloudWatchMetricsEnabled: true
+  #           MetricName: AWSManagedRulesKnownBadInputsRuleSet
+  #       # AWS Managed Rules — Bot Control (basic bot filtering)
+  #       - Name: AWSManagedRulesBotControlRuleSet
+  #         Priority: 2
+  #         Statement:
+  #           ManagedRuleGroupStatement:
+  #             VendorName: AWS
+  #             Name: AWSManagedRulesBotControlRuleSet
+  #         OverrideAction:
+  #           None: {}
+  #         VisibilityConfig:
+  #           SampledRequestsEnabled: true
+  #           CloudWatchMetricsEnabled: true
+  #           MetricName: AWSManagedRulesBotControlRuleSet
+
 
 # ---------------------------------------------------------------------------
 # Outputs — used by GitHub Actions deploy.yml to populate secrets
