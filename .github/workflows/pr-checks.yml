@@ -52,8 +52,11 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Upgrade pip
+        run: python3 -m pip install --upgrade pip
+
       - name: Install backend dependencies
-        run: python3 -m pip install --no-cache-dir -r backend/requirements.txt
+        run: python3 -m pip install --upgrade pip && python3 -m pip install -r backend/requirements.txt
 
       - name: Lint with flake8
         run: |
