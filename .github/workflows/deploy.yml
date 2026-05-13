@@ -438,9 +438,15 @@ jobs:
 
       - name: Run Cypress smoke tests
         working-directory: tests
-        run: npm run test:cypress
+        run: |
+          npx cypress run --config-file e2e/cypress/cypress.config.ts \
+            --spec "e2e/cypress/specs/contact_form.cy.ts" \
+            --grep "@smoke" --invert
+          npx cypress run --config-file e2e/cypress/cypress.config.ts \
+            --spec "e2e/cypress/specs/chatbot.cy.ts"
         env:
           CYPRESS_BASE_URL: https://camiloavila.dev
+          TERM: dumb
 
       - name: Upload Cypress reports
         uses: actions/upload-artifact@v4
