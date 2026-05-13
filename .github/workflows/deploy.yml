@@ -441,7 +441,7 @@ jobs:
         run: |
           npx cypress run --config-file e2e/cypress/cypress.config.ts \
             --spec "e2e/cypress/specs/contact_form.cy.ts" \
-            --grep "@smoke" --invert
+            -c "grep=@smoke,grepInvert=true"
           npx cypress run --config-file e2e/cypress/cypress.config.ts \
             --spec "e2e/cypress/specs/chatbot.cy.ts"
         env:
