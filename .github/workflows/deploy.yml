@@ -195,30 +195,53 @@ jobs:
         with:
           script: |
             const currentCommit = context.sha;
+            const MAX_POLLS = 20;
+            const POLL_INTERVAL_SECS = 30;
+
+            async function getStagingRun() {
+              const { data: runs } = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'deploy-develop.yml',
+                per_page: 10,
+                branch: 'develop'
+              });
+              if (runs.total_count === 0) return null;
+              return runs.workflow_runs.find(run => run.head_sha === currentCommit) || null;
+            }
+
+            function sleep(ms) {
+              return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
             console.log(`Checking if commit ${currentCommit} was tested in staging...`);
 
-            // Get all workflow runs for develop branch (last 10 to find our commit)
-            const { data: runs } = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'deploy-develop.yml',
-              per_page: 10,
-              branch: 'develop'
-            });
+            let matchingRun = await getStagingRun();
+            let polls = 0;
 
-            if (runs.total_count === 0) {
-              core.setFailed('No staging workflow runs found on develop branch');
+            while (!matchingRun && polls < MAX_POLLS) {
+              console.log(`No staging run found yet for commit ${currentCommit}. Polling... (${polls + 1}/${MAX_POLLS})`);
+              await sleep(POLL_INTERVAL_SECS * 1000);
+              matchingRun = await getStagingRun();
+              polls++;
+            }
+
+            if (!matchingRun) {
+              core.setFailed(`Staging workflow for commit ${currentCommit} not found after ${MAX_POLLS} polls. Merge develop to main only after staging deploy completes.`);
               return;
             }
 
-            // Find the run that includes our commit
-            const matchingRun = runs.workflow_runs.find(run =>
-              run.head_sha === currentCommit || run.head_branch === 'develop'
-            );
-
-            if (!matchingRun) {
-              core.setFailed(`Staging workflow for commit ${currentCommit} not found. Merge develop to main only after staging deploy completes.`);
-              return;
+            polls = 0;
+            while (matchingRun.status !== 'completed' && polls < MAX_POLLS) {
+              console.log(`Staging run status: ${matchingRun.status}. Polling... (${polls + 1}/${MAX_POLLS})`);
+              await sleep(POLL_INTERVAL_SECS * 1000);
+              const { data: refreshed } = await github.rest.actions.getWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: matchingRun.id
+              });
+              matchingRun = refreshed;
+              polls++;
             }
 
             console.log(`Found staging run: ${matchingRun.html_url}`);
@@ -226,8 +249,10 @@ jobs:
             console.log(`Conclusion: ${matchingRun.conclusion}`);
             console.log(`Commit: ${matchingRun.head_sha}`);
 
-            if (matchingRun.conclusion !== 'success') {
-              core.setFailed(`Staging workflow did not pass. Status: ${matchingRun.status}, Conclusion: ${matchingRun.conclusion}. Deploy to production blocked until staging tests pass.`);
+            if (matchingRun.status !== 'completed') {
+              core.setFailed(`Staging workflow timed out. Status: ${matchingRun.status}. Deploy to production blocked.`);
+            } else if (matchingRun.conclusion !== 'success') {
+              core.setFailed(`Staging workflow did not pass. Conclusion: ${matchingRun.conclusion}. Deploy to production blocked until staging tests pass.`);
             } else {
               console.log('✅ Staging workflow passed for this commit — proceeding with production deploy');
             }
