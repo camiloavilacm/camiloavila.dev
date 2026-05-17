@@ -112,7 +112,7 @@ jobs:
           ALLOWED_ORIGIN: https://staging.camiloavila.dev
 
       - name: Upload unit test reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: unit-test-reports-${{ github.run_id }}
@@ -120,7 +120,7 @@ jobs:
           retention-days: 30
 
       - name: Upload Allure results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: allure-unit-results-${{ github.run_id }}
@@ -366,7 +366,7 @@ jobs:
           TERM: dumb
 
       - name: Upload Cypress reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: cypress-reports-${{ github.run_id }}
@@ -422,7 +422,7 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
       - name: Upload Playwright security reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-security-reports-${{ github.run_id }}-${{ github.run_attempt }}
@@ -443,7 +443,7 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
       - name: Upload Playwright accessibility reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-chromium-accessibility-reports-${{ github.run_id }}-${{ github.run_attempt }}
@@ -452,7 +452,7 @@ jobs:
           overwrite: true
 
       - name: Upload Playwright reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-chromium-reports-${{ github.run_id }}-${{ github.run_attempt }}
@@ -497,7 +497,7 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
       - name: Upload Playwright reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-firefox-reports-${{ github.run_id }}-${{ github.run_attempt }}
@@ -536,7 +536,7 @@ jobs:
           PLAYWRIGHT_BROWSER: webkit
 
       - name: Upload Playwright reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-webkit-reports-${{ github.run_id }}-${{ github.run_attempt }}
@@ -578,7 +578,7 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
       - name: Upload security test reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-security-reports-${{ github.run_id }}-${{ github.run_attempt }}
@@ -619,7 +619,7 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ secrets.STAGING_PLAYWRIGHT_BASE_URL }}
 
       - name: Upload accessibility test reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-accessibility-reports-${{ github.run_id }}-${{ github.run_attempt }}
@@ -705,7 +705,7 @@ jobs:
           allure generate allure-results/ -o allure-report --clean
 
       - name: Upload Allure report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: allure-report
           path: allure-report/
