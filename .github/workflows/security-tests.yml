@@ -178,13 +178,13 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Download security test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: security-test-results
           path: allure-results
 
       - name: Download previous Allure report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: security-allure-report
           path: previous-report
