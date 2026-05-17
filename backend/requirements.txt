@@ -33,4 +33,4 @@ pytest-json-report>=1.5.0
 allure-pytest>=2.13.0
 flake8>=7.0.0
 moto[s3,dynamodb,ses,bedrock]>=5.0.0
-jinja2>=3.1.0
+jinja2>=3.1.6
