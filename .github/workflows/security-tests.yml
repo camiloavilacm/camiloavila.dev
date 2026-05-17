@@ -91,7 +91,7 @@ jobs:
 
       - name: Upload security test results
         if: always() && steps.run-tests.outcome != 'skipped'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: security-test-results
           path: backend/reports/security/
@@ -214,7 +214,7 @@ jobs:
           allure generate allure-results/ -o security-report --clean
 
       - name: Upload Allure report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: security-allure-report
           path: security-report/
