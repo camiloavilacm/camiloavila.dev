@@ -20,7 +20,7 @@
 
 # --- Production ---
 boto3>=1.34.0
-strands-agents>=0.1.0
+strands-agents>=1.50.1
 strands-agents-tools>=0.1.0
 guardrails-ai>=0.2.0
 bleach>=6.0.0
