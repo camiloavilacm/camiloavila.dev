@@ -23,7 +23,7 @@ from strands import Agent
 
 from tools.generate_reply import generate_reply
 from utils.dynamo_client import save_contact
-from utils.ses_client import send_contact_reply
+from utils.ses_client import send_contact_reply, send_owner_notification
 
 import os
 
@@ -141,7 +141,22 @@ def process_contact(name: str, email: str, message: str) -> dict:
             f"Thank you for reaching out, {name}. Camilo will be in touch soon."
         )
 
-    # Step 2 — Save to DynamoDB (attempt regardless of email outcome)
+    # Step 2 — Send notification to site owner
+    owner_message_id = None
+    try:
+        owner_message_id = send_owner_notification(
+            visitor_name=name,
+            visitor_email=email,
+            visitor_message=message,
+            ai_reply=ai_paragraph,
+        )
+        logger.info(
+            "Owner notification SES email sent. MessageId=%s", owner_message_id
+        )
+    except Exception as exc:
+        logger.error("Owner notification SES send failed: %s", str(exc))
+
+    # Step 3 — Send auto-reply to visitor
     ses_status = "failed"
     message_id = None
 
@@ -156,7 +171,7 @@ def process_contact(name: str, email: str, message: str) -> dict:
     except RuntimeError as exc:
         logger.error("SES send failed: %s", str(exc))
 
-    # Step 3 — Persist to DynamoDB (always save, even if email failed)
+    # Step 4 — Persist to DynamoDB (always save, even if email failed)
     record = save_contact(
         name=name,
         email=email,
@@ -166,7 +181,8 @@ def process_contact(name: str, email: str, message: str) -> dict:
     )
 
     return {
-        "success": ses_status == "sent",
+        "success": ses_status == "sent" or owner_message_id is not None,
         "message_id": message_id,
+        "owner_message_id": owner_message_id,
         "record_id": record["id"],
     }

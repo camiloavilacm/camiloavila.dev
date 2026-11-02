@@ -55,11 +55,17 @@ Parameters:
 
   SesSenderEmail:
     Type: String
-    Default: camiloavilainfo@gmail.com
+    Default: contact@camiloavila.dev
     Description: >
       Verified SES sender email address. Must be verified in SES before deployment.
       In SES sandbox mode only verified addresses can receive mail — request production
       access to send to all visitors.
+
+  OwnerEmail:
+    Type: String
+    Default: camiloavilainfo@gmail.com
+    Description: >
+      Email address to receive new contact form submission notifications.
 
   DomainName:
     Type: String
@@ -84,6 +90,7 @@ Globals:
         BEDROCK_MODEL_ID: !Ref BedrockModelId
         CONTACT_TABLE: !Ref ContactTable
         SES_SENDER_EMAIL: !Ref SesSenderEmail
+        OWNER_EMAIL: !Ref OwnerEmail
         ALLOWED_ORIGIN: !Sub "https://${DomainName}"
 
 # ---------------------------------------------------------------------------
@@ -263,11 +270,16 @@ Resources:
                 Resource: !GetAtt ContactTable.Arn
               - Sid: AllowSESSend
                 Effect: Allow
-                Action: ses:SendEmail
+                Action:
+                  - ses:SendEmail
+                  - ses:SendRawEmail
                 Resource: "*"
                 Condition:
-                  StringEquals:
-                    ses:FromAddress: !Ref SesSenderEmail
+                  StringLike:
+                    ses:FromAddress:
+                      - !Ref SesSenderEmail
+                      - "*@camiloavila.dev"
+                      - "camiloavilainfo@gmail.com"
 
   # -------------------------------------------------------------------------
   # Lambda Layer — Strands Agents (heavy dependencies)

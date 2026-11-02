@@ -114,6 +114,7 @@ class TestSesClientSend:
             assert "camiloavilainfo@gmail.com" in text_body
             assert "+34 655 524 297" in text_body
             assert "linkedin.com/in/camiloavila" in text_body
+            assert call_args.kwargs.get("ReplyToAddresses") == ["camiloavilainfo@gmail.com"]
 
     def test_raises_error_when_ses_sender_env_var_missing(self, monkeypatch):
         """Missing SES_SENDER_EMAIL env var must raise RuntimeError."""
@@ -142,3 +143,43 @@ class TestSesClientSend:
 
             with pytest.raises(RuntimeError, match="MessageRejected"):
                 send_contact_reply("a@b.com", "Jane", "paragraph")
+
+
+@allure.epic("Email")
+@allure.feature("Owner Notification")
+class TestSesOwnerNotification:
+    """Tests for send_owner_notification function."""
+
+    def test_owner_notification_returns_message_id_and_sets_fields(self):
+        """Owner notification must set ToAddresses, ReplyTo, and return MessageId."""
+        from utils.ses_client import send_owner_notification
+
+        with patch("utils.ses_client._ses_client") as mock_ses:
+            mock_ses.send_email.return_value = {"MessageId": "owner-msg-123"}
+
+            msg_id = send_owner_notification(
+                visitor_name="Alice Recruiter",
+                visitor_email="alice@techcorp.com",
+                visitor_message="We'd like to interview you for a Senior QA role.",
+                ai_reply="Thank you for considering me.",
+            )
+
+            assert msg_id == "owner-msg-123"
+            call_args = mock_ses.send_email.call_args
+            assert call_args.kwargs["Destination"]["ToAddresses"] == ["camiloavilainfo@gmail.com"]
+            assert call_args.kwargs["ReplyToAddresses"] == ["alice@techcorp.com"]
+            subject = call_args.kwargs["Message"]["Subject"]["Data"]
+            assert "Alice Recruiter" in subject
+            text_body = call_args.kwargs["Message"]["Body"]["Text"]["Data"]
+            assert "Alice Recruiter" in text_body
+            assert "alice@techcorp.com" in text_body
+            assert "Senior QA role" in text_body
+            assert "Thank you for considering me." in text_body
+
+    def test_owner_notification_raises_error_when_sender_missing(self, monkeypatch):
+        """Missing SES_SENDER_EMAIL must raise RuntimeError."""
+        monkeypatch.delenv("SES_SENDER_EMAIL", raising=False)
+        from utils.ses_client import send_owner_notification
+
+        with pytest.raises(RuntimeError, match="SES_SENDER_EMAIL"):
+            send_owner_notification("Alice", "alice@example.com", "Hello", "Reply")

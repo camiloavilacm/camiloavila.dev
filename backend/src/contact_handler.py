@@ -293,15 +293,17 @@ def lambda_handler(event: dict, context: object) -> dict:
         )
 
         if result["success"]:
-            return build_response(
-                200,
-                {
-                    "message": (
-                        f"Thank you, {name}! Your message has been received "
-                        f"and a reply has been sent to {email}."
-                    )
-                },
-            )
+            if result.get("message_id"):
+                confirmation = (
+                    f"Thank you, {name}! Your message has been received "
+                    f"and a reply has been sent to {email}."
+                )
+            else:
+                confirmation = (
+                    f"Thank you, {name}! Your message has been received. "
+                    "Camilo will get back to you soon."
+                )
+            return build_response(200, {"message": confirmation})
         else:
             # Submission saved to DynamoDB but email failed
             return build_response(
