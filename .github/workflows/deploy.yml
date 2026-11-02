@@ -458,7 +458,9 @@ jobs:
 
       # --- Puppeteer smoke tests ---
       - name: Install Puppeteer browser
-        run: node node_modules/puppeteer/install.mjs
+        run: |
+          rm -rf ~/.cache/puppeteer
+          node node_modules/puppeteer/install.mjs
         working-directory: tests
 
       - name: Run Puppeteer smoke tests
