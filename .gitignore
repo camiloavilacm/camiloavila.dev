@@ -45,6 +45,7 @@ test-results/
 # --- IDEs ---
 .idea/
 .vscode/
+*.code-workspace
 *.swp
 *.swo
 .DS_Store

@@ -221,7 +221,7 @@ For full component diagrams and flow descriptions, see [`docs/architecture.md`](
 ### Prerequisites
 
 - Python 3.13
-- Node.js 20+
+- Node.js 26+
 - AWS SAM CLI (`brew install aws-sam-cli` or [see docs](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html))
 - AWS CLI configured with your account
 - Docker (for `sam local start-api`)

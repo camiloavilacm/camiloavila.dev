@@ -145,10 +145,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
-      - name: Set up Node.js 20
+      - name: Set up Node.js 26
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "26"
           cache: npm
           cache-dependency-path: frontend/package.json
 
@@ -345,10 +345,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
-      - name: Set up Node.js 20
+      - name: Set up Node.js 26
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "26"
           cache: npm
           cache-dependency-path: frontend/package.json
 
@@ -425,10 +425,10 @@ jobs:
         run: sleep 30
 
       # --- Cypress smoke tests ---
-      - name: Set up Node.js 20 (Cypress)
+      - name: Set up Node.js 26 (Cypress)
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "26"
           cache: npm
           cache-dependency-path: tests/package.json
 

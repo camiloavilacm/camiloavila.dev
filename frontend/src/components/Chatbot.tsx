@@ -11,6 +11,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { stripThinkingTags } from '../utils/textUtils';
 
 /** A single message in the chat thread. */
 interface Message {
@@ -65,7 +66,7 @@ const Chatbot: React.FC = () => {
       const data = await response.json();
 
       if (response.ok && data.answer) {
-        setMessages((prev) => [...prev, { role: 'ai', text: data.answer }]);
+        setMessages((prev) => [...prev, { role: 'ai', text: stripThinkingTags(data.answer) }]);
       } else {
         setMessages((prev) => [
           ...prev,

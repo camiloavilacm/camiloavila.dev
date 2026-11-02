@@ -15,6 +15,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Chatbot from './Chatbot';
+import { stripThinkingTags } from '../utils/textUtils';
 
 // Mock VITE_API_URL
 const mockApiUrl = 'https://test-api.example.com';
@@ -228,6 +229,54 @@ describe('Chatbot', () => {
     await waitFor(() => {
       const bold = screen.getByText('Bold');
       expect(bold.tagName).toBe('STRONG');
+    });
+  });
+
+  it('strips <thinking> tags from AI response before displaying', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          answer:
+            '<thinking>The user asked for info.</thinking>\n\nCould you please specify what information you need about Camilo Avila?',
+        }),
+    });
+
+    render(<Chatbot />);
+    const input = screen.getByTestId('chat-input');
+
+    await userEvent.type(input, 'I need information from camilo');
+    await userEvent.click(screen.getByTestId('chat-send'));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'Could you please specify what information you need about Camilo Avila?'
+        )
+      ).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/The user asked for info/)).not.toBeInTheDocument();
+  });
+
+  describe('stripThinkingTags', () => {
+    it('removes <thinking> blocks cleanly', () => {
+      const input = '<thinking>Internal analysis</thinking>Hello world';
+      expect(stripThinkingTags(input)).toBe('Hello world');
+    });
+
+    it('removes <thought> blocks cleanly', () => {
+      const input = '<thought>Internal thoughts</thought>Final answer';
+      expect(stripThinkingTags(input)).toBe('Final answer');
+    });
+
+    it('handles multiline tags', () => {
+      const input = '<thinking>\nLine 1\nLine 2\n</thinking>\n\nPolite response';
+      expect(stripThinkingTags(input)).toBe('Polite response');
+    });
+
+    it('handles unclosed thinking tags gracefully', () => {
+      const input = '<thinking>Incomplete thinking...';
+      expect(stripThinkingTags(input)).toBe('');
     });
   });
 });

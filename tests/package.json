@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "E2E test dependencies for camiloavila.dev — Cypress and Puppeteer",
   "private": true,
+  "engines": {
+    "node": ">=26.0.0"
+  },
   "scripts": {
     "test:cypress": "cypress run --config-file e2e/cypress/cypress.config.ts",
     "test:cypress:open": "cypress open --config-file e2e/cypress/cypress.config.ts",
