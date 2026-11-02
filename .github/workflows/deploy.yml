@@ -458,7 +458,9 @@ jobs:
 
       # --- Puppeteer smoke tests ---
       - name: Install Puppeteer browser
-        run: npx puppeteer browsers install chrome
+        run: |
+          rm -rf ~/.cache/puppeteer
+          npx puppeteer browsers install chrome
         working-directory: tests
 
       - name: Run Puppeteer smoke tests
