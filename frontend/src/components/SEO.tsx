@@ -64,7 +64,7 @@ const SEO: React.FC<SEOProps> = ({
           jobTitle: 'QA Automation Engineer',
           description:
             'QA Automation Engineer specializing in test automation frameworks, Selenium, Playwright, Cypress, and CI/CD pipelines.',
-          sameAs: ['https://www.linkedin.com/in/camiloavila', 'https://github.com/camiloavila'],
+          sameAs: ['https://www.linkedin.com/in/camiloavila', 'https://github.com/camiloavilacm'],
           knowsAbout: [
             'QA Automation',
             'Selenium',
