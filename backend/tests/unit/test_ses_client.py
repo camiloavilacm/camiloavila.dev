@@ -57,8 +57,8 @@ class TestSesClientSend:
             assert msg_id is not None
             assert len(msg_id) > 0
 
-    def test_subject_contains_visitor_name(self, mock_ses):
-        """Email subject must include the visitor's name."""
+    def test_subject_contains_visitor_name_and_camilo_avila(self, mock_ses):
+        """Email subject must include the visitor's name and Camilo Avila."""
         with patch("utils.ses_client._ses_client", mock_ses):
             from utils import ses_client
             import importlib
@@ -72,15 +72,15 @@ class TestSesClientSend:
                 send_contact_reply(
                     to_email="visitor@example.com",
                     to_name="Jane",
-                    ai_paragraph="AI paragraph here.",
                 )
 
                 call_args = mock_ses_client.send_email.call_args
                 subject = call_args.kwargs["Message"]["Subject"]["Data"]
                 assert "Jane" in subject
+                assert "Camilo Avila" in subject
 
-    def test_body_contains_ai_paragraph(self):
-        """Email body must include the AI-generated paragraph."""
+    def test_body_contains_opening_and_camilo_introduction(self):
+        """Email body must include greeting and introduction."""
         from utils.ses_client import send_contact_reply
 
         with patch("utils.ses_client._ses_client") as mock_ses:
@@ -89,15 +89,15 @@ class TestSesClientSend:
             send_contact_reply(
                 to_email="visitor@example.com",
                 to_name="Jane",
-                ai_paragraph="This is the unique AI paragraph for Jane.",
             )
 
             call_args = mock_ses.send_email.call_args
             text_body = call_args.kwargs["Message"]["Body"]["Text"]["Data"]
-            assert "This is the unique AI paragraph for Jane." in text_body
+            assert "Hi Jane" in text_body
+            assert "Senior QA Automation Engineer" in text_body
 
     def test_body_contains_camilo_contact_details(self):
-        """Email body footer must include Camilo's contact info."""
+        """Email body footer must include Camilo's contact info and website."""
         from utils.ses_client import send_contact_reply
 
         with patch("utils.ses_client._ses_client") as mock_ses:
@@ -106,15 +106,15 @@ class TestSesClientSend:
             send_contact_reply(
                 to_email="visitor@example.com",
                 to_name="Jane",
-                ai_paragraph="Some paragraph.",
             )
 
             call_args = mock_ses.send_email.call_args
             text_body = call_args.kwargs["Message"]["Body"]["Text"]["Data"]
-            assert "camiloavilainfo@gmail.com" in text_body
+            assert "contact@camiloavila.dev" in text_body
+            assert "https://www.camiloavila.dev" in text_body
             assert "+34 655 524 297" in text_body
             assert "linkedin.com/in/camiloavila" in text_body
-            assert call_args.kwargs.get("ReplyToAddresses") == ["camiloavilainfo@gmail.com"]
+            assert call_args.kwargs.get("ReplyToAddresses") == ["contact@camiloavila.dev"]
 
     def test_raises_error_when_ses_sender_env_var_missing(self, monkeypatch):
         """Missing SES_SENDER_EMAIL env var must raise RuntimeError."""
@@ -174,7 +174,6 @@ class TestSesOwnerNotification:
             assert "Alice Recruiter" in text_body
             assert "alice@techcorp.com" in text_body
             assert "Senior QA role" in text_body
-            assert "Thank you for considering me." in text_body
 
     def test_owner_notification_raises_error_when_sender_missing(self, monkeypatch):
         """Missing SES_SENDER_EMAIL must raise RuntimeError."""

@@ -39,7 +39,7 @@ _ses_client = boto3.client("ses", region_name="us-east-1")
 # Separated into constants so they are easy to update without touching logic.
 # ---------------------------------------------------------------------------
 
-_SUBJECT_TEMPLATE = "Thanks for reaching out, {name}!"
+_SUBJECT_TEMPLATE = "Thanks for reaching out, {name}! — Camilo Avila"
 
 _OPENING = """Hi {name},
 
@@ -59,7 +59,8 @@ Best regards,
 Camilo Avila
 Senior QA Automation Engineer
 
-Email:    camiloavilainfo@gmail.com
+Email:    contact@camiloavila.dev
+Website:  https://www.camiloavila.dev
 Phone:    +34 655 524 297
 LinkedIn: https://www.linkedin.com/in/camiloavila
 Location: Spain (Remote, US working hours)
@@ -69,18 +70,16 @@ Location: Spain (Remote, US working hours)
 def send_contact_reply(
     to_email: str,
     to_name: str,
-    ai_paragraph: str,
+    ai_paragraph: str = "",
 ) -> str:
     """Send a personalised reply email to a contact form visitor.
 
-    Combines a fixed opening, an AI-generated paragraph personalised to the
-    visitor's message, and a fixed footer with Camilo's contact details.
+    Combines a fixed opening and a fixed footer with Camilo's contact details.
 
     Args:
         to_email:     Recipient's email address (the visitor who filled the form).
         to_name:      Recipient's name — used to personalise the subject and greeting.
-        ai_paragraph: AI-generated paragraph produced by the generate_reply tool,
-                      personalised based on the visitor's original message.
+        ai_paragraph: Optional custom paragraph (unused in default reply).
 
     Returns:
         str: SES MessageId of the sent email (useful for delivery tracking).
@@ -94,7 +93,6 @@ def send_contact_reply(
         >>> msg_id = send_contact_reply(
         ...     to_email="jane@example.com",
         ...     to_name="Jane",
-        ...     ai_paragraph="Based on your interest in QA roles...",
         ... )
         >>> assert msg_id.startswith("0")  # SES MessageId format
     """
@@ -106,19 +104,15 @@ def send_contact_reply(
         )
 
     # Sanitize user-provided content before embedding in HTML email
-    # bleach.clean() strips all HTML tags, preventing XSS injection
     safe_name = bleach.clean(to_name.strip(), tags=[], strip=True)
-    safe_paragraph = bleach.clean(ai_paragraph.strip(), tags=[], strip=True)
 
     subject = _SUBJECT_TEMPLATE.format(name=safe_name)
-    body_text = (
-        _OPENING.format(name=safe_name) + "\n" + safe_paragraph + "\n" + _FOOTER
-    )
+    body_text = _OPENING.format(name=safe_name) + "\n" + _FOOTER
 
     # HTML version — same content with basic formatting
     body_html = f"""
     <html>
-    <body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+    <body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; line-height: 1.5;">
       <p>Hi <strong>{safe_name}</strong>,</p>
       <p>
         Thank you so much for visiting my portfolio and taking the time to reach out.
@@ -129,7 +123,6 @@ def send_contact_reply(
         in test automation, cloud engineering (AWS), and AI integration. I'm currently
         available for remote roles operating within US working hours.
       </p>
-      <p>{safe_paragraph}</p>
       <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
       <p>
         I look forward to connecting with you. Feel free to reply directly to this email
@@ -139,7 +132,8 @@ def send_contact_reply(
         Best regards,<br />
         <strong>Camilo Avila</strong><br />
         Senior QA Automation Engineer<br /><br />
-        Email: <a href="mailto:camiloavilainfo@gmail.com">camiloavilainfo@gmail.com</a><br />
+        Email: <a href="mailto:contact@camiloavila.dev">contact@camiloavila.dev</a><br />
+        Website: <a href="https://www.camiloavila.dev">www.camiloavila.dev</a><br />
         Phone: +34 655 524 297<br />
         LinkedIn: <a href="https://www.linkedin.com/in/camiloavila">linkedin.com/in/camiloavila</a><br />
         Location: Spain (Remote, US working hours)
@@ -152,7 +146,7 @@ def send_contact_reply(
         response = _ses_client.send_email(
             Source=sender,
             Destination={"ToAddresses": [to_email]},
-            ReplyToAddresses=["camiloavilainfo@gmail.com"],
+            ReplyToAddresses=["contact@camiloavila.dev"],
             Message={
                 "Subject": {"Data": subject, "Charset": "UTF-8"},
                 "Body": {
@@ -187,7 +181,7 @@ def send_owner_notification(
     visitor_name: str,
     visitor_email: str,
     visitor_message: str,
-    ai_reply: str,
+    ai_reply: str = "",
 ) -> str:
     """Send an email alert to the site owner notifying them of a new submission.
 
@@ -195,7 +189,7 @@ def send_owner_notification(
         visitor_name:    Visitor's full name from the contact form.
         visitor_email:   Visitor's email address.
         visitor_message: Raw message submitted by the visitor.
-        ai_reply:        Personalized auto-reply generated for the visitor.
+        ai_reply:        Optional AI reply (unused).
 
     Returns:
         str: SES MessageId of the sent notification email.
@@ -216,7 +210,6 @@ def send_owner_notification(
     safe_name = bleach.clean(visitor_name.strip(), tags=[], strip=True)
     safe_email = bleach.clean(visitor_email.strip(), tags=[], strip=True)
     safe_message = bleach.clean(visitor_message.strip(), tags=[], strip=True)
-    safe_reply = bleach.clean(ai_reply.strip(), tags=[], strip=True)
 
     subject = f"New Portfolio Contact: {safe_name}"
 
@@ -230,10 +223,6 @@ Email:   {safe_email}
 Message:
 --------
 {safe_message}
-
-Automated AI Reply Sent:
-------------------------
-{safe_reply}
 
 ---
 Tip: Replying directly to this email will send a reply to {safe_name} ({safe_email}).
@@ -255,9 +244,7 @@ Tip: Replying directly to this email will send a reply to {safe_name} ({safe_ema
         </tr>
       </table>
       <h3 style="color: #334155; margin-bottom: 8px;">Message:</h3>
-      <div style="background-color: #f8fafc; border-left: 4px solid #0d9488; padding: 12px 16px; margin-bottom: 20px; white-space: pre-wrap;">{safe_message}</div>
-      <h3 style="color: #334155; margin-bottom: 8px;">Automated AI Reply Sent:</h3>
-      <div style="background-color: #f1f5f9; border-left: 4px solid #64748b; padding: 12px 16px; margin-bottom: 20px; font-style: italic; white-space: pre-wrap;">{safe_reply}</div>
+      <div style="background-color: #f8fafc; border-left: 4px solid #0d9488; padding: 14px 18px; margin-bottom: 20px; font-size: 15px; white-space: pre-wrap;">{safe_message}</div>
       <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
       <p style="font-size: 13px; color: #64748b;">
         Tip: Replying directly to this email will send your response straight to <strong>{safe_name}</strong> at <strong>{safe_email}</strong>.
