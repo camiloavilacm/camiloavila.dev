@@ -94,6 +94,23 @@ describe('Chatbot', () => {
     expect(screen.getByText('My question')).toBeInTheDocument();
   });
 
+  it('scrolls container to latest user question when sending', async () => {
+    const scrollToSpy = vi.fn();
+    Element.prototype.scrollTo = scrollToSpy;
+
+    render(<Chatbot />);
+    const input = screen.getByTestId('chat-input');
+
+    await userEvent.type(input, 'My question');
+    await userEvent.click(screen.getByTestId('chat-send'));
+
+    expect(scrollToSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        behavior: 'smooth',
+      })
+    );
+  });
+
   it('clears input after sending', async () => {
     render(<Chatbot />);
     const input = screen.getByTestId('chat-input') as HTMLInputElement;

@@ -36,12 +36,24 @@ const Chatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const latestUserMessageRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (latestUserMessageRef.current && messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      const target = latestUserMessageRef.current;
+      const targetTop = target.offsetTop;
+      if (typeof container.scrollTo === 'function') {
+        container.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+      } else {
+        container.scrollTop = Math.max(0, targetTop);
+      }
+    }
+  }, [messages, isLoading]);
 
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 100);
@@ -99,10 +111,11 @@ const Chatbot: React.FC = () => {
   return (
     <div style={styles.container} aria-label="AI Resume Assistant">
       {/* Messages */}
-      <div style={styles.messages} aria-live="polite">
+      <div ref={messagesContainerRef} style={styles.messages} aria-live="polite">
         {messages.map((msg, i) => (
           <div
             key={i}
+            ref={i === lastUserIndex ? latestUserMessageRef : undefined}
             style={{
               ...styles.bubble,
               ...(msg.role === 'user' ? styles.userBubble : styles.aiBubble),
@@ -170,8 +183,6 @@ const Chatbot: React.FC = () => {
             </span>
           </div>
         )}
-
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
@@ -222,6 +233,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '12px',
     maxHeight: '300px',
     overflowY: 'auto',
+    position: 'relative',
   },
   bubble: {
     maxWidth: '85%',
