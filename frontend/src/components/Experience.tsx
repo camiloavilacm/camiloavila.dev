@@ -30,7 +30,7 @@ const EXPERIENCE: ExperienceEntry[] = [
   {
     company: 'Credit Mountain',
     role: 'Senior QA Automation Engineer',
-    period: 'Sep 2022 – Jan 2026',
+    period: 'Sep 2022 – 2026',
     location: 'Spain (Texas-based client)',
     bullets: [
       'Created TypeScript Cypress framework for web testing projects',
