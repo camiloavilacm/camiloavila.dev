@@ -344,3 +344,8 @@ label {
   background-color: rgba(100, 255, 218, 0.2);
   box-shadow: 0 0 12px rgba(100, 255, 218, 0.3);
 }
+
+/* ---- Chatbot AI Bubble Markdown Spacing ---- */
+.chatbot-ai-bubble p:last-child {
+  margin-bottom: 0 !important;
+}

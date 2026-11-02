@@ -116,6 +116,7 @@ const Chatbot: React.FC = () => {
           <div
             key={i}
             ref={i === lastUserIndex ? latestUserMessageRef : undefined}
+            className={msg.role === 'ai' ? 'chatbot-ai-bubble' : undefined}
             style={{
               ...styles.bubble,
               ...(msg.role === 'user' ? styles.userBubble : styles.aiBubble),
@@ -146,11 +147,15 @@ const Chatbot: React.FC = () => {
                 ]}
                 unwrapDisallowed={true}
                 components={{
-                  p: ({ children }) => <p style={{ margin: 0 }}>{children}</p>,
+                  p: ({ children }) => (
+                    <p style={{ margin: '0 0 12px 0', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+                      {children}
+                    </p>
+                  ),
                   ul: ({ children }) => (
                     <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>{children}</ul>
                   ),
-                  li: ({ children }) => <li style={{ marginBottom: '4px' }}>{children}</li>,
+                  li: ({ children }) => <li style={{ marginBottom: '6px' }}>{children}</li>,
                   strong: ({ children }) => (
                     <strong style={{ color: 'var(--accent)' }}>{children}</strong>
                   ),
