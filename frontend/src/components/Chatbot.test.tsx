@@ -250,9 +250,7 @@ describe('Chatbot', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          'Could you please specify what information you need about Camilo Avila?'
-        )
+        screen.getByText('Could you please specify what information you need about Camilo Avila?')
       ).toBeInTheDocument();
     });
     expect(screen.queryByText(/The user asked for info/)).not.toBeInTheDocument();
