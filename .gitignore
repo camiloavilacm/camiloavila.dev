@@ -33,7 +33,8 @@ tests/node_modules/
 samconfig.toml.bak
 
 # --- Test reports (generated at runtime — not committed) ---
-reports/
+/reports/
+tests/reports/
 
 # --- Playwright ---
 playwright-report/

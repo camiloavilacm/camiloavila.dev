@@ -1,0 +1,71 @@
+@import 'tailwindcss';
+
+/* EcoWoman Official Fonts & Color System (theecowoman.es) */
+
+@font-face {
+  font-family: 'Neue Haas Grotesk Display Pro';
+  src:
+    url('https://cdn.shopify.com/s/files/1/0888/9820/8113/files/NeueHaasDisplay-Roman.woff2?v=1747142385')
+      format('woff2'),
+    url('https://cdn.shopify.com/s/files/1/0888/9820/8113/files/NeueHaasDisplay-Roman.woff?v=1747142385')
+      format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Haas Grotesk Display Pro';
+  src:
+    url('https://cdn.shopify.com/s/files/1/0888/9820/8113/files/NeueHaasDisplay-Mediu.woff2?v=1747142384')
+      format('woff2'),
+    url('https://cdn.shopify.com/s/files/1/0888/9820/8113/files/NeueHaasDisplay-Mediu.woff?v=1747142385')
+      format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Haas Grotesk Display Pro';
+  src:
+    url('https://cdn.shopify.com/s/files/1/0888/9820/8113/files/NeueHaasDisplay-Bold.woff2?v=1747142384')
+      format('woff2'),
+    url('https://cdn.shopify.com/s/files/1/0888/9820/8113/files/NeueHaasDisplay-Bold.woff?v=1747142385')
+      format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Haas Grotesk Display Pro';
+  src:
+    url('https://cdn.shopify.com/s/files/1/0888/9820/8113/files/NeueHaasDisplay-Black.woff2?v=1747142341')
+      format('woff2'),
+    url('https://cdn.shopify.com/s/files/1/0888/9820/8113/files/NeueHaasDisplay-Black.woff?v=1747142341')
+      format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ecowoman-font:
+    'Neue Haas Grotesk Display Pro', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Arial, sans-serif;
+  --ecowoman-bg: #faf7f2;
+  --ecowoman-bg-subtle: #f5f1ea;
+  --ecowoman-card-bg: #ffffff;
+  --ecowoman-border: #e8dcca;
+  --ecowoman-border-hover: #dcd0bd;
+  --ecowoman-brown-heading: #462b14;
+  --ecowoman-brown-body: #7a5c4b;
+  --ecowoman-brown-muted: #9a8475;
+  --ecowoman-terracotta: #8c4a26;
+  --ecowoman-green: #108474;
+}
+
+.font-ecowoman {
+  font-family: var(--ecowoman-font);
+}

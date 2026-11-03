@@ -1,0 +1,381 @@
+/* Scoped CSS for Server-Side Tracking Analysis - EcoWoman Brand Palette */
+.serverside-root {
+  --color-white: #fff;
+  --color-neutral-50: #faf7f2;
+  --color-neutral-100: #faf7f2;
+  --color-neutral-200: #e8dcca;
+  --color-neutral-300: #dcd0bd;
+  --color-slate-50: #faf7f2;
+  --color-slate-100: #e8dcca;
+  --color-slate-200: #dcd0bd;
+  --color-slate-300: #9a8475;
+  --color-slate-400: #7a5c4b;
+  --color-slate-500: #513210;
+  --color-slate-600: #462b14;
+  --color-slate-700: #462b14;
+  --color-slate-800: #382314;
+  --color-slate-900: #462b14;
+  --color-slate-900-4: #462b140a;
+  --color-slate-900-6: #462b140f;
+  --color-slate-900-8: #462b1414;
+  --color-slate-900-12: #462b141f;
+  --color-slate-900-16: #462b1429;
+  --color-slate-900-24: #462b143d;
+  --color-slate-900-32: #462b1452;
+  --color-orange-50: #fff4ed;
+  --color-orange-100: #ffe6d4;
+  --color-orange-400: #ff6d34;
+  --color-orange-500: #8c4a26;
+  --color-green-50: #e8f5f1;
+  --color-green-100: #d7f4e6;
+  --color-green-400: #108474;
+  --color-green-500: #0e6d60;
+  --color-purple-50: #faf2ea;
+  --color-purple-100: #f3e8dc;
+  --color-purple-200: #eadccf;
+  --color-purple-300: #d8c3b1;
+  --color-purple-400: #b79983;
+  --color-purple-500: #8c4a26;
+  --color-purple-600: #733b1e;
+  --color-purple-700: #5a2e17;
+  --color-red-50: #feecf0;
+  --color-red-100: #fbc4d1;
+  --color-red-400: #eb001b;
+  --color-red-500: #c20016;
+  --color-yellow-100: #ffefce;
+  --color-yellow-300: #ffc64a;
+  --color-yellow-400: #ffae20;
+
+  --spacing-3xs: 2px;
+  --spacing-2xs: 5px;
+  --spacing-xs: 10px;
+  --spacing-sm: 15px;
+  --spacing-md: 20px;
+  --spacing-lg: 30px;
+  --spacing-xl: 40px;
+  --spacing-2xl: 50px;
+  --spacing-3xl: 70px;
+  --spacing-4xl: 100px;
+  --spacing-md-responsive: 15px;
+  --spacing-lg-responsive: 20px;
+  --spacing-xl-responsive: 30px;
+  --spacing-2xl-responsive: 30px;
+  --spacing-3xl-responsive: 40px;
+  --spacing-4xl-responsive: 50px;
+
+  font-family:
+    'Neue Haas Grotesk Display Pro',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif;
+  color: var(--color-slate-900);
+}
+
+@media (min-width: 1024px) {
+  .serverside-root {
+    --spacing-md-responsive: 20px;
+    --spacing-lg-responsive: 30px;
+    --spacing-xl-responsive: 40px;
+    --spacing-2xl-responsive: 50px;
+    --spacing-3xl-responsive: 70px;
+    --spacing-4xl-responsive: 100px;
+  }
+}
+
+.serverside-root .visuals-neutral {
+  background-color: var(--color-neutral-100);
+}
+.serverside-root .visuals-neutral-grey {
+  background-color: var(--color-neutral-50);
+}
+.serverside-root .visuals-medium-purple {
+  background-color: var(--color-purple-300);
+}
+.serverside-root .visuals-orange {
+  background-color: var(--color-orange-400);
+}
+.serverside-root .visuals-purple {
+  background-color: var(--color-purple-500);
+}
+.serverside-root .visuals-light-red {
+  background-color: var(--color-red-50);
+}
+.serverside-root .visuals-red {
+  background-color: var(--color-red-500);
+}
+.serverside-root .visuals-yellow {
+  background-color: var(--color-yellow-300);
+}
+.serverside-root .visuals-green {
+  background-color: var(--color-green-400);
+}
+
+.serverside-root .bg-primary {
+  background-color: #ffffff;
+}
+.serverside-root .bg-page {
+  background-color: #faf7f2;
+}
+.serverside-root .bg-input {
+  background-color: #ffffff;
+}
+
+.serverside-root .text-heading {
+  color: var(--color-slate-900);
+}
+.serverside-root .text-paragraph {
+  color: var(--color-slate-900);
+}
+.serverside-root .text-paragraph-secondary {
+  color: var(--color-slate-400);
+}
+.serverside-root .text-on-action {
+  color: var(--color-slate-900);
+}
+
+.serverside-root .border-tertiary {
+  border-color: var(--color-slate-900-16);
+}
+.serverside-root .border-ghost {
+  border-color: var(--color-slate-900-8);
+}
+.serverside-root .border-secondary {
+  border-color: var(--color-slate-900-24);
+}
+.serverside-root .border-on-action-secondary {
+  border-color: var(--color-slate-900-24);
+}
+.serverside-root .border-error {
+  border-color: var(--color-red-500);
+}
+
+.serverside-root .heading-0 {
+  font-size: 72px;
+  line-height: 76px;
+  font-weight: 700;
+}
+.serverside-root .heading-1 {
+  font-size: 52px;
+  line-height: 56px;
+  font-weight: 700;
+}
+.serverside-root .heading-2 {
+  font-size: 36px;
+  line-height: 40px;
+  font-weight: 700;
+}
+.serverside-root .heading-3 {
+  font-size: 36px;
+  line-height: 40px;
+  font-weight: 700;
+}
+.serverside-root .heading-4 {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 700;
+}
+.serverside-root .heading-5 {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+}
+.serverside-root .heading-6 {
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+}
+
+.serverside-root .paragraph-xl {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 400;
+}
+.serverside-root .paragraph-lg-regular {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 400;
+}
+.serverside-root .paragraph-lg-semibold {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+.serverside-root .paragraph-md-regular {
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+}
+.serverside-root .paragraph-sm-regular {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 400;
+}
+
+.serverside-root .caption-md {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.serverside-root .caption-sm {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.serverside-root .button-lg-text-mono {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.serverside-root .button-sm-text-mono {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.serverside-root .label-sm-medium {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 600;
+}
+.serverside-root .help-text-regular {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 400;
+}
+
+.serverside-root .p-lg-responsive {
+  padding: var(--spacing-lg-responsive);
+}
+.serverside-root .px-lg-responsive {
+  padding-left: var(--spacing-lg-responsive);
+  padding-right: var(--spacing-lg-responsive);
+}
+.serverside-root .py-lg-responsive {
+  padding-top: var(--spacing-lg-responsive);
+  padding-bottom: var(--spacing-lg-responsive);
+}
+.serverside-root .py-2xl-responsive {
+  padding-top: var(--spacing-2xl-responsive);
+  padding-bottom: var(--spacing-2xl-responsive);
+}
+.serverside-root .py-3xl-responsive {
+  padding-top: var(--spacing-3xl-responsive);
+  padding-bottom: var(--spacing-3xl-responsive);
+}
+.serverside-root .px-3xl-responsive {
+  padding-left: var(--spacing-3xl-responsive);
+  padding-right: var(--spacing-3xl-responsive);
+}
+.serverside-root .gap-lg-responsive {
+  gap: var(--spacing-lg-responsive);
+}
+.serverside-root .gap-2xl-responsive {
+  gap: var(--spacing-2xl-responsive);
+}
+.serverside-root .gap-3xl-responsive {
+  gap: var(--spacing-3xl-responsive);
+}
+
+.serverside-root .px-2xs {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.serverside-root .py-3xs {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.serverside-root .px-sm {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.serverside-root .py-xs {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.serverside-root .px-md {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.serverside-root .py-sm {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+.serverside-root .px-lg {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+.serverside-root .py-md {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.serverside-root .px-xl {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+.serverside-root .py-lg {
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+.serverside-root .py-2xl {
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+.serverside-root .gap-3xs {
+  gap: 2px;
+}
+.serverside-root .gap-2xs {
+  gap: 5px;
+}
+.serverside-root .gap-xs {
+  gap: 10px;
+}
+.serverside-root .gap-sm {
+  gap: 15px;
+}
+.serverside-root .gap-md {
+  gap: 20px;
+}
+.serverside-root .gap-lg {
+  gap: 30px;
+}
+.serverside-root .gap-xl {
+  gap: 40px;
+}
+
+.serverside-root .size-2xl {
+  width: 50px;
+  height: 50px;
+}
+.serverside-root .min-h-3xl {
+  min-height: 70px;
+}
+.serverside-root .h-3xl {
+  height: 70px;
+}
+.serverside-root .min-h-xl {
+  min-height: 40px;
+}
+.serverside-root .min-w-3xl {
+  min-width: 90px;
+}
+.serverside-root .min-w-4xl {
+  min-width: 140px;
+}
+
+.serverside-root .CibPdq_wrapper {
+  background-color: var(--color-neutral-100);
+  flex-direction: column;
+  flex-grow: 1;
+  display: flex;
+}

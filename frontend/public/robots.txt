@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /use-case/
 
 Sitemap: https://camiloavila.dev/sitemap.xml

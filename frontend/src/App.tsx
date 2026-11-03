@@ -1,56 +1,49 @@
 /**
- * App.tsx — Root Application Component
+ * App.tsx — Application Router
  *
- * Composes all portfolio sections in order:
- *   Hero → Chatbot → Skills → Experience → Certifications → ContactForm → ThisSite
- *
- * Section order matches a typical portfolio reading flow:
- *   1. Who you are (Hero)
- *   2. AI Resume Assistant (Chatbot - inline, always visible)
- *   3. What you can do (Skills)
- *   4. Where you've done it (Experience)
- *   5. How it's validated (Certifications)
- *   6. How to reach you (ContactForm)
- *   7. Technical stack (ThisSite)
+ * Serves:
+ *   /                   — Main Portfolio (Camilo Avila — AI Resume Portfolio)
+ *   /use-case/0293828   — Standalone Case Study Demonstration
+ *   *                   — Fallback redirect to /
  */
 
-import { GlowCapture, Glow } from '@codaworks/react-glow';
-import Hero from './components/Hero';
-import Chatbot from './components/Chatbot';
-import Skills from './components/Skills';
-import Experience from './components/Experience';
-import Certifications from './components/Certifications';
-import ContactForm from './components/ContactForm';
-import ThisSite from './components/ThisSite';
-import SEO from './components/SEO';
+import { Suspense, lazy } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import PortfolioHome from './components/PortfolioHome';
 
-/**
- * Root component — renders the full portfolio page.
- *
- * @returns The complete portfolio layout.
- */
-function App() {
+// Lazy load the study-case so zero extra JS is loaded on the main portfolio
+const StudyCaseApp = lazy(() => import('./study-case/StudyCaseApp'));
+
+export function App() {
   return (
-    <GlowCapture>
-      <SEO />
-      <div className="app">
-        <main>
-          <Hero />
-          <Chatbot />
-          <Glow color="#64ffda">
-            <Skills />
-          </Glow>
-          <Glow color="#64ffda">
-            <Experience />
-          </Glow>
-          <Glow color="#64ffda">
-            <Certifications />
-          </Glow>
-          <ContactForm />
-          <ThisSite />
-        </main>
-      </div>
-    </GlowCapture>
+    <BrowserRouter>
+      <Routes>
+        {/* Main portfolio home */}
+        <Route path="/" element={<PortfolioHome />} />
+
+        {/* Standalone demonstration route */}
+        <Route
+          path="/use-case/0293828"
+          element={
+            <Suspense
+              fallback={
+                <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center text-[#462B14] font-mono text-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#108474] animate-pulse" />
+                    <span>Loading Demonstration...</span>
+                  </div>
+                </div>
+              }
+            >
+              <StudyCaseApp />
+            </Suspense>
+          }
+        />
+
+        {/* Fallback redirect */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

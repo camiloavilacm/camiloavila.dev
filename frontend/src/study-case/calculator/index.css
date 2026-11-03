@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+@layer base {
+  body {
+    font-family:
+      'Neue Haas Grotesk Display Pro',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Helvetica Neue',
+      Helvetica,
+      Arial,
+      sans-serif;
+    background-color: #faf8f5;
+    color: #382314;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family:
+      'Neue Haas Grotesk Display Pro',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Helvetica Neue',
+      Helvetica,
+      Arial,
+      sans-serif;
+    color: #382314;
+  }
+}

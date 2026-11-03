@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 /**
  * Vite configuration for the camiloavila.dev frontend.
@@ -15,7 +16,7 @@ import react from "@vitejs/plugin-react";
  *                  Example: https://abc123.execute-api.us-east-1.amazonaws.com/prod
  */
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   build: {
     outDir: "dist",
     sourcemap: false,

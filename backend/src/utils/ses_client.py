@@ -26,7 +26,19 @@ Environment variables required:
 import os
 import logging
 
-import bleach
+try:
+    import bleach
+
+    def _clean_text(text: str) -> str:
+        return bleach.clean(text.strip(), tags=[], strip=True)
+except ImportError:
+    import html
+    import re
+
+    def _clean_text(text: str) -> str:
+        no_tags = re.sub(r"<[^>]*>", "", text.strip())
+        return html.escape(no_tags)
+
 import boto3
 from botocore.exceptions import ClientError
 
@@ -104,7 +116,7 @@ def send_contact_reply(
         )
 
     # Sanitize user-provided content before embedding in HTML email
-    safe_name = bleach.clean(to_name.strip(), tags=[], strip=True)
+    safe_name = _clean_text(to_name)
 
     subject = _SUBJECT_TEMPLATE.format(name=safe_name)
     body_text = _OPENING.format(name=safe_name) + "\n" + _FOOTER
@@ -207,9 +219,9 @@ def send_owner_notification(
 
     owner_email = os.environ.get("OWNER_EMAIL", "camiloavilainfo@gmail.com")
 
-    safe_name = bleach.clean(visitor_name.strip(), tags=[], strip=True)
-    safe_email = bleach.clean(visitor_email.strip(), tags=[], strip=True)
-    safe_message = bleach.clean(visitor_message.strip(), tags=[], strip=True)
+    safe_name = _clean_text(visitor_name)
+    safe_email = _clean_text(visitor_email)
+    safe_message = _clean_text(visitor_message)
 
     subject = f"New Portfolio Contact: {safe_name}"
 
