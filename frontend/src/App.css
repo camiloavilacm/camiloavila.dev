@@ -23,6 +23,9 @@
   --accent: #64ffda;
   --accent-hover: #4cd8b8;
   --border: #233554;
+  --color-error: #ff6b6b;
+  --color-error-bg: rgba(255, 107, 107, 0.08);
+  --color-error-border: rgba(255, 107, 107, 0.3);
   --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
   --font-sans:
     'Calibre', 'Inter', 'San Francisco', 'SF Pro Text', -apple-system, system-ui, sans-serif;
@@ -41,6 +44,22 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  :root {
+    --transition:
+      opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .card:hover {
+    transform: none !important;
+  }
+  .btn:hover {
+    transform: none !important;
+  }
 }
 
 body {
@@ -323,10 +342,13 @@ label {
     max-width: 100% !important;
   }
 
-  /* Adjust experience tab padding for smaller screens */
+  /* Adjust experience tab padding for smaller screens — ensures >=44px touch target */
   #experience .tab {
-    padding: 6px 12px !important;
-    font-size: 12px !important;
+    padding: 10px 16px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    font-size: 13px !important;
   }
 }
 

@@ -9,7 +9,7 @@
  * the section compact while showing full detail per role.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 /** A single work experience entry. */
 interface ExperienceEntry {
@@ -141,6 +141,29 @@ const EXPERIENCE: ExperienceEntry[] = [
 const Experience: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const active = EXPERIENCE[activeIndex];
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+    let nextIndex: number | null = null;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      nextIndex = (index + 1) % EXPERIENCE.length;
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      nextIndex = (index - 1 + EXPERIENCE.length) % EXPERIENCE.length;
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      nextIndex = 0;
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      nextIndex = EXPERIENCE.length - 1;
+    }
+
+    if (nextIndex !== null) {
+      setActiveIndex(nextIndex);
+      tabRefs.current[nextIndex]?.focus();
+    }
+  };
 
   return (
     <section id="experience" aria-labelledby="experience-heading">
@@ -154,7 +177,12 @@ const Experience: React.FC = () => {
           {EXPERIENCE.map((entry, i) => (
             <button
               key={entry.company}
+              ref={(el) => {
+                tabRefs.current[i] = el;
+              }}
+              id={`tab-${i}`}
               role="tab"
+              tabIndex={i === activeIndex ? 0 : -1}
               aria-selected={i === activeIndex}
               aria-controls={`panel-${i}`}
               className={`tab ${i === activeIndex ? 'tab-active' : ''}`}
@@ -163,6 +191,7 @@ const Experience: React.FC = () => {
                 ...(i === activeIndex ? styles.tabActive : {}),
               }}
               onClick={() => setActiveIndex(i)}
+              onKeyDown={(e) => handleKeyDown(e, i)}
             >
               {entry.company}
             </button>
@@ -173,7 +202,8 @@ const Experience: React.FC = () => {
         <div
           id={`panel-${activeIndex}`}
           role="tabpanel"
-          aria-label={active.company}
+          tabIndex={0}
+          aria-labelledby={`tab-${activeIndex}`}
           style={styles.panel}
           className="experience-panel"
         >
@@ -212,7 +242,9 @@ const styles: Record<string, React.CSSProperties> = {
   tab: {
     background: 'none',
     border: 'none',
-    borderLeft: '2px solid transparent',
+    borderLeftWidth: '2px',
+    borderLeftStyle: 'solid',
+    borderLeftColor: 'transparent',
     color: 'var(--text-secondary)',
     cursor: 'pointer',
     fontFamily: 'var(--font-mono)',

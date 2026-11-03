@@ -286,7 +286,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: '120px',
   },
   error: {
-    color: '#ff6b6b',
+    color: 'var(--color-error)',
     fontSize: '13px',
     fontFamily: 'var(--font-mono)',
   },
@@ -297,9 +297,9 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 400,
   },
   serverError: {
-    color: '#ff6b6b',
-    background: 'rgba(255, 107, 107, 0.08)',
-    border: '1px solid rgba(255, 107, 107, 0.3)',
+    color: 'var(--color-error)',
+    background: 'var(--color-error-bg)',
+    border: '1px solid var(--color-error-border)',
     borderRadius: '4px',
     padding: '12px 16px',
     fontSize: '14px',

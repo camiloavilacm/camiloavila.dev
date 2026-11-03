@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T10:35:00Z",
+  "title": "Design System: Camilo Avila Portfolio",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Electric Mint",
+        "canonical": "#64ffda",
+        "tonalRamp": [
+          "#00382e",
+          "#005244",
+          "#006d5c",
+          "#008a74",
+          "#1ba78f",
+          "#4cd8b8",
+          "#64ffda",
+          "#b3ffed"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Seafoam Hover",
+        "canonical": "#4cd8b8",
+        "tonalRamp": [
+          "#00352c",
+          "#004e41",
+          "#006757",
+          "#00826e",
+          "#149f87",
+          "#36bfa2",
+          "#4cd8b8",
+          "#9cecd8"
+        ]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Deep Obsidian Navy",
+        "canonical": "#0a192f",
+        "tonalRamp": [
+          "#02060d",
+          "#050e1b",
+          "#0a192f",
+          "#132847",
+          "#1d3a63",
+          "#2a4e80",
+          "#40679e",
+          "#688cb8"
+        ]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Midnight Surface",
+        "canonical": "#112240",
+        "tonalRamp": [
+          "#040912",
+          "#0a1527",
+          "#112240",
+          "#1b335c",
+          "#26467c",
+          "#345b9d",
+          "#4c75b8",
+          "#7698cd"
+        ]
+      },
+      "neutral-surface-accent": {
+        "role": "neutral",
+        "displayName": "Steel Navy Accent",
+        "canonical": "#1d3461",
+        "tonalRamp": [
+          "#070d18",
+          "#0f1c34",
+          "#1d3461",
+          "#284680",
+          "#365ba1",
+          "#4972be",
+          "#668dda",
+          "#91aee9"
+        ]
+      },
+      "neutral-text": {
+        "role": "neutral",
+        "displayName": "Light Silver Slate",
+        "canonical": "#ccd6f6",
+        "tonalRamp": [
+          "#282e44",
+          "#475173",
+          "#68749e",
+          "#8e9bc7",
+          "#b5c1eb",
+          "#ccd6f6",
+          "#e3e8fa",
+          "#f4f6fd"
+        ]
+      },
+      "neutral-muted": {
+        "role": "neutral",
+        "displayName": "Cool Slate",
+        "canonical": "#8892b0",
+        "tonalRamp": [
+          "#1c202d",
+          "#32384c",
+          "#4d5570",
+          "#697292",
+          "#8892b0",
+          "#a9b1cb",
+          "#cad0e1",
+          "#ebedf4"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Subtle Navy Border",
+        "canonical": "#233554",
+        "tonalRamp": [
+          "#090e18",
+          "#141f32",
+          "#233554",
+          "#31476f",
+          "#425d8d",
+          "#5775ab",
+          "#7390bf",
+          "#9db1d3"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero personal name and primary page statement."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Major section headings with numbered indices and horizontal line rules."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles, role titles, and category groupings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Paragraph text, experience bullet items, and narrative content."
+      },
+      "label": {
+        "displayName": "Monospace Label",
+        "purpose": "Buttons, skill badges, section numbers, input labels, and code tokens."
+      }
+    },
+    "shadows": [
+      {
+        "name": "glow-ambient",
+        "value": "0 0 12px rgba(100, 255, 218, 0.3)",
+        "purpose": "Reactive mouse-driven luminescence rendered around hovered tags and cards."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.645, 0.045, 0.355, 1)",
+        "purpose": "Snappy, disciplined transition curve across buttons, links, and borders."
+      },
+      {
+        "name": "lift-hover",
+        "value": "translateY(-2px)",
+        "purpose": "Subtle tactile card lift on hover."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "480px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1000px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Outline Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Monospace outline action button with mint border and hover fill.",
+      "html": "<button class=\"ds-btn-primary\">GET IN TOUCH</button>",
+      "css": ".ds-btn-primary { display: inline-block; padding: 12px 28px; border: 1px solid #64ffda; border-radius: 4px; color: #64ffda; background: transparent; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 14px; cursor: pointer; transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1); outline: none; text-decoration: none; } .ds-btn-primary:hover { background-color: rgba(100, 255, 218, 0.08); } .ds-btn-primary:focus-visible { box-shadow: 0 0 0 2px #112240, 0 0 0 4px #64ffda; }"
+    },
+    {
+      "name": "Skill Pill / Tag",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "Compact monospace badge for skills, technologies, and framework tags.",
+      "html": "<span class=\"ds-tag\">Cypress</span>",
+      "css": ".ds-tag { display: inline-block; background-color: rgba(100, 255, 218, 0.1); color: #64ffda; border-radius: 3px; padding: 2px 10px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; margin: 3px; transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1); } .ds-tag:hover { background-color: rgba(100, 255, 218, 0.2); box-shadow: 0 0 12px rgba(100, 255, 218, 0.3); }"
+    },
+    {
+      "name": "Surface Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Midnight surface container with subtle border and -2px lift on hover.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Test Automation</h3><p class=\"ds-card-desc\">Enterprise framework architecture and CI/CD pipelines.</p></div>",
+      "css": ".ds-card { background-color: #112240; border: 1px solid #233554; border-radius: 8px; padding: 24px; transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1); font-family: 'Calibre', 'Inter', sans-serif; } .ds-card:hover { border-color: #64ffda; transform: translateY(-2px); } .ds-card-title { color: #ccd6f6; font-size: 18px; font-weight: 600; margin: 0 0 8px 0; } .ds-card-desc { color: #8892b0; font-size: 14px; line-height: 1.5; margin: 0; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Utilitarian dark input field with mint focus boundary.",
+      "html": "<input type=\"text\" class=\"ds-input\" placeholder=\"Your name\" />",
+      "css": ".ds-input { width: 100%; box-sizing: border-box; background-color: #112240; border: 1px solid #233554; border-radius: 4px; color: #ccd6f6; font-family: 'Calibre', 'Inter', sans-serif; font-size: 14px; padding: 12px 16px; outline: none; transition: border-color 0.25s ease; } .ds-input::placeholder { color: #8892b0; } .ds-input:focus { border-color: #64ffda; }"
+    },
+    {
+      "name": "Section Heading",
+      "kind": "custom",
+      "refersTo": "headline",
+      "description": "Numbered section heading with trailing architectural divider line.",
+      "html": "<div class=\"ds-section-heading\"><span class=\"ds-section-num\">01.</span><span class=\"ds-section-text\">Where I've Worked</span><div class=\"ds-section-rule\"></div></div>",
+      "css": ".ds-section-heading { display: flex; align-items: center; white-space: nowrap; margin-bottom: 24px; font-family: 'Calibre', 'Inter', sans-serif; } .ds-section-num { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 20px; color: #64ffda; margin-right: 10px; } .ds-section-text { font-size: 28px; font-weight: 600; color: #ccd6f6; } .ds-section-rule { height: 1px; width: 250px; background-color: #233554; margin-left: 20px; }"
+    },
+    {
+      "name": "Chatbot Message Bubble",
+      "kind": "custom",
+      "refersTo": "bubble",
+      "description": "AI conversational response bubble with formatted markdown highlighting.",
+      "html": "<div class=\"ds-chat-bubble\"><p class=\"ds-chat-p\">Camilo has <strong>13+ years</strong> of experience building automated test frameworks.</p></div>",
+      "css": ".ds-chat-bubble { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; background-color: #1d3461; color: #ccd6f6; font-family: 'Calibre', 'Inter', sans-serif; } .ds-chat-p { margin: 0; } .ds-chat-p strong { color: #64ffda; font-weight: 600; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Developer's Dossier",
+    "overview": "\"The Developer's Dossier\" embodies a classic, minimalist dark developer portfolio rooted in quiet elegance, structural clarity, and high-contrast typography. Instead of flashy marketing ornament or decorative noise, every element communicates technical rigor, reliability, and precision. It draws inspiration from iconic developer workspaces—subdued darkroom canvas layers, terminal monospace telemetry, and focused phosphor mint accents.\n\nThe aesthetic establishes an authoritative, calm demeanor: content and code metrics lead the eye, while surfaces step down into deep obsidian navy backgrounds. Subtle interactive feedback—tactile outline buttons, faint reactive cursor glows, and micro-elevation lifts—reassures the user without breaking their focus.",
+    "keyCharacteristics": [
+      "Calm, High-Contrast Palette: Deep obsidian navy canvases (#0a192f) accented by purposeful electric mint (#64ffda) and legible silver slate (#ccd6f6).",
+      "Telegraphic Monospace Anchors: Monospace fonts are consistently leveraged for technical metadata, numeric section counters, skill badges, and action buttons.",
+      "Architectural Surface Hierarchy: Depth is created through flat tonal layering and 1px structural borders, augmented by reactive cursor glow rather than blurry drop shadows.",
+      "Scannable Density: Structured cards and horizontal tab flows enable rapid parsing by hiring managers and engineering leads."
+    ],
+    "rules": [
+      {
+        "name": "The Ten-Percent Mint Rule",
+        "body": "Electric Mint is strictly allocated to ≤10% of any viewport. Its power comes from restraint; when everything glows, nothing is important.",
+        "section": "colors"
+      },
+      {
+        "name": "The Dual-Navy Contrast Rule",
+        "body": "Content panels must always sit on Midnight Surface (#112240) when placed over Deep Obsidian Navy (#0a192f), never directly on the root background without a defining boundary.",
+        "section": "colors"
+      },
+      {
+        "name": "The Monospace Provenance Rule",
+        "body": "Any piece of text indicating index sequence, technical category, code token, or system state must render in the monospace font stack.",
+        "section": "typography"
+      },
+      {
+        "name": "The Section Anchor Rule",
+        "body": "Every section heading must carry an electric mint monospace number prefix followed by a horizontal 1px rule extending toward the margin.",
+        "section": "typography"
+      },
+      {
+        "name": "The Luminance-Over-Shadow Rule",
+        "body": "Never use heavy, dark blur shadows (box-shadow: 0 20px 40px #000) to create elevation. Create depth through background value shifts (#0a192f -> #112240) and selective mint border highlight.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Flat-At-Rest Rule",
+        "body": "All cards and containers remain completely flat at rest. Motion and glow appear only as an intentional response to user hovering or input focus.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do maintain the 1000px maximum content width on desktop to guarantee reading comfort and visual structure.",
+      "Do prefix major section headings with numeric monospace counters and trailing border rules.",
+      "Do reserve Electric Mint (#64ffda) strictly for interactive elements, code tokens, and active highlights.",
+      "Do use 1px solid #233554 borders to establish clean structural boundaries between tonal layers.",
+      "Do preserve full keyboard accessibility and visible focus rings on all interactive targets."
+    ],
+    "donts": [
+      "Don't use heavy, blurry drop shadows (box-shadow: 0 10px 30px rgba(0,0,0,0.5)); maintain flat tonal layering.",
+      "Don't introduce extraneous bright accent colors (e.g. bright red, purple, orange) that clash with the electric mint terminal aesthetic.",
+      "Don't crowd content on mobile; ensure tab rails and tables enable horizontal touch scrolling without page overflow.",
+      "Don't use full-saturation mint backgrounds for buttons; preserve the clean transparent outline button aesthetic."
+    ]
+  }
+}

@@ -24,6 +24,8 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ["react", "react-dom"],
+          echarts: ["echarts", "echarts-for-react"],
+          lucide: ["lucide-react"],
         },
       },
     },

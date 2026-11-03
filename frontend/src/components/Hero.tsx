@@ -115,7 +115,7 @@ const styles: Record<string, React.CSSProperties> = {
   taglineSub: {
     fontSize: 'clamp(18px, 3.5vw, 36px)',
     color: 'var(--text-secondary)',
-    opacity: 0.6,
+    fontWeight: 400,
   },
   summary: {
     fontSize: '17px',

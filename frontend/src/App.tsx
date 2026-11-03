@@ -27,9 +27,9 @@ export function App() {
           element={
             <Suspense
               fallback={
-                <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center text-[#462B14] font-mono text-sm">
+                <div className="min-h-screen bg-[#0a192f] flex items-center justify-center text-[#ccd6f6] font-mono text-sm">
                   <div className="flex items-center gap-3">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#108474] animate-pulse" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#64ffda] animate-pulse" />
                     <span>Loading Demonstration...</span>
                   </div>
                 </div>
