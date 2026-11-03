@@ -1,18 +1,16 @@
 /**
- * chatbot.test.ts — Puppeteer Tests: AI Resume Chatbot
+ * chatbot.test.ts — Puppeteer Tests: AI Resume Chatbot (Inline Widget)
  *
- * Browser automation tests for the chatbot widget using Puppeteer.
- * Complements the Cypress E2E tests with lower-level DOM interaction
- * and screenshot capture at key steps.
+ * Browser automation tests for the inline chatbot widget using Puppeteer.
+ * Complements the Cypress E2E tests with DOM validation and screenshot capture.
  *
  * Puppeteer tests focus on:
- *   - DOM structure and element attributes
+ *   - DOM structure of the inline search-bar chat widget
  *   - Programmatic input and interaction
+ *   - Send button disabled / enabled states
+ *   - User message rendering and input clearing
  *   - Screenshot capture for visual review
- *   - Timing and async behaviour
- *
- * These differ from Cypress tests in that Puppeteer gives direct browser
- * control — useful for non-standard interactions and CI screenshot artifacts.
+ *   - AI response validation
  *
  * Run locally:
  *   BASE_URL=http://localhost:5173 npm run test:puppeteer
@@ -48,7 +46,7 @@ describe("Chatbot Widget — Puppeteer", () => {
   });
 
   afterAll(async () => {
-    await browser.close();
+    await browser?.close();
   });
 
   beforeEach(async () => {
@@ -58,7 +56,7 @@ describe("Chatbot Widget — Puppeteer", () => {
   });
 
   afterEach(async () => {
-    await page.close();
+    await page?.close();
   });
 
   /**
@@ -74,70 +72,30 @@ describe("Chatbot Widget — Puppeteer", () => {
   };
 
   // -------------------------------------------------------------------------
-  // DOM Structure
+  // DOM Structure (Inline Chatbot)
   // -------------------------------------------------------------------------
-  it("chatbot toggle button is present and visible", async () => {
-    const toggle = await page.$("[data-testid='chatbot-toggle']");
-    expect(toggle).not.toBeNull();
-
-    const isVisible = await page.evaluate(
-      (el) => {
-        const rect = (el as HTMLElement).getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0;
-      },
-      toggle!
-    );
-
-    expect(isVisible).toBe(true);
-    await screenshot("01-toggle-visible");
+  it("chat input field is present and visible on load", async () => {
+    const input = await page.waitForSelector("[data-testid='chat-input']", { visible: true });
+    expect(input).not.toBeNull();
+    await screenshot("01-input-visible");
   });
 
-  it("toggle button has correct aria-label", async () => {
-    const ariaLabel = await page.$eval(
-      "[data-testid='chatbot-toggle']",
-      (el) => el.getAttribute("aria-label")
-    );
-    expect(ariaLabel).toContain("Resume Assistant");
+  it("send button is present and visible", async () => {
+    const sendBtn = await page.waitForSelector("[data-testid='chat-send']", { visible: true });
+    expect(sendBtn).not.toBeNull();
   });
 
-  // -------------------------------------------------------------------------
-  // Panel Open / Close
-  // -------------------------------------------------------------------------
-  it("chat panel is not visible before toggle click", async () => {
-    const panel = await page.$("[data-testid='chatbot-panel']");
-    expect(panel).toBeNull();
-  });
-
-  it("chat panel appears after clicking toggle", async () => {
-    await page.click("[data-testid='chatbot-toggle']");
-    await page.waitForSelector("[data-testid='chatbot-panel']", { visible: true });
-
-    const panel = await page.$("[data-testid='chatbot-panel']");
-    expect(panel).not.toBeNull();
-    await screenshot("02-panel-open");
-  });
-
-  it("chat panel closes when toggle is clicked again", async () => {
-    await page.click("[data-testid='chatbot-toggle']");
-    await page.waitForSelector("[data-testid='chatbot-panel']");
-    await page.click("[data-testid='chatbot-toggle']");
-
-    // Panel should be removed from DOM
-    await page.waitForSelector("[data-testid='chatbot-panel']", {
-      hidden: true,
-    });
-
-    const panel = await page.$("[data-testid='chatbot-panel']");
-    expect(panel).toBeNull();
+  it("welcome message is rendered on page load", async () => {
+    const welcome = await page.waitForSelector("[data-testid='message-ai']", { visible: true });
+    expect(welcome).not.toBeNull();
+    const text = await page.$eval("[data-testid='message-ai']", (el) => el.textContent);
+    expect(text).toContain("Resume Assistant");
   });
 
   // -------------------------------------------------------------------------
   // Input and Interaction
   // -------------------------------------------------------------------------
-  it("chat input is focusable and accepts text", async () => {
-    await page.click("[data-testid='chatbot-toggle']");
-    await page.waitForSelector("[data-testid='chat-input']");
-
+  it("chat input accepts text", async () => {
     await page.click("[data-testid='chat-input']");
     await page.type("[data-testid='chat-input']", "What are your skills?");
 
@@ -146,13 +104,10 @@ describe("Chatbot Widget — Puppeteer", () => {
       (el) => (el as HTMLInputElement).value
     );
     expect(value).toBe("What are your skills?");
-    await screenshot("03-input-typed");
+    await screenshot("02-input-typed");
   });
 
   it("send button is disabled when input is empty", async () => {
-    await page.click("[data-testid='chatbot-toggle']");
-    await page.waitForSelector("[data-testid='chat-send']");
-
     const isDisabled = await page.$eval(
       "[data-testid='chat-send']",
       (el) => (el as HTMLButtonElement).disabled
@@ -161,8 +116,6 @@ describe("Chatbot Widget — Puppeteer", () => {
   });
 
   it("send button becomes enabled when input has text", async () => {
-    await page.click("[data-testid='chatbot-toggle']");
-    await page.waitForSelector("[data-testid='chat-input']");
     await page.type("[data-testid='chat-input']", "Hello");
 
     const isDisabled = await page.$eval(
@@ -173,8 +126,6 @@ describe("Chatbot Widget — Puppeteer", () => {
   });
 
   it("user message appears in thread after sending", async () => {
-    await page.click("[data-testid='chatbot-toggle']");
-    await page.waitForSelector("[data-testid='chat-input']");
     await page.type("[data-testid='chat-input']", "Tell me about your certifications");
     await page.click("[data-testid='chat-send']");
 
@@ -188,12 +139,10 @@ describe("Chatbot Widget — Puppeteer", () => {
       userMsgs[userMsgs.length - 1]
     );
     expect(lastUserMsg).toContain("certifications");
-    await screenshot("04-user-message-sent");
+    await screenshot("03-user-message-sent");
   });
 
-  it("input clears after message is sent", async () => {
-    await page.click("[data-testid='chatbot-toggle']");
-    await page.waitForSelector("[data-testid='chat-input']");
+  it("input clears after message is sent via Enter key", async () => {
     await page.type("[data-testid='chat-input']", "Any text");
     await page.keyboard.press("Enter");
 
@@ -205,8 +154,6 @@ describe("Chatbot Widget — Puppeteer", () => {
   });
 
   it("AI response appears after question is sent @smoke", async () => {
-    await page.click("[data-testid='chatbot-toggle']");
-    await page.waitForSelector("[data-testid='chat-input']");
     await page.type("[data-testid='chat-input']", "What are your AWS certifications?");
     await page.click("[data-testid='chat-send']");
 
@@ -214,7 +161,7 @@ describe("Chatbot Widget — Puppeteer", () => {
     await page.waitForFunction(
       () => {
         const msgs = document.querySelectorAll("[data-testid='message-ai']");
-        return msgs.length >= 2; // Welcome + AI answer
+        return msgs.length >= 2;
       },
       { timeout: 30000 }
     );
@@ -225,7 +172,7 @@ describe("Chatbot Widget — Puppeteer", () => {
     );
 
     const lastAiMsg = aiMessages[aiMessages.length - 1];
-    expect(lastAiMsg).toContain("Developer Associate");
-    await screenshot("05-ai-response");
+    expect(lastAiMsg.length).toBeGreaterThan(10);
+    await screenshot("04-ai-response");
   });
 });

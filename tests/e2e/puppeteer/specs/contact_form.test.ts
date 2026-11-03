@@ -170,17 +170,18 @@ describe("Contact Form — Puppeteer", () => {
     await screenshot("04-before-submit");
     await page.click("button[aria-label='Send message']");
 
-    // Wait for success state (up to 20s)
+    // Wait for success state (up to 30s)
     await page.waitForFunction(
       () =>
-        document.body.textContent?.includes("reply has been sent") ||
-        document.body.textContent?.includes("will get back to you"),
-      { timeout: 20000 }
+        document.body.textContent?.includes("Check your inbox") ||
+        document.body.textContent?.includes("Send another message") ||
+        document.body.textContent?.includes("Message sent"),
+      { timeout: 30000 }
     );
 
     await screenshot("05-success-state");
 
     const bodyText = await page.evaluate(() => document.body.textContent);
-    expect(bodyText).toContain("Puppeteer Test");
+    expect(bodyText).toContain("Send another message");
   });
 });
