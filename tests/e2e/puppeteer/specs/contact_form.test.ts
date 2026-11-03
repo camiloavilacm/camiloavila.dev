@@ -81,7 +81,7 @@ describe("Contact Form — Puppeteer", () => {
   });
 
   it("submit button is present", async () => {
-    const button = await page.$("button[aria-label='Send message']");
+    const button = await page.$("button[data-testid='contact-send']");
     expect(button).not.toBeNull();
   });
 
@@ -89,7 +89,7 @@ describe("Contact Form — Puppeteer", () => {
   // Client-Side Validation
   // -------------------------------------------------------------------------
   it("shows name error on empty submit", async () => {
-    await page.click("button[aria-label='Send message']");
+    await page.click("button[data-testid='contact-send']");
     await page.waitForSelector("#name-error");
 
     const errorText = await page.$eval(
@@ -104,7 +104,7 @@ describe("Contact Form — Puppeteer", () => {
     await page.type("#contact-name", "Test User");
     await page.type("#contact-email", "invalid");
     await page.type("#contact-message", "Hello");
-    await page.click("button[aria-label='Send message']");
+    await page.click("button[data-testid='contact-send']");
 
     await page.waitForSelector("#email-error");
     const errorText = await page.$eval(
@@ -116,7 +116,7 @@ describe("Contact Form — Puppeteer", () => {
 
   it("clears name error when user types in name field", async () => {
     // Trigger the error
-    await page.click("button[aria-label='Send message']");
+    await page.click("button[data-testid='contact-send']");
     await page.waitForSelector("#name-error");
 
     // Type to clear error
@@ -168,7 +168,7 @@ describe("Contact Form — Puppeteer", () => {
     );
 
     await screenshot("04-before-submit");
-    await page.click("button[aria-label='Send message']");
+    await page.click("button[data-testid='contact-send']");
 
     // Wait for success state (up to 30s)
     await page.waitForFunction(

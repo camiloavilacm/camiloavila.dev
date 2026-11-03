@@ -208,7 +208,7 @@ const Chatbot: React.FC = () => {
         <button
           onClick={sendMessage}
           disabled={isLoading || !input.trim()}
-          aria-label="Send message"
+          aria-label="Send chat message"
           data-testid="chat-send"
           style={styles.sendBtn}
         >
