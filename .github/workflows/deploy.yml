@@ -457,15 +457,12 @@ jobs:
           retention-days: 30
 
       # --- Puppeteer smoke tests ---
-      - name: Install Puppeteer browser
-        run: |
-          rm -rf ~/.cache/puppeteer
-          npx puppeteer browsers install chrome
-        working-directory: tests
-
       - name: Run Puppeteer smoke tests
         working-directory: tests
-        run: npm run test:puppeteer
+        run: |
+          CHROME_PATH=$(which google-chrome-stable || which google-chrome || which chromium-browser || which chromium || echo "/usr/bin/google-chrome")
+          echo "Using Chrome at: $CHROME_PATH"
+          PUPPETEER_EXECUTABLE_PATH="$CHROME_PATH" npm run test:puppeteer
         env:
           PUPPETEER_BASE_URL: https://camiloavila.dev
 
