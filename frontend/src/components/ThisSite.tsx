@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const TECH_STACK = [
   { layer: 'Frontend', technology: 'React 18 + Vite + TypeScript' },
@@ -49,6 +50,21 @@ const ThisSite: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      <footer style={styles.footer}>
+        <p style={styles.copyright}>
+          © 2026 Camilo Avila. Built with clean code &amp; automated pipelines.
+        </p>
+        <div style={styles.footerLinks}>
+          <Link to="/privacy" style={styles.footerLink}>
+            Privacy Policy
+          </Link>
+          <span style={styles.footerDot}>•</span>
+          <Link to="/terms" style={styles.footerLink}>
+            Terms of Service
+          </Link>
+        </div>
+      </footer>
     </section>
   );
 };
@@ -98,6 +114,32 @@ const styles: Record<string, React.CSSProperties> = {
   },
   trOdd: {
     background: 'var(--bg-tertiary)',
+  },
+  footer: {
+    marginTop: '60px',
+    paddingTop: '30px',
+    borderTop: '1px solid var(--border)',
+    textAlign: 'center',
+    fontSize: '13px',
+    color: 'var(--text-secondary)',
+    fontFamily: 'var(--font-mono)',
+  },
+  copyright: {
+    marginBottom: '8px',
+  },
+  footerLinks: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '12px',
+    alignItems: 'center',
+  },
+  footerLink: {
+    color: 'var(--accent)',
+    textDecoration: 'none',
+    fontSize: '13px',
+  },
+  footerDot: {
+    color: 'var(--border)',
   },
 };
 

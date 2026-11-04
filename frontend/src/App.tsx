@@ -11,8 +11,10 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PortfolioHome from './components/PortfolioHome';
 
-// Lazy load the study-case so zero extra JS is loaded on the main portfolio
+// Lazy load non-home routes so zero extra JS is loaded on the main portfolio
 const StudyCaseApp = lazy(() => import('./study-case/StudyCaseApp'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 
 export function App() {
   return (
@@ -20,6 +22,27 @@ export function App() {
       <Routes>
         {/* Main portfolio home */}
         <Route path="/" element={<PortfolioHome />} />
+
+        {/* Legal & Policy routes */}
+        <Route
+          path="/privacy"
+          element={
+            <Suspense fallback={<div className="min-h-screen bg-[#0a192f]" />}>
+              <PrivacyPolicy />
+            </Suspense>
+          }
+        />
+        <Route path="/privacy-policy" element={<Navigate to="/privacy" replace />} />
+
+        <Route
+          path="/terms"
+          element={
+            <Suspense fallback={<div className="min-h-screen bg-[#0a192f]" />}>
+              <TermsOfService />
+            </Suspense>
+          }
+        />
+        <Route path="/terms-of-service" element={<Navigate to="/terms" replace />} />
 
         {/* Standalone demonstration route */}
         <Route

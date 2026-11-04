@@ -62,3 +62,7 @@ credentials.json
 
 # --- Knowledge Base (keep locally, update S3 for production) ---
 knowledge_base.md
+
+# --- Google Site Verification ---
+google*.html
+
