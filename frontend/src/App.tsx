@@ -63,6 +63,22 @@ export function App() {
           }
         />
 
+        {/* Real Estate Proposal Presentation Route (HABITIA / Avenew Madrid) */}
+        <Route
+          path="/propuesta_inmobiliaria"
+          Component={() => {
+            window.location.replace('/propuesta_inmobiliaria/index.html');
+            return null;
+          }}
+        />
+        <Route
+          path="/propuesta_inmobiliaria/*"
+          Component={() => {
+            window.location.replace('/propuesta_inmobiliaria/index.html');
+            return null;
+          }}
+        />
+
         {/* Fallback redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
