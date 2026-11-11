@@ -36,6 +36,17 @@ const SKILL_GROUPS: SkillGroup[] = [
     ],
   },
   {
+    title: 'AI & Agentic Systems',
+    skills: [
+      'Claude Cowork',
+      'AI Agents',
+      'Agent Skills & Tooling',
+      'Evaluation Harnesses',
+      'Amazon Bedrock',
+      'Guardrails AI',
+    ],
+  },
+  {
     title: 'Programming Languages',
     skills: ['Python', 'TypeScript', 'JavaScript'],
   },

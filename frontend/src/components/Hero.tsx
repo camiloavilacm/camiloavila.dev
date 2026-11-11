@@ -36,6 +36,8 @@ const Hero: React.FC = () => {
         QA Automation Engineer with 13+ years building enterprise-grade test automation frameworks.
         <br />
         <br />- Web, mobile, API & microservices development and testing
+        <br />- AI & Agentic workflows (Claude Cowork, autonomous agents, skills & evaluation
+        harnesses)
         <br />- Cloud-native testing pipelines (AWS Lambda, CloudWatch, DynamoDB)
         <br />- AWS Certified AI Practitioner and Developer – Associate — testing AI-powered
         features

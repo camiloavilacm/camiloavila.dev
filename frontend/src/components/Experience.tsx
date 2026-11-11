@@ -37,6 +37,7 @@ const EXPERIENCE: ExperienceEntry[] = [
       'Implemented CI/CD pipelines using Docker, TypeScript, and Cypress',
       'Integrated testing workflows with Jira',
       'Designed and maintained test plans for Web and API applications',
+      'Built AI agent workflows and evaluation harnesses with Claude Cowork and modular agent skills',
     ],
   },
   {
