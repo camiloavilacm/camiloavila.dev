@@ -35,12 +35,12 @@ const Hero: React.FC = () => {
       <p style={styles.summary}>
         QA Automation Engineer with 13+ years building enterprise-grade test automation frameworks.
         <br />
-        <br />- Web, mobile, API & microservices testing
+        <br />- Web, mobile, API & microservices development and testing
         <br />- Cloud-native testing pipelines (AWS Lambda, CloudWatch, DynamoDB)
         <br />- AWS Certified AI Practitioner and Developer – Associate — testing AI-powered
         features
         <br />- Test automation frameworks & architecture
-        <br />- Cypress, Selenium, REST API testing
+        <br />- Playwright, Cypress, Selenium, REST API testing
         <br />
         <br />
         Based in Spain - Available for remote US-based roles

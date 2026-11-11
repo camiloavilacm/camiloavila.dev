@@ -25,7 +25,15 @@ interface SkillGroup {
 const SKILL_GROUPS: SkillGroup[] = [
   {
     title: 'Test Automation',
-    skills: ['Cypress', 'Puppeteer', 'Selenium', 'Appium', 'Katalon Studio', 'HP UFT'],
+    skills: [
+      'Playwright',
+      'Cypress',
+      'Puppeteer',
+      'Selenium',
+      'Appium',
+      'Katalon Studio',
+      'HP UFT',
+    ],
   },
   {
     title: 'Programming Languages',
