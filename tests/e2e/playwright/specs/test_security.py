@@ -151,6 +151,7 @@ class TestContactFormProductionSecurity:
     malicious input at the API level.
     """
 
+    @pytest.mark.live_email
     def test_normal_message_accepted(self):
         """Verify normal contact form submissions work."""
         payload = {

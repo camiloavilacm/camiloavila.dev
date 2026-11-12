@@ -462,7 +462,7 @@ jobs:
         run: |
           CHROME_PATH=$(which google-chrome-stable || which google-chrome || which chromium-browser || which chromium || echo "/usr/bin/google-chrome")
           echo "Using Chrome at: $CHROME_PATH"
-          PUPPETEER_EXECUTABLE_PATH="$CHROME_PATH" npm run test:puppeteer
+          PUPPETEER_EXECUTABLE_PATH="$CHROME_PATH" npm run test:puppeteer:no-email
         env:
           PUPPETEER_BASE_URL: https://camiloavila.dev
 
@@ -515,7 +515,7 @@ jobs:
         run: |
           python3 -m pytest tests/e2e/playwright/ \
             -v \
-            -m "functional or api" \
+            -m "(functional or api) and not live_email" \
             --alluredir=reports/e2e/playwright/allure-results \
             --html=reports/e2e/playwright/report.html \
             --self-contained-html
@@ -523,12 +523,23 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ secrets.PLAYWRIGHT_BASE_URL }}
           PLAYWRIGHT_BROWSER: chromium
 
+      - name: Run single live email smoke test (API Gateway -> Lambda -> SES)
+        run: |
+          python3 -m pytest tests/e2e/playwright/specs/test_api.py \
+            -k "test_contact_valid_submission_returns_200" \
+            -v \
+            --html=reports/e2e/playwright/live-email-smoke-report.html \
+            --self-contained-html
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ secrets.PLAYWRIGHT_BASE_URL }}
+
       # --- Playwright security tests ---
       - name: Run Playwright security tests
         run: |
           mkdir -p reports/e2e/playwright-security
           python3 -m pytest tests/e2e/playwright/specs/test_security.py \
             -v \
+            -m "not live_email" \
             --html=reports/e2e/playwright-security/report.html \
             --self-contained-html
         env:

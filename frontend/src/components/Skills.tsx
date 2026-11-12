@@ -69,6 +69,7 @@ const SKILL_GROUPS: SkillGroup[] = [
   {
     title: 'Core Competencies',
     skills: [
+      'Backend Development',
       'Test Automation Patterns',
       'CI/CD Integration',
       'Team Management',
@@ -78,8 +79,9 @@ const SKILL_GROUPS: SkillGroup[] = [
     ],
   },
   {
-    title: ' Industry Experience',
+    title: 'Industry Experience',
     skills: [
+      'Startups',
       'Financial Services (Digital Banking)',
       'IoT (Internet of Things)',
       'Data Science & Analytics',
@@ -87,10 +89,10 @@ const SKILL_GROUPS: SkillGroup[] = [
     ],
   },
   {
-    title: ' Project Management & Collaboration',
+    title: 'Project Management & Collaboration',
     skills: [
       'Issue Tracking: Jira, Linear',
-      'Design Tools: Figma',
+      'Design Tools: Figma (Claude Design, Open Design)',
       'Documentation: Confluence, Notion',
       'Collaboration: Miro',
     ],

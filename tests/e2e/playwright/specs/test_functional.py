@@ -191,6 +191,7 @@ class TestContactFormFunctional:
         page.locator("#contact-name").fill("A")
         expect(page.locator("#name-error")).not_to_be_visible()
 
+    @pytest.mark.live_email
     def test_successful_form_submission_shows_success_state(self, page: Page):
         """Valid form submission must display the success confirmation.
 

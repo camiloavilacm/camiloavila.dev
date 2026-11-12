@@ -9,7 +9,8 @@
   "scripts": {
     "test:cypress": "cypress run --config-file e2e/cypress/cypress.config.ts",
     "test:cypress:open": "cypress open --config-file e2e/cypress/cypress.config.ts",
-    "test:puppeteer": "jest --config e2e/puppeteer/jest.config.cjs"
+    "test:puppeteer": "jest --config e2e/puppeteer/jest.config.cjs",
+    "test:puppeteer:no-email": "jest --config e2e/puppeteer/jest.config.cjs -t '^((?!@live-email).)*$'"
   },
   "devDependencies": {
     "@shelex/cypress-allure-plugin": "^2.40.0",

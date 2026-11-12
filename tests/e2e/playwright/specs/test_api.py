@@ -131,8 +131,9 @@ class TestChatEndpoint:
 class TestContactEndpoint:
     """Functional tests for the contact form API endpoint."""
 
+    @pytest.mark.live_email
     def test_contact_valid_submission_returns_200(self):
-        """Valid submission should return 200."""
+        """Valid submission should return 200 with proper response structure."""
         payload = {
             "name": "Test Visitor",
             "email": "test@example.com",
@@ -147,6 +148,8 @@ class TestContactEndpoint:
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
         body = response.json()
         assert "message" in body, "Response should contain 'message' field"
+        assert isinstance(body["message"], str), "Message must be a string"
+        assert response.headers.get("Content-Type", "").startswith("application/json")
 
     def test_contact_missing_name_returns_400(self):
         """Missing name should return 400."""
@@ -220,27 +223,6 @@ class TestContactEndpoint:
         )
 
         assert response.status_code == 400, f"Expected 400, got {response.status_code}"
-
-    def test_contact_response_has_correct_structure(self):
-        """Response should have proper JSON structure."""
-        payload = {
-            "name": "Test Visitor",
-            "email": "test@example.com",
-            "message": "Hello",
-        }
-        headers = {"Content-Type": "application/json"}
-
-        response = requests.post(
-            CONTACT_API_URL, json=payload, headers=headers, timeout=30
-        )
-
-        assert response.status_code == 200
-        body = response.json()
-
-        # Verify response structure
-        assert "message" in body, "Response must have 'message' key"
-        assert isinstance(body["message"], str), "Message must be a string"
-        assert response.headers.get("Content-Type", "").startswith("application/json")
 
 
 # =============================================================================

@@ -415,6 +415,7 @@ jobs:
           mkdir -p reports/e2e/playwright-security
           python3 -m pytest tests/e2e/playwright/specs/test_security.py \
             -v \
+            -m "not live_email" \
             --html=reports/e2e/playwright-security/report.html \
             --self-contained-html
           sleep 2

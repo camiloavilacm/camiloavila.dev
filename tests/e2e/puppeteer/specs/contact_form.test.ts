@@ -159,7 +159,7 @@ describe("Contact Form — Puppeteer", () => {
   // -------------------------------------------------------------------------
   // Submission — Smoke (requires live API)
   // -------------------------------------------------------------------------
-  it("shows success state after valid submission @smoke", async () => {
+  it("shows success state after valid submission @live-email", async () => {
     await page.type("#contact-name", "Puppeteer Test");
     await page.type("#contact-email", "test@example.com");
     await page.type(
